@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { GradientCard } from "@/components/ui/GradientCard";
 import { Header } from "@/components/ui/Header";
 import { Rating } from "@/components/ui/Rating";
+import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useMasterCatalogDetailQuery } from "@/services/master";
 
 export default function MasterDetailScreen() {
@@ -25,7 +26,7 @@ export default function MasterDetailScreen() {
         <ScrollView contentContainerClassName="gap-4 p-4">
           <GradientCard style={{ alignItems: "center" }} colors={["#8B7CF6", "#6C5CE7"]}>
             <Avatar uri={data.photo} name={data.name} size={84} />
-            <Text className="mt-3 text-xl font-bold text-white">
+            <Text className="mt-3 text-xl text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
               {data.name} {data.surname}
             </Text>
             {data.region ? (
@@ -57,7 +58,9 @@ export default function MasterDetailScreen() {
                   className={`flex-row items-center justify-between ${index > 0 ? "border-t border-border pt-3" : ""}`}
                 >
                   <Text className="flex-1 text-base text-foreground">{service.service_name ?? service.category.name}</Text>
-                  <Text className="text-base font-extrabold text-foreground">{service.price} so'm</Text>
+                  <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+                    {service.price} so'm
+                  </Text>
                 </View>
               ))}
             </Card>

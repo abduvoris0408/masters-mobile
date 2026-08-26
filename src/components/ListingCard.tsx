@@ -4,6 +4,7 @@ import { Text, View } from "react-native";
 import { Chip, type ChipTone } from "@/components/ui/Chip";
 import { IconBadge, type IconBadgeTone } from "@/components/ui/IconBadge";
 import { PressableCard } from "@/components/ui/Card";
+import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 
 export interface ListingCardData {
   id: string;
@@ -30,7 +31,9 @@ export function ListingCard({ item, onPress }: ListingCardProps) {
       <View className="flex-row gap-3">
         <IconBadge icon={item.icon} imageUri={item.imageUri} tone={item.tone} />
         <View className="flex-1 gap-1">
-          <Text className="text-base font-semibold text-foreground">{item.title}</Text>
+          <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+            {item.title}
+          </Text>
           {item.subtitleLines.map((line) => (
             <Text key={line} className="text-sm text-muted">
               {line}
@@ -38,7 +41,9 @@ export function ListingCard({ item, onPress }: ListingCardProps) {
           ))}
         </View>
       </View>
-      <Text className="text-2xl font-extrabold tracking-tight text-foreground">{item.price}</Text>
+      <Text className="text-2xl tracking-tight text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+        {item.price}
+      </Text>
       <Chip label={item.statusLabel} tone={item.statusTone} />
     </PressableCard>
   );

@@ -56,7 +56,8 @@ export default function MastersCatalogScreen() {
 
   useEffect(() => {
     if (!data) return;
-    setItems((prev) => (page === 1 ? data.results : [...prev, ...data.results]));
+    const results = Array.isArray(data.results) ? data.results : [];
+    setItems((prev) => (page === 1 ? results : [...prev, ...results]));
   }, [data, page]);
 
   const hasMore = !!data?.next;

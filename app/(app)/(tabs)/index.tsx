@@ -70,7 +70,12 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (!data) return;
-    setItems((prev) => (page === 1 ? data.results : [...prev, ...data.results]));
+    // Defensive: a misconfigured/unreachable EXPO_PUBLIC_API_URL can return a
+    // response that isn't actually IDjangoPaginated (e.g. a dev server's HTML
+    // fallback page parsed as JSON-ish) — `results` being missing shouldn't
+    // hard-crash the screen.
+    const results = Array.isArray(data.results) ? data.results : [];
+    setItems((prev) => (page === 1 ? results : [...prev, ...results]));
   }, [data, page]);
 
   const hasMore = !!data?.next;

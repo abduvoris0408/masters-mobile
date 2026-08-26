@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { GradientCard } from "@/components/ui/GradientCard";
 import { Header } from "@/components/ui/Header";
 import { Rating } from "@/components/ui/Rating";
+import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useApplicationPublicDetailQuery } from "@/services/application";
 import { formatDate, formatPrice } from "@/utils/format";
 
@@ -25,9 +26,16 @@ export default function ListingDetailScreen() {
       ) : (
         <ScrollView contentContainerClassName="gap-4 p-4">
           <GradientCard>
-            <Text className="text-sm font-medium text-white/70">{data.category.name}</Text>
-            <Text className="mt-1 text-xl font-bold text-white">{data.title}</Text>
-            <Text className="mt-4 text-4xl font-extrabold tracking-tight text-white">
+            <Text className="text-sm text-white/70" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+              {data.category.name}
+            </Text>
+            <Text className="mt-1 text-xl text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+              {data.title}
+            </Text>
+            <Text
+              className="mt-4 text-4xl tracking-tight text-white"
+              style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}
+            >
               {data.budget_from === data.budget_to
                 ? formatPrice(Number(data.budget_from))
                 : `${formatPrice(Number(data.budget_from))} – ${formatPrice(Number(data.budget_to))}`}

@@ -1,5 +1,7 @@
 import { ActivityIndicator, Pressable, Text, type PressableProps } from "react-native";
 
+import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
+
 interface ButtonProps extends Omit<PressableProps, "children"> {
   children: string;
   loading?: boolean;
@@ -46,7 +48,10 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={variant === "solid" ? SPINNER_COLOR[color] : "#6C5CE7"} />
       ) : (
-        <Text className={`text-base font-bold ${variant === "solid" ? "text-white" : textColorClass}`}>
+        <Text
+          className={`text-base ${variant === "solid" ? "text-white" : textColorClass}`}
+          style={{ fontFamily: GOLOS_WEIGHTS.bold }}
+        >
           {children}
         </Text>
       )}

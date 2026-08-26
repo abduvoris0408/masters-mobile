@@ -4,6 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useThemeColors } from "@/lib/theme/colors";
+import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 
 interface HeaderProps {
   title?: string;
@@ -37,7 +38,11 @@ export function Header({ title, onMenuPress, onBackPress, right }: HeaderProps) 
       </View>
 
       {title ? (
-        <Text className="flex-1 text-center text-base font-semibold text-foreground" numberOfLines={1}>
+        <Text
+          className="flex-1 text-center text-base text-foreground"
+          style={{ fontFamily: GOLOS_WEIGHTS.semibold }}
+          numberOfLines={1}
+        >
           {title}
         </Text>
       ) : (

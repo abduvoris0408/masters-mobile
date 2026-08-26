@@ -5,6 +5,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { PressableCard } from "@/components/ui/Card";
 import { GradientCard } from "@/components/ui/GradientCard";
 import { Header } from "@/components/ui/Header";
+import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useLogoutMutation } from "@/services/auth";
 import { useAuthStore } from "@/stores";
 import { EUserType } from "@/types";
@@ -22,7 +23,7 @@ export default function ProfileScreen() {
       <View className="gap-4 px-4">
         <GradientCard style={{ alignItems: "center" }}>
           <Avatar uri={user?.avatar} name={user?.first_name} size={84} />
-          <Text className="mt-3 text-xl font-bold text-white">
+          <Text className="mt-3 text-xl text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
             {user ? `${user.first_name} ${user.last_name}` : ""}
           </Text>
           <Text className="mt-0.5 text-sm text-white/70">{user?.phone}</Text>
@@ -42,7 +43,7 @@ export default function ProfileScreen() {
           <View className="h-10 w-10 items-center justify-center rounded-2xl bg-rose-50">
             <Ionicons name="log-out-outline" size={20} color="#F43F5E" />
           </View>
-          <Text className="flex-1 text-base font-semibold text-foreground">
+          <Text className="flex-1 text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
             {logoutMutation.isPending ? "Chiqilmoqda..." : "Chiqish"}
           </Text>
         </PressableCard>
