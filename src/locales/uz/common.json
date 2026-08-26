@@ -1,0 +1,188 @@
+{
+  "tour_next": "Keyingi",
+  "tour_previous": "Ortga",
+  "tour_finish": "Tushunarli",
+  "login": "Kirish",
+  "register": "Ro'yxatdan o'tish",
+  "logout": "Chiqish",
+  "profile": "Profil",
+  "workers": "Mutaxassislar",
+  "masters_catalog": "Mutaxasislar",
+  "organizations_catalog": "Tashkilotlar",
+  "services": "Xizmatlar",
+  "catalog": "Katalog",
+  "catalog_all_services": "Barcha xizmatlar",
+  "catalog_top_masters": "Top mutaxassislar",
+  "catalog_pricing": "Narx kalkulyatori",
+  "catalog_legal_ai": "Huquqiy yordam",
+  "catalog_group_services": "Xizmat turlari",
+  "catalog_group_services_sub": "Barcha mavjud kategoriyalar",
+  "catalog_group_platform": "Platforma",
+  "catalog_group_platform_sub": "Qo'shimcha imkoniyatlar",
+  "become_worker": "Mutaxassis bo'lish",
+  "view_jobs": "Ishlarni ko'rish",
+  "my_bookings": "Buyurtmalarim",
+  "applications": "Barcha elonlar",
+  "my_applications": "Mening elonlarim",
+  "my_orders": "Mening buyurtmalarim",
+  "switch_to_master": "Mutaxassis profiliga o'tish",
+  "switch_to_organization": "Tashkilot profiliga o'tish",
+  "dashboard": "Dashboard",
+  "courses": "Kurslar",
+  "my_courses": "Mening kurslarim",
+  "post_listing": "Elon joylashtirish",
+  "view_listings": "Elonlarni ko'rish",
+  "my_account": "Hisobim",
+  "logout_confirm_title": "Tizimdan chiqmoqchimisiz?",
+  "edit_profile": "Profilni tahrirlash",
+  "search": "Qidirish",
+  "see_all": "Barchasini ko'rish",
+  "all_workers": "Barcha mutaxassislar",
+  "all": "Barchasi",
+  "order": "Ish joylashtirish",
+  "busy": "Band",
+  "popular": "Mashhur",
+  "per_hour": "so'm/soat",
+  "available": "Bo'sh",
+  "not_available": "Band",
+  "reviews": "sharhga asosan",
+  "masters_mega_desc": "50+ toifadagi ishonchli mutaxassislar bir joyda",
+  "phone": "Telefon raqam",
+  "phone_copy_tooltip": "Nusxalash",
+  "phone_copied": "Telefon raqam nusxalandi",
+  "password": "Parol",
+  "confirm_password": "Parolni takrorlang",
+  "first_name": "Ism",
+  "last_name": "Familiya",
+  "save": "Saqlash",
+  "cancel": "Bekor qilish",
+  "back": "Orqaga",
+  "next": "Davom etish",
+  "submit": "Yuborish",
+  "loading": "Yuklanmoqda...",
+  "error": "Xatolik yuz berdi",
+  "success": "Muvaffaqiyatli",
+  "client": "Mijoz",
+  "worker": "Mutaxassis",
+  "notifications": "Bildirishnomalar",
+  "chat": "Xabarlar",
+  "home": "Bosh sahifa",
+  "view_grid": "Grid",
+  "view_table": "Jadval",
+  "view_map": "Xarita",
+  "escrow_pay_error": "To'lovni boshlashda xatolik yuz berdi. Birozdan so'ng qayta urinib ko'ring.",
+  "not_found_title": "Sahifa topilmadi",
+  "not_found_desc": "Siz qidirayotgan sahifa mavjud emas yoki ko'chirilgan bo'lishi mumkin.",
+  "back_home": "Bosh sahifaga qaytish",
+  "error_title": "Nimadir xato ketdi",
+  "error_desc": "Sahifani yuklashda kutilmagan xatolik yuz berdi. Qayta urinib ko'ring yoki bosh sahifaga qayting.",
+  "try_again": "Qayta urinish",
+  "footer_tagline": "Ishonchli mutaxassislar bilan bog'lanish uchun eng qulay platforma.",
+  "footer_section_platform": "Platforma",
+  "footer_section_clients": "Mijozlar",
+  "footer_section_company": "Kompaniya",
+  "footer_how_it_works": "Qanday ishlaydi",
+  "footer_help": "Yordam",
+  "footer_about": "Biz haqimizda",
+  "footer_blog": "Blog",
+  "footer_contact": "Aloqa",
+  "footer_rights": "Barcha huquqlar himoyalangan.",
+  "footer_privacy": "Maxfiylik siyosati",
+  "footer_terms": "Foydalanish shartlari",
+  "services_page_title": "Barcha xizmat turlari",
+  "services_page_subtitle": "Kerakli kategoriyani tanlang va ishonchli mutaxassislarni shu zahoti toping",
+  "services_master_count": "{{count}} mutaxassis mavjud",
+  "bw_badge": "MUTAXASSIS BO'LISH",
+  "bw_hero_title_1": "O'z kasbingiz bilan",
+  "bw_hero_title_2": "daromad qiling",
+  "bw_hero_subtitle": "Masters platformasiga qo'shiling — minglab mijozlar siz bilan bog'lanishni kutmoqda",
+  "bw_benefit1_title": "Ko'proq buyurtmalar",
+  "bw_benefit1_desc": "Yaqin hududdan avtomatik buyurtmalar oling",
+  "bw_benefit2_title": "To'g'ridan-to'g'ri to'lov",
+  "bw_benefit2_desc": "Hech qanday vositachisiz to'lovni qabul qiling",
+  "bw_benefit3_title": "Reputatsiya quring",
+  "bw_benefit3_desc": "Sharhlar va reyting orqali ishonch yarating",
+  "bw_benefit4_title": "Daromadingiz o'ssin",
+  "bw_benefit4_desc": "Oylik qo'shimcha 2–5 mln so'm ishlash imkoni",
+  "bw_step1_title": "Ro'yxatdan o'ting",
+  "bw_step1_desc": "Bir necha daqiqada bepul hisob yarating va \"Mutaxassis\" turini tanlang.",
+  "bw_step2_title": "Mutaxassisligingizni belgilang",
+  "bw_step2_desc": "Kategoriya, tajriba va ish hududingizni ko'rsating.",
+  "bw_step3_title": "Tasdiqlanishini kuting",
+  "bw_step3_desc": "Moderatorlar profilingizni 24 soat ichida tekshirib chiqadi.",
+  "bw_step4_title": "Buyurtmalar qabul qiling",
+  "bw_step4_desc": "Mijozlar bilan bog'lanib, daromad qilishni boshlang.",
+  "bw_steps_title": "Necha qadamda mutaxassis bo'lasiz",
+  "bw_steps_subtitle": "Jarayon oddiy va shaffof — barchasi shu to'rt qadamdan iborat",
+  "bw_cta_title": "Boshlashga tayyormisiz?",
+  "bw_cta_desc_auth": "Profilingizni to'ldirib, mutaxassisligingizni belgilang.",
+  "bw_cta_desc_guest": "Ro'yxatdan o'ting va mutaxassisligingizni belgilang.",
+  "bw_cta_btn_auth": "Profilni to'ldirish",
+  "bw_have_account": "Hisobingiz bormi?",
+  "service_categories": {
+    "courier": {
+      "name": "Kuryerlik xizmatlari",
+      "description": "Tez va ishonchli yetkazib berish xizmatlari"
+    },
+    "repair-construction": {
+      "name": "Ta'mirlash va qurilish",
+      "description": "Kapital va joriy ta'mirlash, qurilish ishlari"
+    },
+    "cargo-transport": {
+      "name": "Yuk tashish",
+      "description": "Yuk tashish va ko'chirish xizmatlari"
+    },
+    "cleaning": {
+      "name": "Uborka va uy-ro'zg'or yordami",
+      "description": "Kvartira va ofislarni tozalash, uy yumushlari"
+    },
+    "computer-help": {
+      "name": "Kompyuter yordami",
+      "description": "Kompyuter va noutbuklarni sozlash, ta'mirlash"
+    },
+    "photo-video": {
+      "name": "Foto, video va audio",
+      "description": "Fotosurat, video va audio yozib olish xizmatlari"
+    },
+    "software-dev": {
+      "name": "Dasturiy ta'minot",
+      "description": "Veb va mobil ilovalar yaratish"
+    },
+    "equipment-repair": {
+      "name": "Texnika o'rnatish va ta'miri",
+      "description": "Maishiy texnikani o'rnatish va ta'mirlash"
+    },
+    "events-promo": {
+      "name": "Tadbirlar va promoaksiyalar",
+      "description": "Tadbir tashkil qilish va reklama aksiyalari"
+    },
+    "design": {
+      "name": "Dizayn",
+      "description": "Grafik va veb-dizayn xizmatlari"
+    },
+    "virtual-assistant": {
+      "name": "Virtual yordamchi",
+      "description": "Masofadan turib operatsion yordam"
+    },
+    "device-repair": {
+      "name": "Raqamli texnika ta'miri",
+      "description": "Telefon va planshetlarni ta'mirlash"
+    },
+    "beauty-health": {
+      "name": "Go'zallik va salomatlik",
+      "description": "Soch turmagi, parvarish va salomatlik xizmatlari"
+    },
+    "legal-accounting": {
+      "name": "Yuridik va buxgalteriya yordami",
+      "description": "Yuridik maslahat va buxgalteriya xizmatlari"
+    },
+    "vehicle-repair": {
+      "name": "Transport ta'miri",
+      "description": "Avtomobil va mototsikllarni ta'mirlash"
+    },
+    "tutoring": {
+      "name": "Repetitorlik va ta'lim",
+      "description": "Fanlardan xususiy darslar va kurslar"
+    }
+  }
+}

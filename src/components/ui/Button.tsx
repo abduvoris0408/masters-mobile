@@ -1,0 +1,55 @@
+import { ActivityIndicator, Pressable, Text, type PressableProps } from "react-native";
+
+interface ButtonProps extends Omit<PressableProps, "children"> {
+  children: string;
+  loading?: boolean;
+  /** solid = filled pill (the one main CTA per screen), outline = bordered, ghost = text-only. */
+  variant?: "solid" | "outline" | "ghost";
+  /** Which brand color a solid/outline button uses. Reference screens keep this
+   *  rule strictly: accent (green) is the primary action, primary (violet) is
+   *  reserved for nav/tab/badge — never both as competing CTAs on one screen. */
+  color?: "accent" | "primary";
+}
+
+const SPINNER_COLOR: Record<NonNullable<ButtonProps["color"]>, string> = {
+  accent: "#FFFFFF",
+  primary: "#FFFFFF",
+};
+
+export function Button({
+  children,
+  loading,
+  disabled,
+  variant = "solid",
+  color = "accent",
+  className,
+  ...rest
+}: ButtonProps) {
+  const isDisabled = disabled || loading;
+  const colorClass = color === "accent" ? "bg-accent" : "bg-primary";
+  const textColorClass = color === "accent" ? "text-accent" : "text-primary";
+
+  const styles =
+    variant === "solid"
+      ? colorClass
+      : variant === "outline"
+        ? `border-2 ${color === "accent" ? "border-accent" : "border-primary"} bg-transparent`
+        : "bg-transparent";
+
+  return (
+    <Pressable
+      disabled={isDisabled}
+      className={`h-13 items-center justify-center rounded-full px-5 ${styles} ${isDisabled ? "opacity-50" : ""} ${className ?? ""}`}
+      style={{ height: 52 }}
+      {...rest}
+    >
+      {loading ? (
+        <ActivityIndicator color={variant === "solid" ? SPINNER_COLOR[color] : "#6C5CE7"} />
+      ) : (
+        <Text className={`text-base font-bold ${variant === "solid" ? "text-white" : textColorClass}`}>
+          {children}
+        </Text>
+      )}
+    </Pressable>
+  );
+}

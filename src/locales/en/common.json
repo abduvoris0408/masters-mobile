@@ -1,0 +1,188 @@
+{
+  "tour_next": "Next",
+  "tour_previous": "Back",
+  "tour_finish": "Got it",
+  "login": "Sign In",
+  "register": "Sign Up",
+  "logout": "Sign Out",
+  "profile": "Profile",
+  "workers": "Workers",
+  "masters_catalog": "Specialists",
+  "organizations_catalog": "Organizations",
+  "services": "Services",
+  "catalog": "Catalog",
+  "catalog_all_services": "All services",
+  "catalog_top_masters": "Top workers",
+  "catalog_pricing": "Price calculator",
+  "catalog_legal_ai": "Legal help",
+  "catalog_group_services": "Service types",
+  "catalog_group_services_sub": "All available categories",
+  "catalog_group_platform": "Platform",
+  "catalog_group_platform_sub": "More features",
+  "become_worker": "Become a Worker",
+  "view_jobs": "View Jobs",
+  "my_bookings": "My Bookings",
+  "applications": "All Listings",
+  "my_applications": "My Listings",
+  "my_orders": "My Orders",
+  "switch_to_master": "Switch to Master Profile",
+  "switch_to_organization": "Switch to Organization Profile",
+  "dashboard": "Dashboard",
+  "courses": "Courses",
+  "my_courses": "My courses",
+  "post_listing": "Post a listing",
+  "view_listings": "View listings",
+  "my_account": "My account",
+  "logout_confirm_title": "Are you sure you want to log out?",
+  "edit_profile": "Edit Profile",
+  "search": "Search",
+  "see_all": "See All",
+  "all_workers": "All Workers",
+  "all": "All",
+  "order": "Post a Job",
+  "busy": "Unavailable",
+  "popular": "Popular",
+  "per_hour": "UZS/hr",
+  "available": "Available",
+  "not_available": "Unavailable",
+  "reviews": "reviews",
+  "masters_mega_desc": "Trusted specialists across 50+ categories in one place",
+  "phone": "Phone number",
+  "phone_copy_tooltip": "Copy to clipboard",
+  "phone_copied": "Phone number copied",
+  "password": "Password",
+  "confirm_password": "Confirm password",
+  "first_name": "First name",
+  "last_name": "Last name",
+  "save": "Save",
+  "cancel": "Cancel",
+  "back": "Back",
+  "next": "Continue",
+  "submit": "Submit",
+  "loading": "Loading...",
+  "error": "Something went wrong",
+  "success": "Success",
+  "client": "Client",
+  "worker": "Worker",
+  "notifications": "Notifications",
+  "chat": "Messages",
+  "home": "Home",
+  "view_grid": "Grid",
+  "view_table": "Table",
+  "view_map": "Map",
+  "escrow_pay_error": "Couldn't start the payment. Please try again shortly.",
+  "not_found_title": "Page not found",
+  "not_found_desc": "The page you're looking for doesn't exist or may have been moved.",
+  "back_home": "Back to home",
+  "error_title": "Something went wrong",
+  "error_desc": "An unexpected error occurred while loading this page. Try again or go back home.",
+  "try_again": "Try again",
+  "footer_tagline": "The easiest platform to connect with trusted workers.",
+  "footer_section_platform": "Platform",
+  "footer_section_clients": "Clients",
+  "footer_section_company": "Company",
+  "footer_how_it_works": "How it works",
+  "footer_help": "Help",
+  "footer_about": "About us",
+  "footer_blog": "Blog",
+  "footer_contact": "Contact",
+  "footer_rights": "All rights reserved.",
+  "footer_privacy": "Privacy policy",
+  "footer_terms": "Terms of use",
+  "services_page_title": "All service categories",
+  "services_page_subtitle": "Choose the category you need and find trusted workers right away",
+  "services_master_count": "{{count}} workers available",
+  "bw_badge": "BECOME A WORKER",
+  "bw_hero_title_1": "Earn money doing",
+  "bw_hero_title_2": "what you do best",
+  "bw_hero_subtitle": "Join the Masters platform — thousands of clients are waiting to connect with you",
+  "bw_benefit1_title": "More orders",
+  "bw_benefit1_desc": "Get automatic orders from your nearby area",
+  "bw_benefit2_title": "Direct payment",
+  "bw_benefit2_desc": "Accept payment with no middleman",
+  "bw_benefit3_title": "Build a reputation",
+  "bw_benefit3_desc": "Earn trust through reviews and ratings",
+  "bw_benefit4_title": "Grow your income",
+  "bw_benefit4_desc": "Earn an extra 2–5 million UZS a month",
+  "bw_step1_title": "Sign up",
+  "bw_step1_desc": "Create a free account in minutes and choose the \"Worker\" type.",
+  "bw_step2_title": "Define your specialty",
+  "bw_step2_desc": "Specify your category, experience, and work area.",
+  "bw_step3_title": "Wait for approval",
+  "bw_step3_desc": "Moderators review your profile within 24 hours.",
+  "bw_step4_title": "Start taking orders",
+  "bw_step4_desc": "Connect with clients and start earning.",
+  "bw_steps_title": "How many steps to become a worker",
+  "bw_steps_subtitle": "The process is simple and transparent — just these four steps",
+  "bw_cta_title": "Ready to get started?",
+  "bw_cta_desc_auth": "Fill out your profile and define your specialty.",
+  "bw_cta_desc_guest": "Sign up and define your specialty.",
+  "bw_cta_btn_auth": "Complete profile",
+  "bw_have_account": "Already have an account?",
+  "service_categories": {
+    "courier": {
+      "name": "Courier services",
+      "description": "Fast and reliable delivery services"
+    },
+    "repair-construction": {
+      "name": "Repair and construction",
+      "description": "Renovation and construction work of any complexity"
+    },
+    "cargo-transport": {
+      "name": "Cargo transport",
+      "description": "Cargo transport and moving services"
+    },
+    "cleaning": {
+      "name": "Cleaning and household help",
+      "description": "Home and office cleaning, household chores"
+    },
+    "computer-help": {
+      "name": "Computer help",
+      "description": "Computer and laptop setup and repair"
+    },
+    "photo-video": {
+      "name": "Photo, video and audio",
+      "description": "Photo shooting, video and audio recording"
+    },
+    "software-dev": {
+      "name": "Software development",
+      "description": "Web and mobile app development"
+    },
+    "equipment-repair": {
+      "name": "Appliance installation and repair",
+      "description": "Installation and repair of home appliances"
+    },
+    "events-promo": {
+      "name": "Events and promotions",
+      "description": "Event organization and promotional campaigns"
+    },
+    "design": {
+      "name": "Design",
+      "description": "Graphic and web design services"
+    },
+    "virtual-assistant": {
+      "name": "Virtual assistant",
+      "description": "Remote administrative support"
+    },
+    "device-repair": {
+      "name": "Digital device repair",
+      "description": "Phone and tablet repair"
+    },
+    "beauty-health": {
+      "name": "Beauty and health",
+      "description": "Beauty and wellness services"
+    },
+    "legal-accounting": {
+      "name": "Legal and accounting help",
+      "description": "Legal and accounting consulting"
+    },
+    "vehicle-repair": {
+      "name": "Vehicle repair",
+      "description": "Car and motorcycle repair"
+    },
+    "tutoring": {
+      "name": "Tutoring and education",
+      "description": "Private lessons and educational courses"
+    }
+  }
+}

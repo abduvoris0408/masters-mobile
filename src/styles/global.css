@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Page bg carries a faint lavender tint so white cards read as elevated —
+     same trick the reference screens use (light gray-violet canvas, pure
+     white surfaces on top), instead of flat white-on-white. */
+  --color-background: 246 245 250;
+  --color-surface: 255 255 255;
+  --color-foreground: 23 20 33;
+  --color-muted: 121 116 138;
+  --color-border: 232 230 240;
+}
+
+.dark:root {
+  --color-background: 15 13 20;
+  --color-surface: 26 23 34;
+  --color-foreground: 240 239 245;
+  --color-muted: 156 150 175;
+  --color-border: 42 38 54;
+}
