@@ -34,3 +34,20 @@ export interface IContractDetail {
   is_master_accepted: boolean;
   created_at: string;
 }
+
+// GET /contract/user-service-preview/{guid}/ — shown to the customer before
+// they place a direct order on a master's service (guid here is the
+// service's own guid, not an order/contract guid — no order exists yet).
+export interface IUserServicePreview {
+  id: number;
+  guid: string;
+  contract_title: string;
+  // JSON-encoded string, same shape as IAgreementContractContent — parse
+  // before rendering.
+  content: string;
+  customer: IContractPartyRef;
+  master: IContractPartyRef;
+  category: IContractCategoryRef;
+  service_name: string;
+  price: string;
+}

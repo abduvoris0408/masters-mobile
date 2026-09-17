@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
@@ -87,6 +88,7 @@ interface ApplicationWizardProps {
 export function ApplicationWizard({ onFinish, submitting = false }: ApplicationWizardProps) {
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
+  const insets = useSafeAreaInsets();
   const [stepIndex, setStepIndex] = useState(0);
   const [visitedSteps, setVisitedSteps] = useState<Set<number>>(new Set([0]));
   const [values, setValues] = useState<WizardState>(INITIAL_STATE);
@@ -188,7 +190,11 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
   const meta = stepMeta[stepKey];
 
   return (
-    <View className="flex-1">
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? headerHeight : 0}
+    >
       <View className="gap-3 px-4 pt-3" style={{ paddingTop: headerHeight + 12 }}>
         <View className="flex-row items-center gap-2.5">
           <View className="h-1.5 flex-1 overflow-hidden rounded-full bg-border">
@@ -554,7 +560,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
         )}
       </ScrollView>
 
-      <View className="flex-row gap-3 px-4 pb-4 pt-2">
+      <View className="flex-row gap-3 border-t border-border bg-background px-4 pt-3" style={{ paddingBottom: insets.bottom + 12 }}>
         {stepIndex > 0 ? (
           <Pressable
             onPress={handleBack}
@@ -585,7 +591,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
           )}
         </Pressable>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -29,6 +29,13 @@ interface ListingCardProps {
   /** "offer" (default) shows the worker-facing "Taklif yuborish" CTA; "manage"
    *  shows "Takliflarni ko'rish" for the owner's own "Mening elonlarim" list. */
   ctaVariant?: "offer" | "manage";
+  /** "list" (default) is the full card from the reference screens — every
+   *  field, a full-width CTA. "grid" is a compact 2-column tile: title,
+   *  price and offer count only, no description/deadline/CTA — those don't
+   *  fit two-per-row without wrapping into an unreadable wall of text, so
+   *  grid mode trims to what still reads at a glance and taps through to
+   *  the same detail screen for the rest. */
+  variant?: "list" | "grid";
 }
 
 const PAYMENT_LABEL: Record<TPaymentType, string> = {
@@ -41,8 +48,49 @@ const PAYMENT_LABEL: Record<TPaymentType, string> = {
 // a budget row with the payment-type badge, then an offers footer and a
 // full-width CTA. Urgent listings get a red left accent border, matching the
 // reference screens' red-outlined card treatment.
-export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer" }: ListingCardProps) {
+export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer", variant = "list" }: ListingCardProps) {
   const colors = useThemeColors();
+
+  if (variant === "grid") {
+    return (
+      <PressableCard
+        onPress={onPress}
+        className="gap-2 p-3.5"
+        style={item.isUrgent ? { borderLeftWidth: 3, borderLeftColor: colors.danger } : undefined}
+      >
+        <View className="flex-row items-start justify-between gap-1.5">
+          <View className="flex-1 self-start rounded-lg bg-emerald-50 px-2 py-1 dark:bg-accent/15">
+            <Text className="text-[11px] text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={1}>
+              {item.categoryLabel}
+            </Text>
+          </View>
+          {item.isUrgent ? <Ionicons name="flash" size={14} color={colors.danger} /> : null}
+        </View>
+
+        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }} numberOfLines={2}>
+          {item.title}
+        </Text>
+
+        <View className="flex-row items-center gap-1">
+          <Ionicons name="location-outline" size={12} color={colors.muted} />
+          <Text className="flex-1 text-xs text-muted" numberOfLines={1}>
+            {item.address}
+          </Text>
+        </View>
+
+        <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }} numberOfLines={1}>
+          {item.price}
+        </Text>
+
+        <View className="flex-row items-center justify-between gap-1 border-t border-border pt-2">
+          <Text className="text-[11px] text-muted" numberOfLines={1}>
+            {item.offersCount > 0 ? `${item.offersCount} ta taklif` : "Takliflar yo'q"}
+          </Text>
+          <Ionicons name="chevron-forward" size={13} color={colors.muted} />
+        </View>
+      </PressableCard>
+    );
+  }
 
   return (
     <PressableCard

@@ -33,7 +33,8 @@
         {
           "photosPermission": "Rasm tanlash uchun galereyaga ruxsat kerak."
         }
-      ]
+      ],
+      "expo-video"
     ]
   }
 }

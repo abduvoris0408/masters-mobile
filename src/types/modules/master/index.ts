@@ -127,6 +127,10 @@ export interface IUserServiceCategoryRef {
   id: number;
   guid: string;
   name: string;
+  // Marks the one category a master designates as their primary
+  // specialization — highlighted separately from the rest on their public
+  // detail page.
+  is_main: boolean;
 }
 
 export interface IUserServicePricingUnit {

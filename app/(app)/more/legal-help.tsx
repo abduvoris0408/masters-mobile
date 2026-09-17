@@ -1,89 +1,348 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 
-import { Chip } from "@/components/ui/Chip";
-import { PressableCard } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Chip, type ChipTone } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useThemeColors } from "@/lib/theme/colors";
-import { useLegalSupportRequestsQuery } from "@/services/legal-support";
-import type { ILegalSupportRequestListItem } from "@/types";
-import { formatDate } from "@/utils/format";
+import {
+  useCreateLegalSupportRequestByOrderNumberMutation,
+  useLegalSupportCategoriesQuery,
+  useLegalSupportRequestsQuery,
+} from "@/services/legal-support";
+import type { ILegalSupportCategory, ILegalSupportRequestListItem } from "@/types";
+import { formatDateTime } from "@/utils/format";
 import { appendUniquePage } from "@/utils/pagination";
+import { showError, showSuccess } from "@/utils/toast";
 
-const PAGE_SIZE = 12;
+const HISTORY_PAGE_SIZE = 10;
+
+const TRUST_BADGES: { icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
+  { icon: "flash-outline", label: "Bepul birinchi konsultatsiya" },
+  { icon: "time-outline", label: "24 soat ichida javob" },
+  { icon: "lock-closed-outline", label: "Maxfiy va xavfsiz" },
+];
+
+const STATUS_META: Record<string, { tone: ChipTone; label: string }> = {
+  pending: { tone: "warning", label: "Kutilmoqda" },
+  in_review: { tone: "info", label: "Ko'rib chiqilmoqda" },
+  reviewing: { tone: "info", label: "Ko'rib chiqilmoqda" },
+  resolved: { tone: "success", label: "Hal qilindi" },
+  rejected: { tone: "danger", label: "Rad etildi" },
+  closed: { tone: "neutral", label: "Yopilgan" },
+};
+
+// Fallback icon set for categories the backend didn't attach an icon to —
+// keyed off the category id so the same category always gets the same icon.
+const FALLBACK_CATEGORY_ICONS: (keyof typeof Ionicons.glyphMap)[] = [
+  "wallet-outline",
+  "document-text-outline",
+  "close-circle-outline",
+  "shield-outline",
+  "alert-circle-outline",
+];
+
+function CategoryCard({
+  category,
+  selected,
+  onPress,
+}: {
+  category: ILegalSupportCategory;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  const colors = useThemeColors();
+  const fallbackIcon = FALLBACK_CATEGORY_ICONS[category.id % FALLBACK_CATEGORY_ICONS.length];
+
+  return (
+    <Pressable
+      onPress={onPress}
+      className={`gap-2 rounded-2xl border p-3.5 ${selected ? "border-danger bg-red-50 dark:bg-danger/10" : "border-border bg-surface"}`}
+      style={{ width: "48%" }}
+    >
+      <Ionicons name={fallbackIcon} size={20} color={selected ? colors.danger : colors.muted} />
+      <Text
+        className={`text-sm ${selected ? "text-danger" : "text-foreground"}`}
+        style={{ fontFamily: GOLOS_WEIGHTS.semibold }}
+        numberOfLines={2}
+      >
+        {category.name}
+      </Text>
+      {category.description ? (
+        <Text className="text-xs leading-4 text-muted" numberOfLines={2}>
+          {category.description}
+        </Text>
+      ) : null}
+    </Pressable>
+  );
+}
+
+function RequestHistoryRow({ item }: { item: ILegalSupportRequestListItem }) {
+  const status = STATUS_META[item.status] ?? { tone: "neutral" as ChipTone, label: item.status };
+  return (
+    <View className="flex-row items-center justify-between gap-3 rounded-2xl bg-surface p-3.5">
+      <View className="flex-1 gap-1">
+        <View className="flex-row items-center gap-2">
+          <Text className="text-xs text-muted">{formatDateTime(item.created_at)}</Text>
+          {item.is_priority ? <Chip label="Ustuvor" tone="warning" /> : null}
+        </View>
+        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={2}>
+          {item.category.name} — Ish № {item.order.order_number}
+        </Text>
+      </View>
+      <Chip label={status.label} tone={status.tone} />
+    </View>
+  );
+}
 
 export default function LegalHelpScreen() {
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
-  const [page, setPage] = useState(1);
-  const [items, setItems] = useState<ILegalSupportRequestListItem[]>([]);
 
-  const { data, isLoading, isFetching, isError, refetch } = useLegalSupportRequestsQuery(page, PAGE_SIZE);
+  const { data: categoriesData, isLoading: categoriesLoading } = useLegalSupportCategoriesQuery();
+  const categories = categoriesData?.results ?? [];
+  const createMutation = useCreateLegalSupportRequestByOrderNumberMutation();
+
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [orderNumber, setOrderNumber] = useState("");
+  const [againstPerson, setAgainstPerson] = useState("");
+  const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    if (categoryId === null && categories.length > 0) setCategoryId(categories[0].id);
+  }, [categories, categoryId]);
+
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyItems, setHistoryItems] = useState<ILegalSupportRequestListItem[]>([]);
+  const { data, isLoading, isFetching, isError, refetch } = useLegalSupportRequestsQuery(historyPage, HISTORY_PAGE_SIZE);
 
   useEffect(() => {
     if (!data) return;
     const results = Array.isArray(data.results) ? data.results : [];
-    setItems((prev) => appendUniquePage(page === 1 ? [] : prev, results, (i) => i.guid));
-  }, [data, page]);
+    setHistoryItems((prev) => appendUniquePage(historyPage === 1 ? [] : prev, results, (i) => i.guid));
+  }, [data, historyPage]);
 
-  const hasMore = !!data?.next;
+  const hasMoreHistory = !!data?.next;
+
+  const handleSubmit = async () => {
+    if (!orderNumber.trim() || !categoryId || !description.trim() || !againstPerson.trim()) {
+      showError("Barcha maydonlarni to'ldiring");
+      return;
+    }
+    try {
+      await createMutation.mutateAsync({
+        order_number: orderNumber.trim(),
+        category: categoryId,
+        description: description.trim(),
+        against_person: againstPerson.trim(),
+      });
+      showSuccess("Murojaatingiz qabul qilindi — yuristimiz tez orada siz bilan bog'lanadi");
+      setOrderNumber("");
+      setAgainstPerson("");
+      setDescription("");
+      setHistoryPage(1);
+    } catch {
+      showError("Murojaatni yuborib bo'lmadi, qaytadan urinib ko'ring");
+    }
+  };
 
   return (
     <View className="flex-1 bg-background">
       <Header title="Huquqiy yordam" onBackPress={() => router.back()} />
 
-      {isLoading ? (
-        <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
-      ) : isError ? (
-        <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState
-            icon="alert-circle-outline"
-            title="Yuklashda xatolik"
-            description="Qayta urinib ko'ring"
-            actionLabel="Qayta urinish"
-            onAction={() => refetch()}
-          />
-        </View>
-      ) : items.length === 0 ? (
-        <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState icon="shield-checkmark-outline" title="Hozircha murojaatlar yo'q" />
-        </View>
-      ) : (
-        <FlatList
-          data={items}
-          keyExtractor={(item) => item.guid}
-          contentContainerClassName="gap-3 px-4 py-4"
-          contentContainerStyle={{ paddingTop: headerHeight + 16 }}
-          renderItem={({ item }) => (
-            <PressableCard className="gap-2">
-              <View className="flex-row items-center justify-between gap-2">
-                <View className="flex-row items-center gap-2">
-                  <Ionicons name="document-text-outline" size={16} color={colors.accent} />
-                  <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                    {item.category.name}
-                  </Text>
-                </View>
-                <Chip label={item.status} />
+      <FlatList
+        data={historyItems}
+        keyExtractor={(item) => item.guid}
+        contentContainerClassName="gap-4 px-4 pb-10"
+        contentContainerStyle={{ paddingTop: headerHeight + 12 }}
+        ListHeaderComponent={
+          <View className="gap-4">
+            <View className="items-center gap-3 rounded-3xl bg-surface p-5">
+              <View className="h-12 w-12 items-center justify-center rounded-2xl bg-red-50 dark:bg-danger/15">
+                <Ionicons name="shield-checkmark-outline" size={22} color={colors.danger} />
               </View>
-              <Text className="text-sm text-muted" numberOfLines={2}>
-                {item.description}
+              <Text className="text-center text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                Huquqiy yordam
               </Text>
-              <Text className="text-xs text-muted">
-                Buyurtma #{item.order.order_number} · {formatDate(item.created_at)}
+              <Text className="text-center text-sm leading-5 text-muted">
+                Pulingizni ololmadingizmi yoki shartnoma shartlari buzildimi? Bu yerdan to'g'ridan-to'g'ri Masters
+                yuristiga murojaat qilishingiz mumkin — bepul va tez.
               </Text>
-            </PressableCard>
-          )}
-          onEndReachedThreshold={0.4}
-          onEndReached={() => hasMore && !isFetching && setPage((p) => p + 1)}
-          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : null}
-          refreshControl={<RefreshControl refreshing={isFetching && page === 1} onRefresh={() => refetch()} />}
-        />
-      )}
+              <View className="flex-row flex-wrap justify-center gap-2">
+                {TRUST_BADGES.map((badge) => (
+                  <View key={badge.label} className="flex-row items-center gap-1.5 rounded-full bg-background px-3 py-1.5">
+                    <Ionicons name={badge.icon} size={13} color={colors.accent} />
+                    <Text className="text-xs text-foreground">{badge.label}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <View className="gap-2.5">
+              <Text className="px-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                Muammoingiz nima?
+              </Text>
+              {categoriesLoading ? (
+                <ActivityIndicator color={colors.accent} style={{ marginVertical: 16 }} />
+              ) : categories.length === 0 ? (
+                <Text className="px-1 text-sm text-muted">Muammo turlarini yuklab bo'lmadi</Text>
+              ) : (
+                <View className="flex-row flex-wrap justify-between gap-y-2.5">
+                  {categories.map((category) => (
+                    <CategoryCard
+                      key={category.id}
+                      category={category}
+                      selected={categoryId === category.id}
+                      onPress={() => setCategoryId(category.id)}
+                    />
+                  ))}
+                </View>
+              )}
+            </View>
+
+            <Card className="gap-3">
+              <View className="gap-1">
+                <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                  Murojaat qoldiring
+                </Text>
+                <Text className="text-xs text-muted">
+                  Ish raqami va tafsilotlarni kiriting — yuristimiz 24 soat ichida siz bilan bog'lanadi
+                </Text>
+              </View>
+
+              <View className="gap-1.5">
+                <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+                  Ish raqami
+                </Text>
+                <View className="flex-row items-center gap-2 rounded-2xl bg-background px-4">
+                  <Ionicons name="pricetag-outline" size={15} color={colors.muted} />
+                  <TextInput
+                    value={orderNumber}
+                    onChangeText={setOrderNumber}
+                    placeholder="№ BZ-4501"
+                    placeholderTextColor={colors.muted}
+                    className="flex-1 py-3 text-base text-foreground"
+                    style={{ color: colors.foreground }}
+                  />
+                </View>
+              </View>
+
+              <View className="gap-1.5">
+                <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+                  Kimga nisbatan shikoyat
+                </Text>
+                <View className="flex-row items-center gap-2 rounded-2xl bg-background px-4">
+                  <Ionicons name="person-outline" size={15} color={colors.muted} />
+                  <TextInput
+                    value={againstPerson}
+                    onChangeText={setAgainstPerson}
+                    placeholder="Ism yoki tashkilot nomini kiriting"
+                    placeholderTextColor={colors.muted}
+                    className="flex-1 py-3 text-base text-foreground"
+                    style={{ color: colors.foreground }}
+                  />
+                </View>
+              </View>
+
+              <View className="gap-1.5">
+                <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+                  Nima bo'lganini qisqacha yozing
+                </Text>
+                <TextInput
+                  value={description}
+                  onChangeText={setDescription}
+                  multiline
+                  placeholder="Ishni 20-iyulda yakunladim, mijoz tasdiqladi, lekin pul hisobimga hali tushmadi..."
+                  placeholderTextColor={colors.muted}
+                  className="rounded-2xl bg-background px-4 py-3 text-base text-foreground"
+                  style={{ minHeight: 90, textAlignVertical: "top", color: colors.foreground }}
+                />
+              </View>
+
+              <View className="flex-row items-start gap-2 rounded-2xl bg-amber-50 px-3.5 py-3 dark:bg-amber-500/15">
+                <Ionicons name="warning-outline" size={15} color="#D97706" style={{ marginTop: 1 }} />
+                <Text className="flex-1 text-xs text-foreground">
+                  Agar summa katta (500 000 so'mdan yuqori) bo'lsa, murojaatingiz avtomatik ustuvor tartibda ko'rib
+                  chiqiladi
+                </Text>
+              </View>
+
+              <Button loading={createMutation.isPending} onPress={handleSubmit}>
+                Murojaatni yuborish
+              </Button>
+            </Card>
+
+            <Card className="gap-3">
+              <View className="flex-row items-center gap-2.5">
+                <View className="h-8 w-8 items-center justify-center rounded-full bg-emerald-50 dark:bg-accent/15">
+                  <Ionicons name="call-outline" size={16} color={colors.accent} />
+                </View>
+                <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                  Yurist bilan to'g'ridan-to'g'ri bog'lanish
+                </Text>
+              </View>
+              <Text className="text-xs leading-5 text-muted">
+                Murakkab holatlarda, murojaatingiz ko'rib chiqilgach, Masters shtatidagi yurist siz bilan bevosita
+                bog'lanadi — telefon orqali yoki ilova ichidagi chat orqali.
+              </Text>
+              <View className="gap-2">
+                {[
+                  "Murojaat yuborasiz",
+                  "24 soat ichida dastlabki javob olasiz",
+                  "Kerak bo'lsa, yurist siz bilan qo'ng'iroq orqali bog'lanadi",
+                ].map((step, i) => (
+                  <View key={step} className="flex-row items-center gap-2.5">
+                    <View className="h-5 w-5 items-center justify-center rounded-full bg-emerald-50 dark:bg-accent/15">
+                      <Text className="text-[11px] text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                        {i + 1}
+                      </Text>
+                    </View>
+                    <Text className="flex-1 text-xs text-foreground">{step}</Text>
+                  </View>
+                ))}
+              </View>
+              <View className="items-center gap-0.5 rounded-2xl bg-background py-3">
+                <Text className="text-2xl text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+                  870+
+                </Text>
+                <Text className="text-xs text-muted">murojaat muvaffaqiyatli hal qilingan</Text>
+              </View>
+              <Button variant="outline" onPress={() => showError("Bu funksiya tez orada ishga tushadi")}>
+                Hoziroq bog'lanish
+              </Button>
+            </Card>
+
+            <Text className="px-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+              Sizning murojaatlaringiz
+            </Text>
+          </View>
+        }
+        renderItem={({ item }) => <RequestHistoryRow item={item} />}
+        ListEmptyComponent={
+          isLoading ? (
+            <ActivityIndicator color={colors.accent} style={{ marginTop: 16 }} />
+          ) : isError ? (
+            <EmptyState
+              icon="alert-circle-outline"
+              title="Murojaatlar ro'yxatini yuklab bo'lmadi"
+              actionLabel="Qayta urinish"
+              onAction={() => refetch()}
+            />
+          ) : (
+            <EmptyState icon="shield-checkmark-outline" title="Hozircha murojaatlaringiz yo'q" />
+          )
+        }
+        onEndReachedThreshold={0.4}
+        onEndReached={() => hasMoreHistory && !isFetching && setHistoryPage((p) => p + 1)}
+        ListFooterComponent={isFetching && historyPage > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : null}
+        refreshControl={<RefreshControl refreshing={isFetching && historyPage === 1} onRefresh={() => refetch()} />}
+      />
     </View>
   );
 }

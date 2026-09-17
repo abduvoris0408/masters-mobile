@@ -198,6 +198,9 @@ export default function ProfileScreen() {
             <NavRow icon="images-outline" label="Portfolio" onPress={() => router.push("/profile/portfolio")} />
             <NavRow icon="construct-outline" label="Xizmatlar" onPress={() => router.push("/profile/services")} />
             <NavRow icon="document-attach-outline" label="Hujjatlar" onPress={() => router.push("/profile/documents")} />
+            <NavRow icon="videocam-outline" label="Tanishtiruv video" onPress={() => router.push("/profile/intro-video")} />
+            <NavRow icon="wallet-outline" label="Hisobim" onPress={() => router.push("/more/balance")} />
+            <NavRow icon="paper-plane-outline" label="Tashkilotga so'rovlarim" onPress={() => router.push("/profile/join-requests")} />
           </View>
         ) : null}
 

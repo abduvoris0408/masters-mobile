@@ -198,6 +198,10 @@ export const ENDPOINTS = {
   CONTRACT: {
     DETAIL: (orderGuid: string) => `/contract/detail/${orderGuid}/`,
     MASTER_ACCEPT: (orderGuid: string) => `/contract/master-accept/${orderGuid}/`,
+    // guid here is the service's own guid (not an order/contract guid — no
+    // order exists yet) — shown to a customer before they place a direct
+    // order on a master's priced service.
+    USER_SERVICE_PREVIEW: (serviceGuid: string) => `/contract/user-service-preview/${serviceGuid}/`,
   },
   BLOG: {
     LIST: "/blog/list/",

@@ -6,8 +6,10 @@ import type {
   IApplicationOffer,
   ICreateApplicationRequest,
   ICreateOfferRequest,
+  ICreateOrderRequest,
   IMyOffer,
   IOfferAcceptResponse,
+  IOrderDirectCreateResponse,
   IUpdateApplicationRequest,
 } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -102,6 +104,22 @@ export const useAcceptOfferMutation = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["application", "detail"], exact: false });
       qc.invalidateQueries({ queryKey: ["application", "my-list"] });
+    },
+  });
+};
+
+// Customer orders a master's priced service directly (no listing/offer
+// involved) — the "Buyurtma berish" flow on the master detail screen. The
+// order (and its own contract, auto-accepted on the customer's side) is
+// created immediately; the master still has to accept it via
+// useMasterAcceptContractMutation.
+export const useCreateOrderMutation = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ICreateOrderRequest): Promise<IOrderDirectCreateResponse> =>
+      axiosInstance.post(ENDPOINTS.APPLICATION.ORDER_CREATE, data).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["application", "order", "my-master-list"] });
     },
   });
 };

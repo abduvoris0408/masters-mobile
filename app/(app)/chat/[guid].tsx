@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Avatar } from "@/components/ui/Avatar";
 import { Header } from "@/components/ui/Header";
@@ -49,6 +50,24 @@ function readBoolean(value: boolean | string): boolean {
   return value === true || value === "true";
 }
 
+function InviteDetailRow({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; label: string; value: string }) {
+  const colors = useThemeColors();
+  return (
+    <View className="flex-row items-start gap-2">
+      <Ionicons name={icon} size={13} color={colors.muted} style={{ marginTop: 1.5 }} />
+      <Text className="flex-1 text-xs text-muted">
+        {label}: <Text style={{ fontFamily: GOLOS_WEIGHTS.medium, color: colors.foreground }}>{value}</Text>
+      </Text>
+    </View>
+  );
+}
+
+// Order/offer/application invite bubbles carry more structured content
+// (price, address, budget range, comment) than a plain chat message, so they
+// get their own wider card instead of squeezing that into a regular
+// max-w-[78%] text bubble — each field is its own labeled row rather than
+// being crammed onto shared lines, which used to wrap unpredictably and read
+// as garbled on longer addresses/comments.
 function InviteBubble({ message }: { message: IChatMessage }) {
   const colors = useThemeColors();
   const label = CHAT_INVITE_LABEL[message.type] ?? "Yangi xabar";
@@ -60,36 +79,40 @@ function InviteBubble({ message }: { message: IChatMessage }) {
         : "document-text-outline";
 
   return (
-    <View className="max-w-[85%] gap-2 self-start rounded-2xl border border-border bg-surface p-3.5">
-      <View className="flex-row items-center gap-2">
-        <View className="h-7 w-7 items-center justify-center rounded-full bg-emerald-50 dark:bg-accent/15">
-          <Ionicons name={icon} size={14} color={colors.accent} />
+    <View className="w-[92%] max-w-[360px] gap-3 self-start rounded-2xl border border-border bg-surface p-4">
+      <View className="flex-row items-center gap-2.5">
+        <View className="h-8 w-8 items-center justify-center rounded-full bg-emerald-50 dark:bg-accent/15">
+          <Ionicons name={icon} size={15} color={colors.accent} />
         </View>
-        <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+        <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
           {message.text || label}
         </Text>
       </View>
 
       {message.order ? (
-        <View className="gap-1 border-t border-border pt-2">
-          <Text className="text-xs text-muted">Narx: {formatPrice(Number(message.order.price))}</Text>
-          {message.order.address ? <Text className="text-xs text-muted">Manzil: {message.order.address}</Text> : null}
-          {message.order.comment ? <Text className="text-xs text-muted">Izoh: {message.order.comment}</Text> : null}
+        <View className="gap-2 border-t border-border pt-3">
+          <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+            {formatPrice(Number(message.order.price))}
+          </Text>
+          {message.order.address ? <InviteDetailRow icon="location-outline" label="Manzil" value={message.order.address} /> : null}
+          {message.order.comment ? <InviteDetailRow icon="chatbox-ellipses-outline" label="Izoh" value={message.order.comment} /> : null}
         </View>
       ) : message.offer ? (
-        <View className="gap-1 border-t border-border pt-2">
-          <Text className="text-xs text-muted">Narx: {formatPrice(Number(message.offer.price))}</Text>
-          {message.offer.comment ? <Text className="text-xs text-muted">Izoh: {message.offer.comment}</Text> : null}
+        <View className="gap-2 border-t border-border pt-3">
+          <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+            {formatPrice(Number(message.offer.price))}
+          </Text>
+          {message.offer.comment ? <InviteDetailRow icon="chatbox-ellipses-outline" label="Izoh" value={message.offer.comment} /> : null}
         </View>
       ) : message.application ? (
-        <View className="gap-1 border-t border-border pt-2">
-          <Text className="text-xs text-muted">Tavsif: {message.application.description}</Text>
+        <View className="gap-2 border-t border-border pt-3">
           {message.application.budget_from ? (
-            <Text className="text-xs text-muted">
-              Byudjet: {formatPrice(Number(message.application.budget_from))}
+            <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+              {formatPrice(Number(message.application.budget_from))}
               {message.application.budget_to ? ` – ${formatPrice(Number(message.application.budget_to))}` : ""}
             </Text>
           ) : null}
+          <InviteDetailRow icon="document-text-outline" label="Tavsif" value={message.application.description} />
         </View>
       ) : null}
     </View>
@@ -153,6 +176,7 @@ function MessageBubble({
 export default function ChatThreadScreen() {
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
+  const insets = useSafeAreaInsets();
   const { guid, id } = useLocalSearchParams<{ guid: string; id?: string }>();
   const chatId = id ? Number(id) : null;
   const currentUserId = useAuthStore((s) => s.user?.id);
@@ -377,7 +401,10 @@ export default function ChatThreadScreen() {
         </View>
       ) : null}
 
-      <View className="flex-row items-end gap-2 border-t border-border bg-background px-3 py-2">
+      <View
+        className="flex-row items-end gap-2 border-t border-border bg-background px-3 pt-2"
+        style={{ paddingBottom: Math.max(insets.bottom, 8) }}
+      >
         <Pressable onPress={pickImages} hitSlop={8} className="h-10 w-10 items-center justify-center">
           <Ionicons name="image-outline" size={22} color={colors.muted} />
         </Pressable>

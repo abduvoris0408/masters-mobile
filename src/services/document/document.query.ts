@@ -7,8 +7,6 @@ export const DOCUMENT_KEYS = {
   list: (kind: TDocumentOwnerKind, ownerGuid: string | null) => ["document", "list", kind, ownerGuid],
 };
 
-// Read-only for now — same follow-up note as portfolio.query.ts: create/
-// update/delete needs a file-picker + multipart form, left for later.
 export const useDocumentListQuery = (kind: TDocumentOwnerKind, ownerGuid: string | null) =>
   useQuery({
     queryKey: DOCUMENT_KEYS.list(kind, ownerGuid),

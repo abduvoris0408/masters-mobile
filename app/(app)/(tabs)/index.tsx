@@ -191,6 +191,7 @@ export default function HomeScreen() {
             <View style={viewMode === "grid" ? { flex: 1 } : undefined}>
               <ListingCard
                 item={toListingCard(item)}
+                variant={viewMode === "grid" ? "grid" : "list"}
                 onPress={() => router.push(`/listing/${item.guid}`)}
                 onOfferPress={() => router.push(`/listing/${item.guid}`)}
               />

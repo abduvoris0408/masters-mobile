@@ -87,7 +87,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
 
   return (
     <>
-      <View pointerEvents="box-none" style={[styles.wrapper, { bottom: Math.max(insets.bottom - 14, -6) }]}>
+      <View pointerEvents="box-none" style={[styles.wrapper, { bottom: Math.max(insets.bottom - 4, 4) }]}>
         <BlurView
           intensity={Platform.OS === "ios" ? 55 : 100}
           tint={isDark ? "dark" : "light"}
