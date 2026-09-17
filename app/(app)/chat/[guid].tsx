@@ -405,8 +405,8 @@ export default function ChatThreadScreen() {
         className="flex-row items-end gap-2 border-t border-border bg-background px-3 pt-2"
         style={{ paddingBottom: Math.max(insets.bottom, 8) }}
       >
-        <Pressable onPress={pickImages} hitSlop={8} className="h-10 w-10 items-center justify-center">
-          <Ionicons name="image-outline" size={22} color={colors.muted} />
+        <Pressable onPress={pickImages} hitSlop={8} className="h-10 w-10 items-center justify-center rounded-full bg-surface">
+          <Ionicons name="image-outline" size={20} color={colors.foreground} />
         </Pressable>
         <View className="flex-1 flex-row items-end rounded-2xl bg-surface px-4">
           <TextInput

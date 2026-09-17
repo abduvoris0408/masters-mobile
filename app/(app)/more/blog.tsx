@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { ActivityIndicator, FlatList, Image, Pressable, RefreshControl, Text, View } from "react-native";
 import { router } from "expo-router";
@@ -21,7 +22,13 @@ function BlogRow({ item }: { item: IBlogListItem }) {
       onPress={() => router.push(`/blog/${item.guid}`)}
       className="gap-2.5 overflow-hidden rounded-3xl bg-surface p-3"
     >
-      <Image source={{ uri: item.image }} className="rounded-2xl" style={{ width: "100%", height: 160 }} resizeMode="cover" />
+      {item.image ? (
+        <Image source={{ uri: item.image }} className="rounded-2xl" style={{ width: "100%", height: 160 }} resizeMode="cover" />
+      ) : (
+        <View className="items-center justify-center rounded-2xl bg-background" style={{ width: "100%", height: 160 }}>
+          <Ionicons name="newspaper-outline" size={32} color="#94A3B8" />
+        </View>
+      )}
       <View className="gap-1 px-1">
         <Text className="text-xs text-muted">{formatDate(item.created_at)}</Text>
         <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }} numberOfLines={2}>

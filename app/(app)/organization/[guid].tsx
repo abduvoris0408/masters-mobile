@@ -112,8 +112,10 @@ export default function OrganizationDetailScreen() {
                   onPress={() => Linking.openURL(`tel:${data.director_phone}`)}
                   className="flex-row items-center gap-2"
                 >
-                  <Ionicons name="call-outline" size={16} color={colors.muted} />
-                  <Text className="flex-1 text-sm text-accent">{formatPhoneNumber(data.director_phone)}</Text>
+                  <Ionicons name="call-outline" size={16} color={colors.accent} />
+                  <Text className="flex-1 text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+                    {formatPhoneNumber(data.director_phone)}
+                  </Text>
                 </Pressable>
               ) : null}
               <View className="flex-row items-center gap-2">

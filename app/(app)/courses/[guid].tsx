@@ -41,10 +41,12 @@ function LessonListRow({
       className={`flex-row items-center gap-3 rounded-2xl px-3 py-3 ${active ? "bg-emerald-50 dark:bg-accent/15" : ""}`}
     >
       <View
-        className={`h-9 w-9 items-center justify-center rounded-full ${lesson.is_read ? "bg-emerald-50 dark:bg-accent/15" : "bg-surface"}`}
+        className={`h-9 w-9 items-center justify-center rounded-full ${
+          active ? "bg-accent" : lesson.is_read ? "bg-emerald-50 dark:bg-accent/15" : "bg-surface"
+        }`}
       >
         {active ? (
-          <Ionicons name="play" size={16} color={colors.accent} />
+          <Ionicons name="play" size={16} color="#FFFFFF" />
         ) : lesson.is_read ? (
           <Ionicons name="checkmark" size={18} color={colors.accent} />
         ) : (

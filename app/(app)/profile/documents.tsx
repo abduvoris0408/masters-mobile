@@ -28,6 +28,10 @@ import { showError, showSuccess } from "@/utils/toast";
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
+function isPdfFile(url: string) {
+  return url.toLowerCase().endsWith(".pdf");
+}
+
 function DocumentFormModal({
   visible,
   profileGuid,
@@ -242,13 +246,20 @@ export default function ProfileDocumentsScreen() {
           keyExtractor={(item: IDocument) => item.guid}
           contentContainerClassName="gap-2.5 px-4 pb-8"
           contentContainerStyle={{ paddingTop: headerHeight + 12 }}
-          renderItem={({ item }) => (
+          renderItem={({ item }) => {
+            const isPdf = isPdfFile(item.file);
+            return (
             <View className="flex-row items-center gap-3 rounded-3xl bg-surface p-4">
               <Pressable
                 onPress={() => Linking.openURL(item.file)}
-                className="h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-accent/15"
+                className="h-11 w-11 items-center justify-center rounded-2xl"
+                style={{ backgroundColor: isPdf ? "#FEE2E2" : "#DBEAFE" }}
               >
-                <Ionicons name="document-text-outline" size={20} color={colors.accent} />
+                <Ionicons
+                  name={isPdf ? "document-text-outline" : "image-outline"}
+                  size={20}
+                  color={isPdf ? "#DC2626" : "#2563EB"}
+                />
               </Pressable>
               <Pressable className="flex-1 gap-0.5" onPress={() => Linking.openURL(item.file)}>
                 <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={1}>
@@ -269,7 +280,8 @@ export default function ProfileDocumentsScreen() {
                 )}
               </Pressable>
             </View>
-          )}
+            );
+          }}
         />
       )}
 

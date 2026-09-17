@@ -99,7 +99,7 @@ export default function ProfileScreen() {
 
       <ScrollView
         contentContainerClassName="gap-4 px-4"
-        contentContainerStyle={{ paddingTop: headerHeight + 12, paddingBottom: 32 }}
+        contentContainerStyle={{ paddingTop: headerHeight + 12, paddingBottom: 140 }}
       >
         {/* Avatar */}
         <View className="items-center gap-3">

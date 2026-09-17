@@ -219,9 +219,7 @@ export default function ApplicationManageScreen() {
             <Text className="px-1 text-xs text-muted">Mutaxassislar tomonidan ushbu elonga yuborilgan takliflar</Text>
 
             {!data.offers || data.offers.length === 0 ? (
-              <View className="items-center rounded-3xl bg-surface p-6">
-                <Text className="text-sm text-muted">Hali taklif yo'q</Text>
-              </View>
+              <EmptyState icon="people-outline" title="Hali taklif yo'q" description="Mutaxassislar hali taklif yubormagan" />
             ) : (
               data.offers.map((offer) => (
                 <OfferRow

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
-import { useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -627,6 +627,14 @@ function ReviewRow({
   );
 }
 
+// Module-level so any PickerField instance can tell every other instance
+// to close — otherwise two independent `useState`s (e.g. region + district)
+// can both stay expanded at once, pushing the rest of the step around.
+const pickerListeners = new Set<(openId: string) => void>();
+function notifyPickerOpened(openId: string) {
+  pickerListeners.forEach((fn) => fn(openId));
+}
+
 function PickerField({
   label,
   placeholder,
@@ -647,7 +655,18 @@ function PickerField({
   error?: string;
 }) {
   const colors = useThemeColors();
+  const id = useId();
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const listener = (openId: string) => {
+      if (openId !== id) setOpen(false);
+    };
+    pickerListeners.add(listener);
+    return () => {
+      pickerListeners.delete(listener);
+    };
+  }, [id]);
 
   return (
     <View className="gap-1.5">
@@ -655,7 +674,14 @@ function PickerField({
         {label}
       </Text>
       <Pressable
-        onPress={() => !disabled && setOpen((o) => !o)}
+        onPress={() => {
+          if (disabled) return;
+          setOpen((o) => {
+            const next = !o;
+            if (next) notifyPickerOpened(id);
+            return next;
+          });
+        }}
         className={`h-13 flex-row items-center justify-between rounded-2xl bg-surface px-4 ${disabled ? "opacity-50" : ""}`}
         style={{ height: 52 }}
       >

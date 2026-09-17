@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Image, Linking, Pressable, ScrollView, Text, View } from "react-native";
 
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -97,6 +97,10 @@ function ServicesTab({ groups, onOrder }: { groups: ServiceGroup[]; onOrder?: (s
   );
 }
 
+function isPdfFile(url: string) {
+  return url.toLowerCase().endsWith(".pdf");
+}
+
 function DocumentsTab({ profileGuid }: { profileGuid: string }) {
   const colors = useThemeColors();
   const { data, isLoading } = useDocumentListQuery("profile", profileGuid);
@@ -106,16 +110,35 @@ function DocumentsTab({ profileGuid }: { profileGuid: string }) {
 
   return (
     <View className="gap-2.5">
-      {data.map((doc) => (
-        <View key={doc.guid} className="gap-0.5 rounded-2xl bg-background p-3.5">
-          <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={1}>
-            {doc.title}
-          </Text>
-          <Text className="text-xs text-muted">
-            {doc.issued_by} · {formatDate(doc.issued_at)}
-          </Text>
-        </View>
-      ))}
+      {data.map((doc) => {
+        const isPdf = isPdfFile(doc.file);
+        return (
+          <Pressable
+            key={doc.guid}
+            onPress={() => Linking.openURL(doc.file)}
+            className="flex-row items-center gap-3 rounded-2xl bg-background p-3.5"
+          >
+            <View
+              className="h-9 w-9 items-center justify-center rounded-xl"
+              style={{ backgroundColor: isPdf ? "#FEE2E2" : "#DBEAFE" }}
+            >
+              <Ionicons
+                name={isPdf ? "document-text-outline" : "image-outline"}
+                size={17}
+                color={isPdf ? "#DC2626" : "#2563EB"}
+              />
+            </View>
+            <View className="flex-1 gap-0.5">
+              <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={1}>
+                {doc.title}
+              </Text>
+              <Text className="text-xs text-muted">
+                {doc.issued_by} · {formatDate(doc.issued_at)}
+              </Text>
+            </View>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }

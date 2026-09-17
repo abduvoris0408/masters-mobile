@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Switch, Text, View } from "react-native";
 import { router } from "expo-router";
 
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -50,21 +50,17 @@ function ServiceRow({ service, profileGuid }: { service: IUserService; profileGu
         </Text>
       ) : null}
 
-      <Pressable
-        onPress={() => {
-          const next = !isPublished;
-          setIsPublished(next);
-          handleSave(next);
-        }}
-        className="flex-row items-center gap-2"
-      >
-        <View
-          className={`h-5 w-5 items-center justify-center rounded-md ${isPublished ? "bg-accent" : "border border-border bg-background"}`}
-        >
-          {isPublished ? <Ionicons name="checkmark" size={14} color="#FFFFFF" /> : null}
-        </View>
+      <View className="flex-row items-center justify-between gap-2">
         <Text className="text-sm text-muted">Katalogda ko'rsatish</Text>
-      </Pressable>
+        <Switch
+          value={isPublished}
+          onValueChange={(next) => {
+            setIsPublished(next);
+            handleSave(next);
+          }}
+          trackColor={{ true: colors.accent }}
+        />
+      </View>
 
       <View className="flex-row items-center gap-2">
         <View className="flex-1">

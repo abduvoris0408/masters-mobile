@@ -246,6 +246,7 @@ function OrdersList({ perspective }: { perspective: "client" | "worker" }) {
           data={items}
           keyExtractor={(item) => item.guid}
           contentContainerClassName="gap-3 px-4 py-2"
+          contentContainerStyle={{ paddingBottom: 140 }}
           renderItem={({ item }) => (
             <OrderCard
               order={item}

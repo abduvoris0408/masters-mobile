@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-native";
 import { router } from "expo-router";
 
+import { Avatar } from "@/components/ui/Avatar";
 import { PressableCard } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
@@ -58,11 +59,7 @@ export default function OrganizationsCatalogScreen() {
           contentContainerStyle={{ paddingTop: headerHeight + 16 }}
           renderItem={({ item }) => (
             <PressableCard className="flex-row items-center gap-3" onPress={() => router.push(`/organization/${item.guid}`)}>
-              <View className="h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50">
-                <Text className="text-lg text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                  {item.name.trim()[0]?.toUpperCase() ?? "?"}
-                </Text>
-              </View>
+              <Avatar uri={item.logo} name={item.name} size={48} fallbackIcon="business" />
               <View className="flex-1 gap-0.5">
                 <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                   {item.name}

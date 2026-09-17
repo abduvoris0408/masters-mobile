@@ -8,6 +8,9 @@ interface AvatarProps {
   uri?: string | null;
   name?: string | null;
   size?: number;
+  /** Icon shown when there's no photo — "person" (default) for people,
+   *  "business" for organizations, so catalogs don't all look like users. */
+  fallbackIcon?: keyof typeof Ionicons.glyphMap;
 }
 
 // Falls back to a person icon, not an initial letter — a blank avatar photo
@@ -15,7 +18,7 @@ interface AvatarProps {
 // tile read as broken/unset rather than as an intentional placeholder. Also
 // recovers from a broken/expired image URL via onError, so a dead photo link
 // doesn't just render nothing.
-export function Avatar({ uri, name, size = 44 }: AvatarProps) {
+export function Avatar({ uri, name, size = 44, fallbackIcon = "person" }: AvatarProps) {
   const colors = useThemeColors();
   const [failed, setFailed] = useState(false);
 
@@ -34,7 +37,7 @@ export function Avatar({ uri, name, size = 44 }: AvatarProps) {
       className="items-center justify-center rounded-full bg-emerald-100 dark:bg-accent/15"
       style={{ width: size, height: size }}
     >
-      <Ionicons name="person" size={size * 0.55} color={colors.primary} />
+      <Ionicons name={fallbackIcon} size={size * 0.55} color={colors.primary} />
     </View>
   );
 }

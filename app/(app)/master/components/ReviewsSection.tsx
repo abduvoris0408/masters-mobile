@@ -2,6 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
+import { Avatar } from "@/components/ui/Avatar";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Rating } from "@/components/ui/Rating";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -49,19 +51,14 @@ export function ReviewsSection({ profileGuid, fallbackRating, page, onPageChange
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginVertical: 16 }} />
       ) : count === 0 ? (
-        <View className="items-center gap-2 py-6">
-          <Ionicons name="chatbubbles-outline" size={30} color={colors.muted} />
-          <Text className="text-sm text-muted">Hozircha sharhlar yo'q</Text>
-        </View>
+        <EmptyState icon="chatbubbles-outline" title="Hozircha sharhlar yo'q" />
       ) : (
         <View className="gap-2.5">
           {reviews.map((review) => (
             <View key={review.id} className="gap-1.5 rounded-2xl border border-border p-3.5">
               <View className="flex-row items-center justify-between gap-2">
                 <View className="flex-row items-center gap-2">
-                  <View className="h-6 w-6 items-center justify-center rounded-full bg-background">
-                    <Ionicons name="person" size={12} color={colors.muted} />
-                  </View>
+                  <Avatar name={review.customer?.name} size={24} />
                   <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                     {review.customer?.name}
                   </Text>

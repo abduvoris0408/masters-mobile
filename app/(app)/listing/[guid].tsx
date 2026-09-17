@@ -50,14 +50,28 @@ const STATUS_COLOR: Record<string, string> = {
   closed: "#79748A",
 };
 
-function DetailRow({ label, value, index }: { label: string; value: React.ReactNode; index: number }) {
+function DetailRow({
+  label,
+  value,
+  index,
+  icon,
+}: {
+  label: string;
+  value: React.ReactNode;
+  index: number;
+  icon?: keyof typeof Ionicons.glyphMap;
+}) {
+  const colors = useThemeColors();
   return (
     <View
       className={`gap-1 px-4 py-3.5 sm:flex-row sm:items-start sm:gap-3 ${index % 2 === 1 ? "bg-background" : "bg-surface"}`}
     >
-      <Text className="text-sm text-muted sm:w-[130px]" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-        {label}
-      </Text>
+      <View className="flex-row items-center gap-1.5 sm:w-[130px]">
+        {icon ? <Ionicons name={icon} size={14} color={colors.muted} /> : null}
+        <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+          {label}
+        </Text>
+      </View>
       <View className="flex-1">{typeof value === "string" ? <Text className="text-sm text-foreground">{value}</Text> : value}</View>
     </View>
   );
@@ -165,9 +179,10 @@ export default function ListingDetailScreen() {
 
             {/* Spec table */}
             <View className="overflow-hidden rounded-3xl border border-border">
-              <DetailRow index={0} label="Manzil" value={data.address || "Ko'rsatilmagan"} />
+              <DetailRow index={0} icon="location-outline" label="Manzil" value={data.address || "Ko'rsatilmagan"} />
               <DetailRow
                 index={1}
+                icon="calendar-outline"
                 label="Bajarish muddati"
                 value={
                   data.date_from
@@ -179,6 +194,7 @@ export default function ListingDetailScreen() {
               />
               <DetailRow
                 index={2}
+                icon="wallet-outline"
                 label="Byudjet"
                 value={
                   data.budget_from === data.budget_to
@@ -188,6 +204,7 @@ export default function ListingDetailScreen() {
               />
               <DetailRow
                 index={3}
+                icon="card-outline"
                 label="To'lov"
                 value={
                   data.payment_type === "escrow"
@@ -197,6 +214,7 @@ export default function ListingDetailScreen() {
               />
               <DetailRow
                 index={4}
+                icon="document-text-outline"
                 label="Tavsif"
                 value={
                   <View className="rounded-xl bg-background p-3">
@@ -207,6 +225,7 @@ export default function ListingDetailScreen() {
               {data.additional_works && data.additional_works.length > 0 ? (
                 <DetailRow
                   index={5}
+                  icon="add-circle-outline"
                   label="Qo'shimcha"
                   value={
                     <View className="flex-row flex-wrap gap-1.5">
@@ -220,6 +239,7 @@ export default function ListingDetailScreen() {
               {data.images && data.images.length > 0 ? (
                 <DetailRow
                   index={6}
+                  icon="image-outline"
                   label="Rasmlar"
                   value={
                     <View className="flex-row flex-wrap gap-2">
