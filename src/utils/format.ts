@@ -54,6 +54,18 @@ export const formatRelativeDay = (
   return d.format("D MMM YYYY");
 };
 
+// Profile screen's tenure badge: "Yangi" the first month, then "N oy
+// platformada" up to a year, then "N yil" — mirrors the web project's
+// banner_new_on_platform/months/years keys.
+export const formatTenure = (createdAt?: string): string => {
+  if (!createdAt) return "Yangi";
+  const months = dayjs().diff(dayjs(createdAt), "month");
+  if (months < 1) return "Yangi";
+  if (months < 12) return `${months} oy platformada`;
+  const years = Math.floor(months / 12);
+  return `${years} yil platformada`;
+};
+
 export const fromNow = (date: string, locale = i18n.language) =>
   dayjs(date).locale(toDayjsLocale(locale)).fromNow();
 

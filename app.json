@@ -27,7 +27,13 @@
       "expo-status-bar",
       "expo-secure-store",
       "expo-localization",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Rasm tanlash uchun galereyaga ruxsat kerak."
+        }
+      ]
     ]
   }
 }

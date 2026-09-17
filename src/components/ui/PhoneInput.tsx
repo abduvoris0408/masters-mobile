@@ -1,5 +1,7 @@
 import { Text, TextInput, View } from "react-native";
 
+import { useThemeColors } from "@/lib/theme/colors";
+
 // Same 2-3-2-2 grouping mask as the web project's components/shared/PhoneInput.
 function maskDigits(digits: string): string {
   const d = digits.slice(0, 9);
@@ -17,6 +19,7 @@ interface PhoneInputProps {
 }
 
 export function PhoneInput({ value = "", onChange, label }: PhoneInputProps) {
+  const colors = useThemeColors();
   const localDigits = value.replace(/^\+998/, "").replace(/\D/g, "");
   const displayValue = maskDigits(localDigits);
 
@@ -31,14 +34,14 @@ export function PhoneInput({ value = "", onChange, label }: PhoneInputProps) {
       <View className="flex-row items-center rounded-2xl bg-surface px-4">
         <Text className="mr-2 text-base text-muted">+998</Text>
         <TextInput
-          className="flex-1 text-base text-foreground"
-          style={{ height: 52 }}
+          className="flex-1"
+          style={{ height: 52, fontSize: 16, color: colors.foreground }}
           value={displayValue}
           onChangeText={handleChange}
           placeholder="90 123 45 67"
-          placeholderTextColor="rgb(121 116 138)"
+          placeholderTextColor={colors.muted}
           keyboardType="number-pad"
-          maxLength={11}
+          maxLength={12}
         />
       </View>
     </View>

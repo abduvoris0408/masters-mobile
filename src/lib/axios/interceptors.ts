@@ -4,7 +4,7 @@ import { useAuthStore } from "@/stores";
 import { extractFirstFieldError } from "@/utils/errors";
 import { showError } from "@/utils/toast";
 import type { InternalAxiosRequestConfig } from "axios";
-import { axiosInstance } from "./axios";
+import { axiosInstance, DEMO_TOKEN } from "./axios";
 
 // Ported unchanged from the web project's lib/axios/interceptors.ts — same
 // refresh/401 concurrency logic (queueing, single in-flight refresh, public
@@ -51,6 +51,10 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const config = error.config as RetryConfig | undefined;
+
+    if (useAuthStore.getState().accessToken === DEMO_TOKEN) {
+      return Promise.reject(error);
+    }
 
     if (config?.url && PUBLIC_AUTH_URLS.includes(config.url)) {
       notifyApiError(error, config);

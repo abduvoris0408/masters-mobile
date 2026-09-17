@@ -30,6 +30,8 @@ export const ENDPOINTS = {
     // Pre-defined listing titles (each pre-attached to a category), searchable
     // via ?q= — powers the title autocomplete in the create/quick-apply wizard.
     TITLE_LIST: "/application/application-title/list/",
+    // Ids returned here feed ICreateApplicationRequest/IUpdateApplicationRequest's `images` array.
+    IMAGE_CREATE: "/application/image/create/",
     OFFER_CREATE: "/application/offer/create/",
     OFFER_ACCEPT: (guid: string) => `/application/offer/accept/${guid}/`,
     OFFER_MY_LIST: "/application/offer/my-list/",
@@ -196,6 +198,10 @@ export const ENDPOINTS = {
   CONTRACT: {
     DETAIL: (orderGuid: string) => `/contract/detail/${orderGuid}/`,
     MASTER_ACCEPT: (orderGuid: string) => `/contract/master-accept/${orderGuid}/`,
+  },
+  BLOG: {
+    LIST: "/blog/list/",
+    DETAIL: (guid: string) => `/blog/detail/${guid}/`,
   },
   CHAT: {
     LIST: "/chat/list/",

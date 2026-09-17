@@ -19,8 +19,8 @@ export function TextField({ label, error, secureToggle, secureTextEntry, classNa
       {label ? <Text className="text-sm font-medium text-foreground">{label}</Text> : null}
       <View className="flex-row items-center rounded-2xl bg-surface px-4">
         <TextInput
-          className={`h-13 flex-1 text-base text-foreground ${className ?? ""}`}
-          style={{ height: 52 }}
+          className={`h-13 flex-1 ${className ?? ""}`}
+          style={{ height: 52, fontSize: 16, color: colors.foreground }}
           placeholderTextColor={colors.muted}
           secureTextEntry={secureToggle ? !reveal : secureTextEntry}
           {...rest}

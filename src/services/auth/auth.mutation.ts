@@ -14,6 +14,7 @@ import type {
   IRegisterResponse,
   IResendOtpRequest,
   IResetPasswordRequest,
+  IRoleUpdateRequest,
   ITokenPair,
   ITokens,
 } from "@/types";
@@ -160,3 +161,21 @@ export const useResetPasswordMutation = () =>
     mutationFn: (data: IResetPasswordRequest) =>
       axiosInstance.post(ENDPOINTS.AUTH.RESET_PASSWORD, data).then((r) => r.data),
   });
+
+// Profile screen's "Mutaxassis profiliga o'tish" / "Mijoz profiliga
+// qaytish" switch — re-derives the session from the fresh /me-profile/
+// response the same way login does, so `user_type` and any master-profile
+// fields update immediately without a full re-login.
+export const useRoleUpdateMutation = () => {
+  const { setUser } = useAuthStore();
+  return useMutation({
+    mutationFn: async (data: IRoleUpdateRequest): Promise<IAuthUser> => {
+      await axiosInstance.post(ENDPOINTS.USER.ROLE_UPDATE, data);
+      const profile = await axiosInstance
+        .get<IMeProfileResponse>(ENDPOINTS.MASTER_PROFILE.ME)
+        .then((r) => r.data);
+      return buildAuthUser(profile);
+    },
+    onSuccess: (user) => setUser(user),
+  });
+};

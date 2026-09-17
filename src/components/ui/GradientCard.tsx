@@ -16,7 +16,7 @@ interface GradientCardProps extends PropsWithChildren {
 // native component, not one of NativeWind's auto-intercepted primitives (the
 // same class of bug hit RN's core Animated.View earlier — confirmed via
 // screenshot there), so utility classes are not guaranteed to apply.
-export function GradientCard({ colors = ["#8B7CF6", "#6C5CE7"], style, children }: GradientCardProps) {
+export function GradientCard({ colors = ["#22C55E", "#059669"], style, children }: GradientCardProps) {
   return (
     <LinearGradient
       colors={colors}

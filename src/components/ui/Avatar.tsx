@@ -18,7 +18,7 @@ export function Avatar({ uri, name, size = 44 }: AvatarProps) {
   const initial = (name?.trim()?.[0] ?? "?").toUpperCase();
   return (
     <View
-      className="items-center justify-center rounded-full bg-violet-100"
+      className="items-center justify-center rounded-full bg-emerald-100"
       style={{ width: size, height: size }}
     >
       <Text className="font-semibold text-primary" style={{ fontSize: size * 0.4 }}>

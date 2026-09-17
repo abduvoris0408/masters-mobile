@@ -18,6 +18,16 @@ export interface IApplicationTitleSuggestion {
   category: IApplicationCategoryRef;
 }
 
+// Response from POST /application/image/create/ — one row per uploaded
+// image, `id` is what create/update's `images` array references. The detail
+// endpoints also embed `guid` on each nested image; upload itself doesn't
+// return one, so it's optional here.
+export interface IApplicationImage {
+  id: number;
+  guid?: string;
+  image: string;
+}
+
 export interface IApplication {
   id: number;
   guid: string;
@@ -53,6 +63,9 @@ export interface IApplication {
   // GET /jobs/base-category-additional-work/list/), returned as full
   // objects the same way `category` is embedded rather than bare ids.
   additional_works?: IJobsCategoryAdditionalWork[];
+  // Listing photos, uploaded beforehand via POST /application/image/create/
+  // and attached here as full objects, same pattern as additional_works.
+  images?: IApplicationImage[];
 }
 
 // GET /application/map-list/ — a lightweight, unpaginated projection of open
@@ -99,6 +112,9 @@ export interface ICreateApplicationRequest {
   // (GET /jobs/base-category-additional-work/list/?category=<guid>), scoped
   // to whichever category was selected.
   additional_works?: number[];
+  // Ids returned by POST /application/image/create/, one call per picked
+  // photo, collected from the wizard's images step.
+  images?: number[];
 }
 
 // Editing a listing sends only the changed fields (PATCH). `status` is used on
@@ -121,6 +137,7 @@ export interface IUpdateApplicationRequest {
   payment_type?: TPaymentType;
   status?: string;
   additional_works?: number[];
+  images?: number[];
 }
 
 export interface IApplicationOfferMaster {

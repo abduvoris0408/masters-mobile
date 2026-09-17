@@ -13,6 +13,12 @@ declare module "axios" {
 // RN equivalent of Vite's `import.meta.env.APP_API_URL` on web.
 const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
+// Sentinel used by login.tsx's dev-only "Demo ko'rish" bypass — see
+// interceptors.ts, which skips the 401/refresh/logout chain for this token so
+// browsing the app with a fake session never gets bounced back to /login the
+// moment a real API call 401s.
+export const DEMO_TOKEN = "demo-token";
+
 export const axiosInstance = axios.create({
   baseURL: `${API_URL}/api/v1`,
   timeout: 15000,

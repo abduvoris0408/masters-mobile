@@ -8,8 +8,9 @@ interface ButtonProps extends Omit<PressableProps, "children"> {
   /** solid = filled pill (the one main CTA per screen), outline = bordered, ghost = text-only. */
   variant?: "solid" | "outline" | "ghost";
   /** Which brand color a solid/outline button uses. Reference screens keep this
-   *  rule strictly: accent (green) is the primary action, primary (violet) is
-   *  reserved for nav/tab/badge — never both as competing CTAs on one screen. */
+   *  rule strictly: accent (emerald) is the primary action, primary (a
+   *  slightly darker green) is reserved for nav/tab/badge — never both as
+   *  competing CTAs on one screen. */
   color?: "accent" | "primary";
 }
 
@@ -46,7 +47,7 @@ export function Button({
       {...rest}
     >
       {loading ? (
-        <ActivityIndicator color={variant === "solid" ? SPINNER_COLOR[color] : "#6C5CE7"} />
+        <ActivityIndicator color={variant === "solid" ? SPINNER_COLOR[color] : "#16A34A"} />
       ) : (
         <Text
           className={`text-base ${variant === "solid" ? "text-white" : textColorClass}`}

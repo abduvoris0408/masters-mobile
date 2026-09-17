@@ -17,7 +17,8 @@ export function SearchBar({ rightIcon, onRightIconPress, ...rest }: SearchBarPro
       <View className="h-12 flex-1 flex-row items-center rounded-full bg-surface px-4">
         <Ionicons name="search-outline" size={18} color={colors.muted} style={{ marginRight: 8 }} />
         <TextInput
-          className="flex-1 text-base text-foreground"
+          className="flex-1"
+          style={{ fontSize: 16, color: colors.foreground }}
           placeholderTextColor={colors.muted}
           {...rest}
         />

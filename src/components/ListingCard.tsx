@@ -1,50 +1,147 @@
-import type { Ionicons } from "@expo/vector-icons";
-import { Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Pressable, Text, View } from "react-native";
 
-import { Chip, type ChipTone } from "@/components/ui/Chip";
-import { IconBadge, type IconBadgeTone } from "@/components/ui/IconBadge";
+import { Avatar } from "@/components/ui/Avatar";
 import { PressableCard } from "@/components/ui/Card";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
+import { useThemeColors } from "@/lib/theme/colors";
+import type { TPaymentType } from "@/types";
 
 export interface ListingCardData {
   id: string;
-  icon?: keyof typeof Ionicons.glyphMap;
-  imageUri?: string | null;
-  tone: IconBadgeTone;
+  categoryLabel: string;
   title: string;
-  subtitleLines: string[];
+  description?: string;
+  address: string;
+  isUrgent: boolean;
+  deadlineLabel: string;
   price: string;
-  statusLabel: string;
-  statusTone?: ChipTone;
+  paymentType?: TPaymentType;
+  offersCount: number;
+  postedAtLabel: string;
+  offerAvatarUri?: string | null;
 }
 
 interface ListingCardProps {
   item: ListingCardData;
   onPress?: () => void;
+  onOfferPress?: () => void;
+  /** "offer" (default) shows the worker-facing "Taklif yuborish" CTA; "manage"
+   *  shows "Takliflarni ko'rish" for the owner's own "Mening elonlarim" list. */
+  ctaVariant?: "offer" | "manage";
 }
 
-// One card = one listing row, composed from IconBadge + Chip + Card so the
-// visual language stays defined in one place instead of per-screen styling.
-export function ListingCard({ item, onPress }: ListingCardProps) {
+const PAYMENT_LABEL: Record<TPaymentType, string> = {
+  direct: "To'g'ridan-to'g'ri",
+  escrow: "Xavfsiz to'lov",
+};
+
+// One card = one listing row from the "Elonlar" feed screenshot: category
+// tag + urgent badge up top, title/description, location + deadline rows,
+// a budget row with the payment-type badge, then an offers footer and a
+// full-width CTA. Urgent listings get a red left accent border, matching the
+// reference screens' red-outlined card treatment.
+export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer" }: ListingCardProps) {
+  const colors = useThemeColors();
+
   return (
-    <PressableCard onPress={onPress} className="gap-3">
-      <View className="flex-row gap-3">
-        <IconBadge icon={item.icon} imageUri={item.imageUri} tone={item.tone} />
-        <View className="flex-1 gap-1">
-          <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-            {item.title}
+    <PressableCard
+      onPress={onPress}
+      className="gap-3 p-4"
+      style={
+        item.isUrgent
+          ? { borderLeftWidth: 3, borderLeftColor: colors.danger }
+          : undefined
+      }
+    >
+      <View className="flex-row items-start justify-between gap-2">
+        <View className="self-start rounded-lg bg-emerald-50 px-2.5 py-1 dark:bg-accent/15">
+          <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+            {item.categoryLabel}
           </Text>
-          {item.subtitleLines.map((line) => (
-            <Text key={line} className="text-sm text-muted">
-              {line}
+        </View>
+        {item.isUrgent ? (
+          <View className="flex-row items-center gap-1 self-start rounded-lg bg-red-50 px-2.5 py-1 dark:bg-danger/15">
+            <Ionicons name="flash" size={12} color={colors.danger} />
+            <Text className="text-xs text-danger" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+              Shoshilinch
             </Text>
-          ))}
+          </View>
+        ) : null}
+      </View>
+
+      <View className="gap-1">
+        <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }} numberOfLines={2}>
+          {item.title}
+        </Text>
+        {item.description ? (
+          <Text className="text-sm text-muted" numberOfLines={1}>
+            {item.description}
+          </Text>
+        ) : null}
+      </View>
+
+      <View className="flex-row items-center gap-1.5">
+        <Ionicons name="location-outline" size={14} color={colors.muted} />
+        <Text className="flex-1 text-sm text-muted" numberOfLines={1}>
+          {item.address}
+        </Text>
+      </View>
+
+      <View className="flex-row items-center gap-1.5">
+        <Ionicons name="alert-circle-outline" size={14} color={colors.muted} />
+        <Text className="text-sm text-muted">Bajarish muddati: </Text>
+        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+          {item.deadlineLabel}
+        </Text>
+      </View>
+
+      <View className="gap-2 rounded-2xl bg-background px-3.5 py-3">
+        <View className="flex-row items-center justify-between gap-2">
+          <View className="flex-row items-center gap-1">
+            <Ionicons name="wallet-outline" size={13} color={colors.muted} />
+            <Text className="text-xs text-muted">Byudjet</Text>
+          </View>
+          {item.paymentType ? (
+            <View className="flex-row items-center gap-1 self-start rounded-lg bg-surface px-2.5 py-1.5">
+              <Ionicons
+                name={item.paymentType === "escrow" ? "shield-checkmark-outline" : "swap-horizontal-outline"}
+                size={12}
+                color={colors.muted}
+              />
+              <Text className="text-xs text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }} numberOfLines={1}>
+                {PAYMENT_LABEL[item.paymentType]}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+        <Text className="text-lg text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+          {item.price}
+        </Text>
+      </View>
+
+      <View className="flex-row items-center justify-between gap-2 pt-1">
+        <View className="flex-row items-center gap-2">
+          <Ionicons name="time-outline" size={13} color={colors.muted} />
+          <Text className="text-xs text-muted">{item.postedAtLabel}</Text>
+        </View>
+        <View className="flex-row items-center gap-1.5">
+          <Avatar uri={item.offerAvatarUri} size={20} />
+          <Text className="text-xs text-muted">
+            {item.offersCount > 0 ? `${item.offersCount} ta taklif keldi` : "Takliflar yo'q"}
+          </Text>
         </View>
       </View>
-      <Text className="text-2xl tracking-tight text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
-        {item.price}
-      </Text>
-      <Chip label={item.statusLabel} tone={item.statusTone} />
+
+      <Pressable
+        onPress={onOfferPress}
+        className="flex-row items-center justify-center gap-2 rounded-full bg-accent py-3"
+      >
+        <Ionicons name={ctaVariant === "manage" ? "people-outline" : "paper-plane-outline"} size={16} color="#FFFFFF" />
+        <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+          {ctaVariant === "manage" ? "Takliflarni ko'rish" : "Taklif yuborish"}
+        </Text>
+      </Pressable>
     </PressableCard>
   );
 }

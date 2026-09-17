@@ -13,6 +13,7 @@ import {
 } from "@expo-google-fonts/golos-text";
 import { Toast } from "@/components/Toast";
 import { applyGolosAsDefaultFont } from "@/lib/theme/fonts";
+import { ChatSocketProvider } from "@/providers/ChatSocketProvider";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { Stack } from "expo-router";
@@ -45,11 +46,13 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryProvider>
           <ThemeProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(auth)" />
-              <Stack.Screen name="(app)" />
-            </Stack>
-            <Toast />
+            <ChatSocketProvider>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen name="(app)" />
+              </Stack>
+              <Toast />
+            </ChatSocketProvider>
           </ThemeProvider>
         </QueryProvider>
       </SafeAreaProvider>

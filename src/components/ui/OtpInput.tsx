@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { TextInput, View } from "react-native";
 
+import { useThemeColors } from "@/lib/theme/colors";
+
 interface OtpInputProps {
   value: string;
   onChange: (value: string) => void;
@@ -12,6 +14,7 @@ interface OtpInputProps {
 // Same segmented-box interaction as the web project's components/shared/OtpInput
 // (per-box refs, auto-advance on digit entry, backspace jumps back).
 export function OtpInput({ value, onChange, length = 6, autoFocus, onComplete }: OtpInputProps) {
+  const colors = useThemeColors();
   const refs = useRef<(TextInput | null)[]>([]);
   const digits = Array.from({ length }, (_, i) => value[i] ?? "");
   const focusAt = (idx: number) => refs.current[idx]?.focus();
@@ -47,9 +50,10 @@ export function OtpInput({ value, onChange, length = 6, autoFocus, onComplete }:
           keyboardType="number-pad"
           maxLength={1}
           autoFocus={autoFocus && idx === 0}
-          className={`h-[60px] w-[46px] rounded-2xl text-center text-xl font-bold text-foreground ${
+          className={`h-[60px] w-[46px] rounded-2xl text-center text-xl font-bold ${
             digit ? "bg-primary/10 border-2 border-primary" : "bg-surface border border-border"
           }`}
+          style={{ color: colors.foreground }}
         />
       ))}
     </View>

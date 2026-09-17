@@ -6,6 +6,7 @@ import { Link, router } from "expo-router";
 import { Button } from "@/components/ui/Button";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { TextField } from "@/components/ui/TextField";
+import { DEMO_TOKEN } from "@/lib/axios";
 import { useLoginMutation } from "@/services/auth";
 import { useAuthStore } from "@/stores";
 import { EUserType } from "@/types";
@@ -83,7 +84,7 @@ export default function LoginScreen() {
                   user_type: EUserType.CLIENT,
                   is_verified: true,
                 },
-                { access_token: "demo-token", refresh_token: "demo-token" }
+                { access_token: DEMO_TOKEN, refresh_token: DEMO_TOKEN }
               );
               router.replace("/");
             }}

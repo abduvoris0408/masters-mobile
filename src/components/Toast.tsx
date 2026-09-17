@@ -1,38 +1,81 @@
+import { Ionicons } from "@expo/vector-icons";
+import { useColorScheme } from "nativewind";
 import { useEffect } from "react";
-import { Pressable, Text } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useThemeColors } from "@/lib/theme/colors";
+import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
+import type { ToastKind } from "@/stores/toast.store";
 import { useToastStore } from "@/stores/toast.store";
 
-const KIND_STYLES = {
-  error: "bg-red-600",
-  success: "bg-emerald-600",
-  warning: "bg-amber-500",
-} as const;
+const KIND_META: Record<ToastKind, { icon: keyof typeof Ionicons.glyphMap; tint: string }> = {
+  error: { icon: "close-circle", tint: "#DC2626" },
+  success: { icon: "checkmark-circle", tint: "#059669" },
+  warning: { icon: "warning", tint: "#D97706" },
+};
 
 // Backs @/utils/toast's showError/showSuccess/showWarning — mounted once in
-// the root layout. Deliberately plain (no animation lib, no external toast
-// package) until real screens/screenshots dictate the final look.
+// the root layout. Liquid-glass card (matches the header/tab-bar language)
+// with a colored icon tile per kind instead of a solid-color banner, plus a
+// spring slide-in / fade-out so it doesn't just snap in and out.
 export function Toast() {
   const toast = useToastStore((s) => s.toast);
   const dismiss = useToastStore((s) => s.dismiss);
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
+
+  const progress = useSharedValue(0);
 
   useEffect(() => {
     if (!toast) return;
-    const timer = setTimeout(() => dismiss(toast.id), 3500);
+    progress.value = 0;
+    progress.value = withSpring(1, { damping: 16, stiffness: 180 });
+    const timer = setTimeout(() => {
+      progress.value = withTiming(0, { duration: 180 });
+      setTimeout(() => dismiss(toast.id), 180);
+    }, 3200);
     return () => clearTimeout(timer);
-  }, [toast, dismiss]);
+  }, [toast?.id]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ translateY: (1 - progress.value) * -24 }, { scale: 0.96 + progress.value * 0.04 }],
+  }));
 
   if (!toast) return null;
+  const meta = KIND_META[toast.kind];
 
   return (
-    <Pressable
-      onPress={() => dismiss(toast.id)}
-      className={`absolute left-4 right-4 rounded-xl px-4 py-3.5 ${KIND_STYLES[toast.kind]}`}
-      style={{ top: insets.top + 8 }}
+    <Animated.View
+      style={[{ position: "absolute", left: 14, right: 14, top: insets.top + 10, zIndex: 100 }, animatedStyle]}
     >
-      <Text className="text-center text-sm font-medium text-white">{toast.message}</Text>
-    </Pressable>
+      <Pressable
+        onPress={() => dismiss(toast.id)}
+        className={`flex-row items-center gap-3 rounded-2xl border px-4 py-3.5 ${isDark ? "border-white/10 bg-[#1c1f2a]/95" : "border-black/5 bg-white/95"}`}
+        style={{
+          shadowColor: "#0F172A",
+          shadowOpacity: 0.18,
+          shadowRadius: 20,
+          shadowOffset: { width: 0, height: 8 },
+          elevation: 10,
+        }}
+      >
+        <View className="h-8 w-8 items-center justify-center rounded-full" style={{ backgroundColor: `${meta.tint}1F` }}>
+          <Ionicons name={meta.icon} size={18} color={meta.tint} />
+        </View>
+        <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+          {toast.message}
+        </Text>
+      </Pressable>
+    </Animated.View>
   );
 }

@@ -11,9 +11,11 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterFab } from "@/components/ui/FilterFab";
 import { Header } from "@/components/ui/Header";
 import { SearchBar } from "@/components/ui/SearchBar";
-import { useAppDrawer } from "@/providers/DrawerProvider";
+import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
+import { useThemeColors } from "@/lib/theme/colors";
 import { useMastersCatalogQuery } from "@/services/master";
 import type { IUserServiceCatalogSummary } from "@/types";
+import { appendUniquePage } from "@/utils/pagination";
 
 function toMasterCard(item: IUserServiceCatalogSummary): MasterCardData {
   const firstService = item.services[0];
@@ -30,7 +32,8 @@ function toMasterCard(item: IUserServiceCatalogSummary): MasterCardData {
 const PAGE_SIZE = 12;
 
 export default function MastersCatalogScreen() {
-  const { open } = useAppDrawer();
+  const colors = useThemeColors();
+  const headerHeight = useHeaderHeight();
   const [searchInput, setSearchInput] = useState("");
   const [query, setQuery] = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
@@ -57,7 +60,7 @@ export default function MastersCatalogScreen() {
   useEffect(() => {
     if (!data) return;
     const results = Array.isArray(data.results) ? data.results : [];
-    setItems((prev) => (page === 1 ? results : [...prev, ...results]));
+    setItems((prev) => appendUniquePage(page === 1 ? [] : prev, results, (i) => i.guid));
   }, [data, page]);
 
   const hasMore = !!data?.next;
@@ -65,13 +68,13 @@ export default function MastersCatalogScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Mutaxassislar" onMenuPress={open} />
-      <View className="px-4 pb-2">
+      <Header title="Mutaxassislar" onBackPress={() => router.back()} />
+      <View className="px-4 pb-2" style={{ paddingTop: headerHeight }}>
         <SearchBar placeholder="Mutaxassis yoki xizmat qidirish..." value={searchInput} onChangeText={setSearchInput} />
       </View>
 
       {isLoading ? (
-        <ActivityIndicator className="mt-10" />
+        <ActivityIndicator className="mt-10" color={colors.accent} />
       ) : isError ? (
         <EmptyState icon="alert-circle-outline" title="Yuklashda xatolik" description="Qayta urinib ko'ring" actionLabel="Qayta urinish" onAction={() => refetch()} />
       ) : items.length === 0 ? (
@@ -86,7 +89,7 @@ export default function MastersCatalogScreen() {
           )}
           onEndReachedThreshold={0.4}
           onEndReached={() => hasMore && !isFetching && setPage((p) => p + 1)}
-          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" /> : null}
+          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : null}
           refreshControl={<RefreshControl refreshing={isFetching && page === 1} onRefresh={() => refetch()} />}
         />
       )}
