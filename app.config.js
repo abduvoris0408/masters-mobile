@@ -13,8 +13,10 @@ module.exports = {
     userInterfaceStyle: "automatic",
     ios: {
       supportsTablet: true,
+      bundleIdentifier: "uz.masters.mobile",
     },
     android: {
+      package: "uz.masters.mobile",
       adaptiveIcon: {
         backgroundColor: "#E6F4FE",
         foregroundImage: "./assets/android-icon-foreground.png",
@@ -52,5 +54,10 @@ module.exports = {
         },
       ],
     ],
+    extra: {
+      eas: {
+        projectId: "868fff5d-dac7-47fd-9fad-7651e5169f6a",
+      },
+    },
   },
 };

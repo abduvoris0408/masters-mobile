@@ -6,10 +6,7 @@ import { Link, router } from "expo-router";
 import { Button } from "@/components/ui/Button";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { TextField } from "@/components/ui/TextField";
-import { DEMO_TOKEN } from "@/lib/axios";
 import { useLoginMutation } from "@/services/auth";
-import { useAuthStore, useOnboardingStore } from "@/stores";
-import { EUserType } from "@/types";
 import { showError } from "@/utils/toast";
 
 export default function LoginScreen() {
@@ -65,49 +62,6 @@ export default function LoginScreen() {
             </Pressable>
           </Link>
         </View>
-
-        {/* Dev-only: no backend is connected yet, so this is the only way to
-            preview the protected screens right now. Never ships — __DEV__ is
-            stripped from production/release builds. Remove once a real
-            backend + login flow is testable end-to-end. */}
-        {__DEV__ ? (
-          <Pressable
-            className="mt-10 self-center"
-            onPress={() => {
-              useAuthStore.getState().setAuth(
-                {
-                  id: 1,
-                  guid: "demo-guid",
-                  first_name: "Demo",
-                  last_name: "Foydalanuvchi",
-                  phone: "+998901234567",
-                  user_type: EUserType.CLIENT,
-                  is_verified: true,
-                },
-                { access_token: DEMO_TOKEN, refresh_token: DEMO_TOKEN }
-              );
-              router.replace("/");
-            }}
-          >
-            <Text className="text-xs text-muted underline">Demo ko'rish (dev, backend'siz)</Text>
-          </Pressable>
-        ) : null}
-
-        {/* Dev-only: onboarding is a one-time, persisted flag (AsyncStorage),
-            so once it's completed it never shows again — this replays it
-            without needing to reinstall the app or clear storage manually.
-            Never ships — __DEV__ is stripped from production/release builds. */}
-        {__DEV__ ? (
-          <Pressable
-            className="mt-3 self-center"
-            onPress={() => {
-              useOnboardingStore.getState().setHasSeenOnboarding(false);
-              router.replace("/(onboarding)");
-            }}
-          >
-            <Text className="text-xs text-muted underline">Onboarding'ni qayta ko'rish (dev)</Text>
-          </Pressable>
-        ) : null}
       </ScrollView>
     </KeyboardAvoidingView>
   );
