@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, FlatList, RefreshControl, View } from "react-native";
 import { router } from "expo-router";
 
 import {
   CategoryRegionFilterSheet,
+  type CategoryRegionFilterSheetHandle,
   type CategoryRegionFilterValue,
 } from "@/components/CategoryRegionFilterSheet";
 import { MasterCard, type MasterCardData } from "@/components/MasterCard";
@@ -36,7 +37,7 @@ export default function MastersCatalogScreen() {
   const headerHeight = useHeaderHeight();
   const [searchInput, setSearchInput] = useState("");
   const [query, setQuery] = useState("");
-  const [filterVisible, setFilterVisible] = useState(false);
+  const filterSheetRef = useRef<CategoryRegionFilterSheetHandle>(null);
   const [filters, setFilters] = useState<CategoryRegionFilterValue>({ category: [], region: null });
   const [page, setPage] = useState(1);
   const [items, setItems] = useState<IUserServiceCatalogSummary[]>([]);
@@ -94,14 +95,12 @@ export default function MastersCatalogScreen() {
         />
       )}
 
-      <FilterFab label={activeFilterCount > 0 ? `Filtr (${activeFilterCount})` : "Filtr"} onPress={() => setFilterVisible(true)} />
-
-      <CategoryRegionFilterSheet
-        visible={filterVisible}
-        onClose={() => setFilterVisible(false)}
-        value={filters}
-        onApply={setFilters}
+      <FilterFab
+        label={activeFilterCount > 0 ? `Filtr (${activeFilterCount})` : "Filtr"}
+        onPress={() => filterSheetRef.current?.present()}
       />
+
+      <CategoryRegionFilterSheet ref={filterSheetRef} value={filters} onApply={setFilters} />
     </View>
   );
 }

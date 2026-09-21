@@ -1,9 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, Image, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useActionSheet } from "@expo/react-native-action-sheet";
+import {
+  BottomSheetModal,
+  BottomSheetScrollView,
+  BottomSheetTextInput,
+  BottomSheetBackdrop,
+  type BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
+import { ActivityIndicator, Alert, FlatList, Image, Pressable, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -29,19 +36,18 @@ interface NewImage extends IPickedPortfolioImage {
   localId: string;
 }
 
-function PortfolioFormModal({
-  visible,
-  profileGuid,
-  item,
-  onClose,
-}: {
-  visible: boolean;
-  profileGuid: string | null;
-  item: IPortfolioWork | null;
-  onClose: () => void;
-}) {
+interface PortfolioFormModalHandle {
+  present: (item: IPortfolioWork | null) => void;
+}
+
+const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: string | null }>(function PortfolioFormModal(
+  { profileGuid },
+  ref,
+) {
   const colors = useThemeColors();
-  const insets = useSafeAreaInsets();
+  const sheetRef = useRef<BottomSheetModal>(null);
+  const { showActionSheetWithOptions } = useActionSheet();
+  const [item, setItem] = useState<IPortfolioWork | null>(null);
   const isEdit = !!item;
 
   const [description, setDescription] = useState("");
@@ -53,15 +59,41 @@ function PortfolioFormModal({
   const updateMutation = useUpdatePortfolioMutation(profileGuid);
   const isPending = createMutation.isPending || updateMutation.isPending;
 
-  useEffect(() => {
-    if (!visible) return;
-    setDescription(item?.description ?? "");
-    setKeptImages(item?.images ?? []);
-    setRemovedIds([]);
-    setNewImages([]);
-  }, [visible, item]);
+  useImperativeHandle(ref, () => ({
+    present: (nextItem) => {
+      setItem(nextItem);
+      setDescription(nextItem?.description ?? "");
+      setKeptImages(nextItem?.images ?? []);
+      setRemovedIds([]);
+      setNewImages([]);
+      sheetRef.current?.present();
+    },
+  }));
 
-  const handlePick = async () => {
+  const acceptAssets = (assets: ImagePicker.ImagePickerAsset[]) => {
+    const accepted: NewImage[] = [];
+    for (const asset of assets) {
+      if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
+        showError("Rasm hajmi 5 MB dan oshmasligi kerak");
+        continue;
+      }
+      accepted.push({ localId: `${Date.now()}-${Math.random()}`, uri: asset.uri, type: "image/jpeg", name: `portfolio-${Date.now()}.jpg` });
+    }
+    if (accepted.length) setNewImages((prev) => [...prev, ...accepted]);
+  };
+
+  const pickFromCamera = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Ruxsat kerak", "Kameradan foydalanish uchun ruxsat bering.");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
+    if (result.canceled || result.assets.length === 0) return;
+    acceptAssets(result.assets);
+  };
+
+  const pickFromLibrary = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       Alert.alert("Ruxsat kerak", "Rasm tanlash uchun galereyaga ruxsat bering.");
@@ -74,16 +106,20 @@ function PortfolioFormModal({
       quality: 0.8,
     });
     if (result.canceled || result.assets.length === 0) return;
+    acceptAssets(result.assets);
+  };
 
-    const accepted: NewImage[] = [];
-    for (const asset of result.assets) {
-      if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
-        showError("Rasm hajmi 5 MB dan oshmasligi kerak");
-        continue;
-      }
-      accepted.push({ localId: `${Date.now()}-${Math.random()}`, uri: asset.uri, type: "image/jpeg", name: `portfolio-${Date.now()}.jpg` });
-    }
-    if (accepted.length) setNewImages((prev) => [...prev, ...accepted]);
+  const handlePick = () => {
+    showActionSheetWithOptions(
+      {
+        options: ["Kamera", "Galereya", "Bekor qilish"],
+        cancelButtonIndex: 2,
+      },
+      (selectedIndex) => {
+        if (selectedIndex === 0) pickFromCamera();
+        else if (selectedIndex === 1) pickFromLibrary();
+      },
+    );
   };
 
   const removeKept = (img: IPortfolioImage) => {
@@ -117,78 +153,93 @@ function PortfolioFormModal({
         await createMutation.mutateAsync({ description: description.trim(), images: newImages });
         showSuccess("Ish qo'shildi");
       }
-      onClose();
+      sheetRef.current?.dismiss();
     } catch {
       showError(isEdit ? "Yangilashda xatolik yuz berdi" : "Qo'shishda xatolik yuz berdi");
     }
   };
 
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.4} />
+    ),
+    [],
+  );
+
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable className="flex-1 bg-black/40" onPress={onClose} />
-      <View className="rounded-t-3xl bg-background px-5 pt-5" style={{ paddingBottom: insets.bottom + 16, maxHeight: "85%" }}>
+    <BottomSheetModal
+      ref={sheetRef}
+      snapPoints={["85%"]}
+      enableDynamicSizing={false}
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
+      backdropComponent={renderBackdrop}
+      backgroundStyle={{ backgroundColor: colors.background, borderRadius: 24 }}
+      handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
+    >
+      <View className="px-5">
         <Text className="mb-4 text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
           {isEdit ? "Ishni tahrirlash" : "Yangi ish qo'shish"}
         </Text>
+      </View>
 
-        <ScrollView>
-          <Text className="mb-1.5 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-            Tavsif
-          </Text>
-          <TextInput
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            placeholder="Bajarilgan ish haqida qisqacha yozing"
-            placeholderTextColor={colors.muted}
-            className="mb-4 rounded-2xl bg-surface px-4 py-3 text-base text-foreground"
-            style={{ minHeight: 90, textAlignVertical: "top", color: colors.foreground }}
-          />
+      <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20 }}>
+        <Text className="mb-1.5 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+          Tavsif
+        </Text>
+        <BottomSheetTextInput
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          placeholder="Bajarilgan ish haqida qisqacha yozing"
+          placeholderTextColor={colors.muted}
+          className="mb-4 rounded-2xl bg-surface px-4 py-3 text-base text-foreground"
+          style={{ minHeight: 90, textAlignVertical: "top", color: colors.foreground }}
+        />
 
-          <Text className="mb-2 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-            Rasmlar {totalImages > 0 ? `(${totalImages})` : ""}
-          </Text>
-          <View className="mb-4 flex-row flex-wrap gap-2.5">
-            {keptImages.map((img) => (
-              <View key={img.id} style={{ width: 88, height: 88 }}>
-                <Image source={{ uri: img.image }} className="h-full w-full rounded-xl" />
-                <Pressable
-                  onPress={() => removeKept(img)}
-                  className="absolute right-1 top-1 h-5 w-5 items-center justify-center rounded-full bg-black/60"
-                >
-                  <Ionicons name="close" size={12} color="#FFFFFF" />
-                </Pressable>
-              </View>
-            ))}
-            {newImages.map((img) => (
-              <View key={img.localId} style={{ width: 88, height: 88 }}>
-                <Image source={{ uri: img.uri }} className="h-full w-full rounded-xl" />
-                <Pressable
-                  onPress={() => removeNew(img.localId)}
-                  className="absolute right-1 top-1 h-5 w-5 items-center justify-center rounded-full bg-black/60"
-                >
-                  <Ionicons name="close" size={12} color="#FFFFFF" />
-                </Pressable>
-              </View>
-            ))}
-            <Pressable
-              onPress={handlePick}
-              className="items-center justify-center gap-1 rounded-xl border border-dashed border-border bg-surface"
-              style={{ width: 88, height: 88 }}
-            >
-              <Ionicons name="image-outline" size={20} color={colors.muted} />
-              <Text className="text-[10px] text-muted">Rasm qo'shish</Text>
-            </Pressable>
-          </View>
-        </ScrollView>
+        <Text className="mb-2 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+          Rasmlar {totalImages > 0 ? `(${totalImages})` : ""}
+        </Text>
+        <View className="mb-4 flex-row flex-wrap gap-2.5">
+          {keptImages.map((img) => (
+            <View key={img.id} style={{ width: 88, height: 88 }}>
+              <Image source={{ uri: img.image }} className="h-full w-full rounded-xl" />
+              <Pressable
+                onPress={() => removeKept(img)}
+                className="absolute right-1 top-1 h-5 w-5 items-center justify-center rounded-full bg-black/60"
+              >
+                <Ionicons name="close" size={12} color="#FFFFFF" />
+              </Pressable>
+            </View>
+          ))}
+          {newImages.map((img) => (
+            <View key={img.localId} style={{ width: 88, height: 88 }}>
+              <Image source={{ uri: img.uri }} className="h-full w-full rounded-xl" />
+              <Pressable
+                onPress={() => removeNew(img.localId)}
+                className="absolute right-1 top-1 h-5 w-5 items-center justify-center rounded-full bg-black/60"
+              >
+                <Ionicons name="close" size={12} color="#FFFFFF" />
+              </Pressable>
+            </View>
+          ))}
+          <Pressable
+            onPress={handlePick}
+            className="items-center justify-center gap-1 rounded-xl border border-dashed border-border bg-surface"
+            style={{ width: 88, height: 88 }}
+          >
+            <Ionicons name="image-outline" size={20} color={colors.muted} />
+            <Text className="text-[10px] text-muted">Rasm qo'shish</Text>
+          </Pressable>
+        </View>
 
-        <Button loading={isPending} onPress={handleSubmit}>
+        <Button className="mb-5" loading={isPending} onPress={handleSubmit}>
           {isEdit ? "Saqlash" : "Qo'shish"}
         </Button>
-      </View>
-    </Modal>
+      </BottomSheetScrollView>
+    </BottomSheetModal>
   );
-}
+});
 
 export default function ProfilePortfolioScreen() {
   const colors = useThemeColors();
@@ -198,19 +249,11 @@ export default function ProfilePortfolioScreen() {
   const { data: works, isLoading } = usePortfolioListQuery(profileGuid);
   const deleteMutation = useDeletePortfolioMutation(profileGuid);
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editing, setEditing] = useState<IPortfolioWork | null>(null);
+  const formSheetRef = useRef<PortfolioFormModalHandle>(null);
   const [deletingGuid, setDeletingGuid] = useState<string | null>(null);
 
-  const openAdd = () => {
-    setEditing(null);
-    setModalVisible(true);
-  };
-
-  const openEdit = (item: IPortfolioWork) => {
-    setEditing(item);
-    setModalVisible(true);
-  };
+  const openAdd = () => formSheetRef.current?.present(null);
+  const openEdit = (item: IPortfolioWork) => formSheetRef.current?.present(item);
 
   const handleDelete = (guid: string) => {
     Alert.alert("Ishni o'chirish", "Ushbu ishni o'chirishni tasdiqlaysizmi?", [
@@ -291,7 +334,7 @@ export default function ProfilePortfolioScreen() {
         />
       )}
 
-      <PortfolioFormModal visible={modalVisible} profileGuid={profileGuid} item={editing} onClose={() => setModalVisible(false)} />
+      <PortfolioFormModal ref={formSheetRef} profileGuid={profileGuid} />
     </View>
   );
 }

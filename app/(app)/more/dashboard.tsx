@@ -12,7 +12,7 @@ import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useMyMasterOrdersQuery } from "@/services/application";
 import { useMasterProfileQuery, useProfileStatisticsQuery } from "@/services/master";
 import { ORDER_STATUS_LABEL } from "@/utils/orderStatus";
-import { formatDate, formatPrice } from "@/utils/format";
+import { formatAddress, formatDate, formatPrice } from "@/utils/format";
 
 type TileTone = "emerald" | "amber" | "violet" | "sky" | "rose" | "orange";
 
@@ -173,7 +173,7 @@ export default function DashboardScreen() {
                     </Text>
                   </View>
                   <Text className="text-xs text-muted" numberOfLines={1}>
-                    {order.address}
+                    {formatAddress(order.address)}
                   </Text>
                   <View className="flex-row items-center justify-between">
                     <Text className="text-xs text-muted">{formatDate(order.created_at)}</Text>

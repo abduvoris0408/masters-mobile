@@ -32,7 +32,9 @@ export function PhoneInput({ value = "", onChange, label }: PhoneInputProps) {
     <View className="gap-1.5">
       {label ? <Text className="text-sm font-medium text-foreground">{label}</Text> : null}
       <View className="flex-row items-center rounded-2xl bg-surface px-4">
-        <Text className="mr-2 text-base text-muted">+998</Text>
+        <Text className="mr-2 text-muted" style={{ fontSize: 16 }}>
+          +998
+        </Text>
         <TextInput
           className="flex-1"
           style={{ height: 52, fontSize: 16, color: colors.foreground }}

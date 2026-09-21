@@ -1,10 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { router } from "expo-router";
 
+import { ApplicationsMapView } from "@/components/ApplicationsMapView";
 import {
   CategoryRegionFilterSheet,
+  type CategoryRegionFilterSheetHandle,
   type CategoryRegionFilterValue,
 } from "@/components/CategoryRegionFilterSheet";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
@@ -17,7 +19,7 @@ import { useThemeColors } from "@/lib/theme/colors";
 import { useAllJobsCategoriesQuery } from "@/services/master";
 import { useApplicationsQuery } from "@/services/application";
 import type { IApplication } from "@/types";
-import { formatPostedAt, formatPrice } from "@/utils/format";
+import { formatAddress, formatPostedAt, formatPrice } from "@/utils/format";
 import { appendUniquePage } from "@/utils/pagination";
 
 type SortMode = "most_offers" | undefined;
@@ -29,7 +31,7 @@ function toListingCard(item: IApplication): ListingCardData {
     categoryLabel: item.category.name,
     title: item.title,
     description: item.description,
-    address: item.address || "Manzil ko'rsatilmagan",
+    address: formatAddress(item.address) || "Manzil ko'rsatilmagan",
     isUrgent: item.is_urgent,
     deadlineLabel: item.is_urgent
       ? "Shoshilinch"
@@ -56,7 +58,7 @@ export default function HomeScreen() {
   const headerHeight = useHeaderHeight();
   const [categoryFilter, setCategoryFilter] = useState<string>(ALL_CATEGORY);
   const [sort, setSort] = useState<SortMode>(undefined);
-  const [filterVisible, setFilterVisible] = useState(false);
+  const filterSheetRef = useRef<CategoryRegionFilterSheetHandle>(null);
   const [filters, setFilters] = useState<CategoryRegionFilterValue>({ category: [], region: null });
   const [page, setPage] = useState(1);
   const [items, setItems] = useState<IApplication[]>([]);
@@ -120,7 +122,7 @@ export default function HomeScreen() {
         <View className="flex-row items-center justify-between px-4">
           <View className="flex-row items-center gap-2">
             <Pressable
-              onPress={() => setFilterVisible(true)}
+              onPress={() => filterSheetRef.current?.present()}
               className="h-9 w-9 items-center justify-center rounded-xl bg-surface"
             >
               <Ionicons name="options-outline" size={17} color={colors.foreground} />
@@ -177,7 +179,9 @@ export default function HomeScreen() {
       ) : items.length === 0 ? (
         <EmptyState icon="search-outline" title="Hech narsa topilmadi" description="Boshqa so'z yoki filtr bilan urinib ko'ring" />
       ) : viewMode === "map" ? (
-        <EmptyState icon="map-outline" title="Xaritada ko'rish" description="Bu ko'rinish tez orada qo'shiladi" />
+        <View style={{ flex: 1 }}>
+          <ApplicationsMapView items={items} onSelect={(item) => router.push(`/listing/${item.guid}`)} />
+        </View>
       ) : (
         <FlatList
           key={viewMode}
@@ -204,12 +208,7 @@ export default function HomeScreen() {
         />
       )}
 
-      <CategoryRegionFilterSheet
-        visible={filterVisible}
-        onClose={() => setFilterVisible(false)}
-        value={filters}
-        onApply={setFilters}
-      />
+      <CategoryRegionFilterSheet ref={filterSheetRef} value={filters} onApply={setFilters} />
     </View>
   );
 }

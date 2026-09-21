@@ -17,6 +17,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Avatar } from "@/components/ui/Avatar";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -32,7 +33,7 @@ import {
 } from "@/services/chat";
 import { useAuthStore } from "@/stores";
 import { EChatMessageType, type IChatImage, type IChatMessage } from "@/types";
-import { formatPrice, formatRelativeDay } from "@/utils/format";
+import { formatAddress, formatPrice, formatRelativeDay } from "@/utils/format";
 import { showError } from "@/utils/toast";
 
 const PAGE_SIZE_STEP = 30;
@@ -94,7 +95,7 @@ function InviteBubble({ message }: { message: IChatMessage }) {
           <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
             {formatPrice(Number(message.order.price))}
           </Text>
-          {message.order.address ? <InviteDetailRow icon="location-outline" label="Manzil" value={message.order.address} /> : null}
+          {message.order.address ? <InviteDetailRow icon="location-outline" label="Manzil" value={formatAddress(message.order.address)} /> : null}
           {message.order.comment ? <InviteDetailRow icon="chatbox-ellipses-outline" label="Izoh" value={message.order.comment} /> : null}
         </View>
       ) : message.offer ? (
@@ -357,7 +358,13 @@ export default function ChatThreadScreen() {
             )
           }
           ListEmptyComponent={
-            <Text className="mt-10 self-center text-sm text-muted">Hali xabarlar yo'q. Birinchi bo'lib yozing!</Text>
+            <View style={{ height: 420 }}>
+              <EmptyState
+                icon="chatbubble-ellipses-outline"
+                title="Hali xabarlar yo'q"
+                description="Birinchi bo'lib yozing va suhbatni boshlang"
+              />
+            </View>
           }
         />
       )}

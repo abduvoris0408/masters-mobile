@@ -10,7 +10,7 @@ import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { useMyApplicationsQuery } from "@/services/application";
 import type { IApplication } from "@/types";
-import { formatPostedAt, formatPrice } from "@/utils/format";
+import { formatAddress, formatPostedAt, formatPrice } from "@/utils/format";
 import { appendUniquePage } from "@/utils/pagination";
 
 function toListingCard(item: IApplication): ListingCardData {
@@ -20,7 +20,7 @@ function toListingCard(item: IApplication): ListingCardData {
     categoryLabel: item.category.name,
     title: item.title,
     description: item.description,
-    address: item.address || "Manzil ko'rsatilmagan",
+    address: formatAddress(item.address) || "Manzil ko'rsatilmagan",
     isUrgent: item.is_urgent,
     deadlineLabel: item.is_urgent ? "Shoshilinch" : "Muddat kelishiladi",
     price: sameBudget
@@ -90,7 +90,11 @@ export default function MyApplicationsScreen() {
           onAction={() => refetch()}
         />
       ) : items.length === 0 ? (
-        <EmptyState icon="document-text-outline" title="Siz hali birorta elon joylashtirmagansiz" />
+        <EmptyState
+          icon="document-text-outline"
+          title="Siz hali birorta elon joylashtirmagansiz"
+          description="Elon joylashtirib, ustalardan takliflar olishni boshlang"
+        />
       ) : (
         <FlatList
           data={items}

@@ -12,6 +12,18 @@ const toDayjsLocale = (lng: string) => (lng === "uz" ? "uz-latn" : lng);
 export const formatPrice = (price: number) =>
   new Intl.NumberFormat("uz-UZ").format(price) + " so'm";
 
+// Addresses come back from the geocoder as "O'zbekiston, Toshkent shahri,
+// ..." — every listing in the country shares that leading segment, so it's
+// pure noise on cards/detail rows. Strips just that one leading "country,"
+// piece (and a stray leading comma/space) without touching the rest.
+// The apostrophe in "O'zbekiston" can be a plain "'" (U+0027), a typographic
+// "'" (U+2019), or a modifier letter "ʻ"/"ʼ" depending on source — matched
+// as a class so all of those (and no apostrophe at all) are stripped.
+export const formatAddress = (address?: string | null): string => {
+  if (!address) return "";
+  return address.replace(/^\s*o['‘’ʻʼ]?zbekiston\s*,?\s*/i, "").trim();
+};
+
 // Same 2-3-2-2 grouping PhoneInput masks while typing, applied to already-
 // stored numbers for display ("+998901234567" -> "+998 90 123 45 67").
 // Anything that isn't a 998-prefixed 12-digit number is returned unchanged

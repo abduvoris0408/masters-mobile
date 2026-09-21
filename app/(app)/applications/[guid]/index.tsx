@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Chip, type ChipTone } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
-import { StaticMap } from "@/components/ui/StaticMap";
+import { LocationMap } from "@/components/ui/LocationMap";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -17,7 +17,7 @@ import {
   useUpdateApplicationMutation,
 } from "@/services/application";
 import type { IApplicationOffer } from "@/types";
-import { formatDate, formatPhoneNumber, formatPrice } from "@/utils/format";
+import { formatAddress, formatDate, formatPhoneNumber, formatPrice } from "@/utils/format";
 import { showError, showSuccess } from "@/utils/toast";
 
 const STATUS_META: Record<string, { label: string; tone: ChipTone }> = {
@@ -162,14 +162,14 @@ export default function ApplicationManageScreen() {
           </View>
 
           {data.latitude && data.longitude ? (
-            <StaticMap lat={Number(data.latitude)} lng={Number(data.longitude)} height={160} />
+            <LocationMap lat={Number(data.latitude)} lng={Number(data.longitude)} height={160} />
           ) : null}
 
           <Card className="gap-3">
             <View className="flex-row items-center justify-between">
               <Text className="text-xs text-muted">Manzil</Text>
               <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                {data.address || "Ko'rsatilmagan"}
+                {formatAddress(data.address) || "Ko'rsatilmagan"}
               </Text>
             </View>
             <View className="flex-row items-center justify-between border-t border-border pt-3">

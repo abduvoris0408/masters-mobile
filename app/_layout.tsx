@@ -11,6 +11,8 @@ import {
   GolosText_900Black,
   useFonts,
 } from "@expo-google-fonts/golos-text";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Toast } from "@/components/Toast";
 import { applyGolosAsDefaultFont } from "@/lib/theme/fonts";
 import { ChatSocketProvider } from "@/providers/ChatSocketProvider";
@@ -46,13 +48,18 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryProvider>
           <ThemeProvider>
-            <ChatSocketProvider>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(auth)" />
-                <Stack.Screen name="(app)" />
-              </Stack>
-              <Toast />
-            </ChatSocketProvider>
+            <ActionSheetProvider>
+              <BottomSheetModalProvider>
+                <ChatSocketProvider>
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="(onboarding)" />
+                    <Stack.Screen name="(auth)" />
+                    <Stack.Screen name="(app)" />
+                  </Stack>
+                  <Toast />
+                </ChatSocketProvider>
+              </BottomSheetModalProvider>
+            </ActionSheetProvider>
           </ThemeProvider>
         </QueryProvider>
       </SafeAreaProvider>

@@ -1,9 +1,26 @@
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+// @react-native-community/datetimepicker is a native module — it isn't
+// bundled inside Expo Go, so a static top-level import throws at module
+// load and takes the whole file down with it (surfaces as unrelated errors
+// like "Property 'DatePickerField' doesn't exist"). Loaded lazily and
+// guarded so Expo Go falls back to a plain text field below, while a
+// dev-client/production build gets the real native picker.
+type DateTimePickerModule = typeof import("@react-native-community/datetimepicker");
+let dateTimePickerModule: DateTimePickerModule | null = null;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  dateTimePickerModule = require("@react-native-community/datetimepicker");
+} catch {
+  dateTimePickerModule = null;
+}
+
+import { MapLocationPicker } from "@/components/MapLocationPicker";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
@@ -18,7 +35,7 @@ import {
   useRegionsQuery,
 } from "@/services/master";
 import type { IApplicationCategoryRef, ICreateApplicationRequest, TPaymentType } from "@/types";
-import { formatPrice } from "@/utils/format";
+import { formatDate, formatPrice } from "@/utils/format";
 import { AdditionalWorksChecklist } from "./AdditionalWorksChecklist";
 import { ChoiceCard } from "./ChoiceCard";
 import { PaymentTypeOption } from "./PaymentTypeOption";
@@ -46,6 +63,8 @@ interface WizardState {
   region: string | null;
   district: string | null;
   address: string;
+  latitude: number | null;
+  longitude: number | null;
   budget_from: string;
   budget_to: string;
   is_urgent: boolean | null;
@@ -63,6 +82,8 @@ const INITIAL_STATE: WizardState = {
   region: null,
   district: null,
   address: "",
+  latitude: null,
+  longitude: null,
   budget_from: "",
   budget_to: "",
   is_urgent: null,
@@ -81,10 +102,10 @@ interface ApplicationWizardProps {
 
 // RN port of the web project's ApplicationWizard (src/pages/applications/create
 // in the ustabor-front repo) — same 8-step flow and field set, minus antd
-// Form/Tour/tips-panel scaffolding this platform doesn't have. The map-based
-// location picker is intentionally simplified to a plain address field here;
-// per react-native-app-spec.md §8, Yandex Maps needs a separate RN-specific
-// integration decision this pass doesn't make.
+// Form/Tour/tips-panel scaffolding this platform doesn't have. The location
+// step uses MapLocationPicker (react-native-maps for the tile layer, since
+// Yandex's JS SDK is web-only, + the same Yandex Geocoder REST calls the web
+// app uses for search/reverse-geocode) — see src/components/MapLocationPicker.tsx.
 export function ApplicationWizard({ onFinish, submitting = false }: ApplicationWizardProps) {
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
@@ -150,6 +171,8 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
         category: (matchedCategory?.id ?? values.category) as number,
         description: values.description,
         address: values.address,
+        latitude: values.latitude ?? undefined,
+        longitude: values.longitude ?? undefined,
         region: region?.id,
         district: district?.id,
         budget_from: Number(values.budget_from),
@@ -190,11 +213,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
   const meta = stepMeta[stepKey];
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? headerHeight : 0}
-    >
+    <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View className="gap-3 px-4 pt-3" style={{ paddingTop: headerHeight + 12 }}>
         <View className="flex-row items-center gap-2.5">
           <View className="h-1.5 flex-1 overflow-hidden rounded-full bg-border">
@@ -331,6 +350,22 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
 
         {visitedSteps.has(3) && stepKey === "location" && (
           <View className="gap-3">
+            <MapLocationPicker
+              value={values.latitude != null && values.longitude != null ? { lat: values.latitude, lng: values.longitude } : null}
+              onChange={({ lat, lng }) => {
+                set("latitude", lat);
+                set("longitude", lng);
+              }}
+              onAddressResolved={(resolved) => {
+                if (resolved.address) set("address", resolved.address);
+                const matchedRegion = regions?.find((r) => r.name === resolved.regionName);
+                if (matchedRegion) {
+                  set("region", matchedRegion.guid);
+                  set("district", null);
+                }
+              }}
+            />
+
             <View className="flex-row gap-3">
               <View className="flex-1">
                 <PickerField
@@ -391,30 +426,17 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
             </View>
 
             {values.is_urgent === false ? (
-              <View className="gap-2">
-                <View className="flex-row gap-3">
-                  <TextField
-                    label="Boshlanish sanasi (YYYY-MM-DD)"
-                    placeholder={dayjs().format(DATE_FORMAT)}
-                    value={values.date_from ?? ""}
-                    onChangeText={(v) => set("date_from", v || null)}
-                  />
-                  <TextField
-                    label="Tugash sanasi (YYYY-MM-DD)"
-                    placeholder={dayjs().add(1, "day").format(DATE_FORMAT)}
-                    value={values.date_to ?? ""}
-                    onChangeText={(v) => set("date_to", v || null)}
-                  />
-                </View>
-                <View className="flex-row gap-5">
+              <View className="gap-3">
+                <View className="flex-row flex-wrap gap-2">
                   <Pressable
                     onPress={() => {
                       const today = dayjs().format(DATE_FORMAT);
                       set("date_from", today);
                       set("date_to", today);
                     }}
+                    className="rounded-full bg-surface px-3.5 py-2"
                   >
-                    <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                    <Text className="text-xs text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                       Bugun
                     </Text>
                   </Pressable>
@@ -424,8 +446,9 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
                       set("date_from", tomorrow);
                       set("date_to", tomorrow);
                     }}
+                    className="rounded-full bg-surface px-3.5 py-2"
                   >
-                    <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                    <Text className="text-xs text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                       Ertaga
                     </Text>
                   </Pressable>
@@ -434,12 +457,26 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
                       set("date_from", dayjs().format(DATE_FORMAT));
                       set("date_to", dayjs().add(6, "day").format(DATE_FORMAT));
                     }}
+                    className="rounded-full bg-surface px-3.5 py-2"
                   >
-                    <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                    <Text className="text-xs text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                       Shu hafta ichida
                     </Text>
                   </Pressable>
                 </View>
+
+                <DatePickerField
+                  label="Boshlanish sanasi"
+                  value={values.date_from}
+                  minimumDate={new Date()}
+                  onChange={(date) => set("date_from", date)}
+                />
+                <DatePickerField
+                  label="Tugash sanasi"
+                  value={values.date_to}
+                  minimumDate={values.date_from ? dayjs(values.date_from).toDate() : new Date()}
+                  onChange={(date) => set("date_to", date)}
+                />
               </View>
             ) : null}
           </View>
@@ -449,6 +486,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
           <View className="gap-4">
             <View className="flex-row gap-3">
               <TextField
+                className="flex-1"
                 label="Byudjet (dan)"
                 placeholder="100 000"
                 keyboardType="number-pad"
@@ -457,6 +495,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
                 error={errors.budget_from}
               />
               <TextField
+                className="flex-1"
                 label="Byudjet (gacha)"
                 placeholder="200 000"
                 keyboardType="number-pad"
@@ -558,39 +597,39 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
             />
           </View>
         )}
-      </ScrollView>
 
-      <View className="flex-row gap-3 border-t border-border bg-background px-4 pt-3" style={{ paddingBottom: insets.bottom + 12 }}>
-        {stepIndex > 0 ? (
+        <View className="flex-row gap-3 pt-2" style={{ paddingBottom: insets.bottom + 12 }}>
+          {stepIndex > 0 ? (
+            <Pressable
+              onPress={handleBack}
+              className="h-13 flex-row items-center justify-center gap-1.5 rounded-full bg-surface px-5"
+              style={{ height: 52 }}
+            >
+              <Ionicons name="arrow-back" size={16} color={colors.foreground} />
+              <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+                Orqaga
+              </Text>
+            </Pressable>
+          ) : null}
           <Pressable
-            onPress={handleBack}
-            className="h-13 flex-row items-center justify-center gap-1.5 rounded-full bg-surface px-5"
+            onPress={handleContinue}
+            disabled={stepKey === "review" && submitting}
+            className={`h-13 flex-1 flex-row items-center justify-center gap-1.5 rounded-full bg-accent ${stepKey === "review" && submitting ? "opacity-60" : ""}`}
             style={{ height: 52 }}
           >
-            <Ionicons name="arrow-back" size={16} color={colors.foreground} />
-            <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-              Orqaga
-            </Text>
+            {stepKey === "review" && submitting ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <>
+                <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                  {stepKey === "review" ? "Elonni joylash" : "Davom etish"}
+                </Text>
+                <Ionicons name={stepKey === "review" ? "paper-plane-outline" : "arrow-forward"} size={16} color="#FFFFFF" />
+              </>
+            )}
           </Pressable>
-        ) : null}
-        <Pressable
-          onPress={handleContinue}
-          disabled={stepKey === "review" && submitting}
-          className={`h-13 flex-1 flex-row items-center justify-center gap-1.5 rounded-full bg-accent ${stepKey === "review" && submitting ? "opacity-60" : ""}`}
-          style={{ height: 52 }}
-        >
-          {stepKey === "review" && submitting ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <>
-              <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                {stepKey === "review" ? "Elonni joylash" : "Davom etish"}
-              </Text>
-              <Ionicons name={stepKey === "review" ? "paper-plane-outline" : "arrow-forward"} size={16} color="#FFFFFF" />
-            </>
-          )}
-        </Pressable>
-      </View>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -627,14 +666,11 @@ function ReviewRow({
   );
 }
 
-// Module-level so any PickerField instance can tell every other instance
-// to close — otherwise two independent `useState`s (e.g. region + district)
-// can both stay expanded at once, pushing the rest of the step around.
-const pickerListeners = new Set<(openId: string) => void>();
-function notifyPickerOpened(openId: string) {
-  pickerListeners.forEach((fn) => fn(openId));
-}
-
+// Native action sheet instead of a hand-rolled dropdown: iOS gets a real
+// UIAlertController (.actionSheet style, Swift/UIKit), Android a Material
+// bottom sheet — both via @expo/react-native-action-sheet's useActionSheet,
+// which picks the right native primitive per platform instead of this app
+// drawing its own absolutely-positioned option list.
 function PickerField({
   label,
   placeholder,
@@ -655,18 +691,17 @@ function PickerField({
   error?: string;
 }) {
   const colors = useThemeColors();
-  const id = useId();
-  const [open, setOpen] = useState(false);
+  const { showActionSheetWithOptions } = useActionSheet();
 
-  useEffect(() => {
-    const listener = (openId: string) => {
-      if (openId !== id) setOpen(false);
-    };
-    pickerListeners.add(listener);
-    return () => {
-      pickerListeners.delete(listener);
-    };
-  }, [id]);
+  const open = () => {
+    if (disabled || loading || options.length === 0) return;
+    const labels = [...options.map((o) => o.label), "Bekor qilish"];
+    const cancelButtonIndex = labels.length - 1;
+    showActionSheetWithOptions({ options: labels, cancelButtonIndex, title: label }, (selectedIndex) => {
+      if (selectedIndex == null || selectedIndex === cancelButtonIndex) return;
+      onSelect(options[selectedIndex].value);
+    });
+  };
 
   return (
     <View className="gap-1.5">
@@ -674,40 +709,97 @@ function PickerField({
         {label}
       </Text>
       <Pressable
-        onPress={() => {
-          if (disabled) return;
-          setOpen((o) => {
-            const next = !o;
-            if (next) notifyPickerOpened(id);
-            return next;
-          });
-        }}
+        onPress={open}
         className={`h-13 flex-row items-center justify-between rounded-2xl bg-surface px-4 ${disabled ? "opacity-50" : ""}`}
         style={{ height: 52 }}
       >
         <Text className={value ? "text-base text-foreground" : "text-base text-muted"} numberOfLines={1}>
           {loading ? "Yuklanmoqda..." : value || placeholder}
         </Text>
-        <Ionicons name={open ? "chevron-up" : "chevron-down"} size={16} color={colors.muted} />
+        <Ionicons name="chevron-down" size={16} color={colors.muted} />
       </Pressable>
       {error ? <Text className="text-xs text-red-500">{error}</Text> : null}
+    </View>
+  );
+}
 
-      {open ? (
-        <View className="max-h-52 gap-0.5 overflow-hidden rounded-2xl bg-surface">
-          <ScrollView>
-            {options.map((opt) => (
-              <Pressable
-                key={opt.value}
-                onPress={() => {
-                  onSelect(opt.value);
-                  setOpen(false);
-                }}
-                className="px-4 py-3"
-              >
-                <Text className="text-sm text-foreground">{opt.label}</Text>
-              </Pressable>
-            ))}
-          </ScrollView>
+// Android shows its date dialog imperatively (no inline mode); iOS renders
+// the wheel inline inside a dismissible sheet so the user sees the picker
+// without leaving the field, matching PickerField's own dropdown pattern.
+function DatePickerField({
+  label,
+  value,
+  minimumDate,
+  onChange,
+}: {
+  label: string;
+  value: string | null;
+  minimumDate?: Date;
+  onChange: (date: string) => void;
+}) {
+  const colors = useThemeColors();
+  const [iosPickerOpen, setIosPickerOpen] = useState(false);
+  const dateValue = value ? dayjs(value).toDate() : new Date();
+
+  // No native module (Expo Go) — fall back to a plain YYYY-MM-DD text field
+  // instead of crashing the whole wizard.
+  if (!dateTimePickerModule) {
+    return (
+      <TextField
+        label={`${label} (YYYY-MM-DD)`}
+        placeholder={dayjs().format(DATE_FORMAT)}
+        value={value ?? ""}
+        onChangeText={(v) => onChange(v)}
+      />
+    );
+  }
+
+  const DateTimePicker = dateTimePickerModule.default;
+  const { DateTimePickerAndroid } = dateTimePickerModule;
+
+  const open = () => {
+    if (Platform.OS === "android") {
+      DateTimePickerAndroid.open({
+        value: dateValue,
+        mode: "date",
+        minimumDate,
+        onChange: (event, selected) => {
+          if (event.type === "set" && selected) onChange(dayjs(selected).format(DATE_FORMAT));
+        },
+      });
+    } else {
+      setIosPickerOpen((o) => !o);
+    }
+  };
+
+  return (
+    <View className="gap-1.5">
+      <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+        {label}
+      </Text>
+      <Pressable
+        onPress={open}
+        className="h-13 flex-row items-center justify-between rounded-2xl bg-surface px-4"
+        style={{ height: 52 }}
+      >
+        <Text className={value ? "text-base text-foreground" : "text-base text-muted"}>
+          {value ? formatDate(value) : "Sanani tanlang"}
+        </Text>
+        <Ionicons name="calendar-outline" size={18} color={colors.muted} />
+      </Pressable>
+
+      {Platform.OS === "ios" && iosPickerOpen ? (
+        <View className="overflow-hidden rounded-2xl bg-surface">
+          <DateTimePicker
+            value={dateValue}
+            mode="date"
+            display="inline"
+            minimumDate={minimumDate}
+            accentColor={colors.accent}
+            onChange={(_, selected) => {
+              if (selected) onChange(dayjs(selected).format(DATE_FORMAT));
+            }}
+          />
         </View>
       ) : null}
     </View>

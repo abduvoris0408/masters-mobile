@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
+import { router } from "expo-router";
 import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,6 +22,9 @@ interface HeaderProps {
    *  shell header's onNotificationsPage check (no point linking to the
    *  page you're already on). */
   hideRight?: boolean;
+  /** The settings screen itself hides the settings gear — no point linking
+   *  to the page you're already on. */
+  hideSettings?: boolean;
 }
 
 // Floating liquid-glass header — absolutely positioned over the screen's
@@ -37,13 +41,24 @@ interface HeaderProps {
 // slot (back/search/menu/bell) renders through the same HeaderIconButton so
 // they share one visual size/weight instead of the bell looking bare next to
 // a bordered back button.
-export function Header({ title, onMenuPress, onBackPress, onSearchPress, right, hideRight }: HeaderProps) {
+export function Header({ title, onMenuPress, onBackPress, onSearchPress, right, hideRight, hideSettings }: HeaderProps) {
   const insets = useSafeAreaInsets();
   const iconColor = useThemeColors().foreground;
   const isAuth = useAuthStore((s) => s.isAuth);
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
-  const resolvedRight = right ?? (!hideRight && isAuth ? <NotificationBell /> : null);
+  const resolvedRight =
+    right ??
+    (!hideRight && isAuth ? (
+      <View className="flex-row items-center gap-1.5">
+        {hideSettings ? null : (
+          <HeaderIconButton onPress={() => router.push("/more/settings")}>
+            <Ionicons name="settings-outline" size={20} color={iconColor} />
+          </HeaderIconButton>
+        )}
+        <NotificationBell />
+      </View>
+    ) : null);
 
   return (
     <ProgressiveBlurView
@@ -53,7 +68,7 @@ export function Header({ title, onMenuPress, onBackPress, onSearchPress, right, 
       style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 20 }}
     >
       <View className="flex-row items-center justify-between px-4 pb-3" style={{ paddingTop: insets.top + 10 }}>
-        <View className="w-11">
+        <View style={{ minWidth: 84 }}>
           {onBackPress ? (
             <HeaderIconButton onPress={onBackPress}>
               <Ionicons name="chevron-back" size={22} color={iconColor} />
@@ -81,7 +96,9 @@ export function Header({ title, onMenuPress, onBackPress, onSearchPress, right, 
           <View className="flex-1" />
         )}
 
-        <View className="w-11 items-end">{resolvedRight}</View>
+        <View className="items-end" style={{ minWidth: 84 }}>
+          {resolvedRight}
+        </View>
       </View>
     </ProgressiveBlurView>
   );

@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BottomSheetModal, BottomSheetScrollView, BottomSheetBackdrop, type BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 
 import { Button } from "@/components/ui/Button";
+import { useThemeColors } from "@/lib/theme/colors";
 import { useAllJobsCategoriesQuery, useRegionsQuery } from "@/services/master";
 
 export interface CategoryRegionFilterValue {
@@ -11,48 +12,80 @@ export interface CategoryRegionFilterValue {
 }
 
 interface CategoryRegionFilterSheetProps {
-  visible: boolean;
-  onClose: () => void;
   value: CategoryRegionFilterValue;
   onApply: (value: CategoryRegionFilterValue) => void;
+}
+
+export interface CategoryRegionFilterSheetHandle {
+  present: () => void;
+  dismiss: () => void;
 }
 
 // Bottom sheet shared by the Home (elonlar) and Masters catalog feeds — both
 // filter on the same category/region dimensions per IApplicationsListFilters
 // / IMasterCatalogListFilters; screen-specific extra filters (price/sort)
 // can be layered on top later without duplicating this shell.
-export function CategoryRegionFilterSheet({ visible, onClose, value, onApply }: CategoryRegionFilterSheetProps) {
-  const insets = useSafeAreaInsets();
-  const { data: categories } = useAllJobsCategoriesQuery(visible);
-  const { data: regions } = useRegionsQuery(visible);
+//
+// Built on @gorhom/bottom-sheet, same rationale as MoreSheet.tsx — native
+// spring/gesture feel instead of a plain <Modal> slide. Imperative
+// present()/dismiss() via ref; `open` (local state, driven by the sheet's
+// own onChange) replaces the old `visible` prop as the queries' fetch-gate.
+export const CategoryRegionFilterSheet = forwardRef<CategoryRegionFilterSheetHandle, CategoryRegionFilterSheetProps>(
+  function CategoryRegionFilterSheet({ value, onApply }, ref) {
+    const sheetRef = useRef<BottomSheetModal>(null);
+    const colors = useThemeColors();
+    const [open, setOpen] = useState(false);
+    const { data: categories } = useAllJobsCategoriesQuery(open);
+    const { data: regions } = useRegionsQuery(open);
 
-  const [category, setCategory] = useState<number[]>(value.category);
-  const [region, setRegion] = useState<number | null>(value.region);
+    const [category, setCategory] = useState<number[]>(value.category);
+    const [region, setRegion] = useState<number | null>(value.region);
 
-  const toggleCategory = (id: number) => {
-    setCategory((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
-  };
+    useImperativeHandle(ref, () => ({
+      present: () => {
+        setCategory(value.category);
+        setRegion(value.region);
+        sheetRef.current?.present();
+      },
+      dismiss: () => sheetRef.current?.dismiss(),
+    }));
 
-  const reset = () => {
-    setCategory([]);
-    setRegion(null);
-  };
+    const toggleCategory = (id: number) => {
+      setCategory((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
+    };
 
-  const apply = () => {
-    onApply({ category, region });
-    onClose();
-  };
+    const reset = () => {
+      setCategory([]);
+      setRegion(null);
+    };
 
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable className="flex-1 bg-black/40" onPress={onClose} />
-      <View
-        className="rounded-t-3xl bg-background px-5 pt-5"
-        style={{ paddingBottom: insets.bottom + 16, maxHeight: "75%" }}
+    const apply = () => {
+      onApply({ category, region });
+      sheetRef.current?.dismiss();
+    };
+
+    const renderBackdrop = useCallback(
+      (props: BottomSheetBackdropProps) => (
+        <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.4} />
+      ),
+      [],
+    );
+
+    return (
+      <BottomSheetModal
+        ref={sheetRef}
+        snapPoints={["75%"]}
+        enableDynamicSizing={false}
+        onChange={(index) => setOpen(index >= 0)}
+        backdropComponent={renderBackdrop}
+        backgroundStyle={{ backgroundColor: colors.background, borderRadius: 24 }}
+        handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
       >
-        <Text className="mb-4 text-lg font-semibold text-foreground">Filtr</Text>
+        <View className="px-5">
+          <Text className="mb-4 text-lg font-semibold text-foreground">Filtr</Text>
+        </View>
 
-        <ScrollView>
+        <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20 }}>
           <Text className="mb-2 text-sm font-medium text-muted">Kategoriya</Text>
           <View className="mb-5 flex-row flex-wrap gap-2">
             {categories?.map((c) => {
@@ -96,9 +129,9 @@ export function CategoryRegionFilterSheet({ visible, onClose, value, onApply }: 
               );
             })}
           </View>
-        </ScrollView>
+        </BottomSheetScrollView>
 
-        <View className="flex-row gap-3 pt-2">
+        <View className="flex-row gap-3 px-5 pb-4 pt-2">
           <Button variant="outline" color="primary" className="flex-1" onPress={reset}>
             Tozalash
           </Button>
@@ -106,7 +139,7 @@ export function CategoryRegionFilterSheet({ visible, onClose, value, onApply }: 
             Qo'llash
           </Button>
         </View>
-      </View>
-    </Modal>
-  );
-}
+      </BottomSheetModal>
+    );
+  },
+);

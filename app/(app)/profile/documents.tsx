@@ -1,10 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  BottomSheetModal,
+  BottomSheetScrollView,
+  BottomSheetBackdrop,
+  type BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
+import { ActivityIndicator, Alert, FlatList, Pressable, Text, View } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -32,19 +37,17 @@ function isPdfFile(url: string) {
   return url.toLowerCase().endsWith(".pdf");
 }
 
-function DocumentFormModal({
-  visible,
-  profileGuid,
-  item,
-  onClose,
-}: {
-  visible: boolean;
-  profileGuid: string | null;
-  item: IDocument | null;
-  onClose: () => void;
-}) {
+interface DocumentFormModalHandle {
+  present: (item: IDocument | null) => void;
+}
+
+const DocumentFormModal = forwardRef<DocumentFormModalHandle, { profileGuid: string | null }>(function DocumentFormModal(
+  { profileGuid },
+  ref,
+) {
   const colors = useThemeColors();
-  const insets = useSafeAreaInsets();
+  const sheetRef = useRef<BottomSheetModal>(null);
+  const [item, setItem] = useState<IDocument | null>(null);
   const isEdit = !!item;
 
   const [title, setTitle] = useState("");
@@ -56,13 +59,16 @@ function DocumentFormModal({
   const updateMutation = useUpdateDocumentMutation("profile", profileGuid);
   const isPending = createMutation.isPending || updateMutation.isPending;
 
-  useEffect(() => {
-    if (!visible) return;
-    setTitle(item?.title ?? "");
-    setIssuedBy(item?.issued_by ?? "");
-    setIssuedAt(item?.issued_at ?? "");
-    setFile(null);
-  }, [visible, item]);
+  useImperativeHandle(ref, () => ({
+    present: (nextItem) => {
+      setItem(nextItem);
+      setTitle(nextItem?.title ?? "");
+      setIssuedBy(nextItem?.issued_by ?? "");
+      setIssuedAt(nextItem?.issued_at ?? "");
+      setFile(null);
+      sheetRef.current?.present();
+    },
+  }));
 
   const handlePick = async () => {
     const result = await DocumentPicker.getDocumentAsync({ type: ["image/*", "application/pdf"] });
@@ -106,73 +112,88 @@ function DocumentFormModal({
         await createMutation.mutateAsync({ title: title.trim(), issued_by: issuedBy.trim(), issued_at: issuedAt, file });
         showSuccess("Hujjat qo'shildi");
       }
-      onClose();
+      sheetRef.current?.dismiss();
     } catch {
       showError(isEdit ? "Yangilashda xatolik yuz berdi" : "Qo'shishda xatolik yuz berdi");
     }
   };
 
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.4} />
+    ),
+    [],
+  );
+
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable className="flex-1 bg-black/40" onPress={onClose} />
-      <View className="rounded-t-3xl bg-background px-5 pt-5" style={{ paddingBottom: insets.bottom + 16, maxHeight: "85%" }}>
+    <BottomSheetModal
+      ref={sheetRef}
+      snapPoints={["85%"]}
+      enableDynamicSizing={false}
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
+      backdropComponent={renderBackdrop}
+      backgroundStyle={{ backgroundColor: colors.background, borderRadius: 24 }}
+      handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
+    >
+      <View className="px-5">
         <Text className="mb-4 text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
           {isEdit ? "Hujjatni tahrirlash" : "Yangi hujjat qo'shish"}
         </Text>
+      </View>
 
-        <ScrollView>
-          <TextField label="Nomi" value={title} onChangeText={setTitle} placeholder="Sertifikat nomi" />
-          <View style={{ height: 12 }} />
-          <TextField label="Kim tomonidan berilgan" value={issuedBy} onChangeText={setIssuedBy} placeholder="Tashkilot nomi" />
-          <View style={{ height: 12 }} />
-          <TextField label="Berilgan sana" value={issuedAt} onChangeText={setIssuedAt} placeholder="2025-01-31" />
-          <View style={{ height: 16 }} />
+      <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20 }}>
+        <TextField label="Nomi" value={title} onChangeText={setTitle} placeholder="Sertifikat nomi" />
+        <View style={{ height: 12 }} />
+        <TextField label="Kim tomonidan berilgan" value={issuedBy} onChangeText={setIssuedBy} placeholder="Tashkilot nomi" />
+        <View style={{ height: 12 }} />
+        <TextField label="Berilgan sana" value={issuedAt} onChangeText={setIssuedAt} placeholder="2025-01-31" />
+        <View style={{ height: 16 }} />
 
-          <Text className="mb-2 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-            Fayl
-          </Text>
-          {file ? (
-            <View className="flex-row items-center gap-2.5 rounded-2xl bg-surface px-3.5 py-3">
-              <Ionicons name="document-text-outline" size={18} color={colors.accent} />
-              <Text className="flex-1 text-sm text-foreground" numberOfLines={1}>
-                {file.name}
-              </Text>
-              <Pressable onPress={() => setFile(null)} hitSlop={8}>
-                <Ionicons name="close-circle" size={18} color={colors.muted} />
-              </Pressable>
-            </View>
-          ) : isEdit && item?.file ? (
-            <View className="flex-row items-center gap-2.5 rounded-2xl bg-surface px-3.5 py-3">
-              <Ionicons name="document-text-outline" size={18} color={colors.muted} />
-              <Text className="flex-1 text-xs text-muted" numberOfLines={1}>
-                Joriy fayl saqlanadi
-              </Text>
-              <Pressable onPress={handlePick}>
-                <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                  Almashtirish
-                </Text>
-              </Pressable>
-            </View>
-          ) : (
-            <Pressable
-              onPress={handlePick}
-              className="flex-row items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-4"
-            >
-              <Ionicons name="cloud-upload-outline" size={18} color={colors.muted} />
-              <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                Fayl tanlash (rasm yoki PDF)
+        <Text className="mb-2 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+          Fayl
+        </Text>
+        {file ? (
+          <View className="flex-row items-center gap-2.5 rounded-2xl bg-surface px-3.5 py-3">
+            <Ionicons name="document-text-outline" size={18} color={colors.accent} />
+            <Text className="flex-1 text-sm text-foreground" numberOfLines={1}>
+              {file.name}
+            </Text>
+            <Pressable onPress={() => setFile(null)} hitSlop={8}>
+              <Ionicons name="close-circle" size={18} color={colors.muted} />
+            </Pressable>
+          </View>
+        ) : isEdit && item?.file ? (
+          <View className="flex-row items-center gap-2.5 rounded-2xl bg-surface px-3.5 py-3">
+            <Ionicons name="document-text-outline" size={18} color={colors.muted} />
+            <Text className="flex-1 text-xs text-muted" numberOfLines={1}>
+              Joriy fayl saqlanadi
+            </Text>
+            <Pressable onPress={handlePick}>
+              <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+                Almashtirish
               </Text>
             </Pressable>
-          )}
-        </ScrollView>
+          </View>
+        ) : (
+          <Pressable
+            onPress={handlePick}
+            className="flex-row items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-4"
+          >
+            <Ionicons name="cloud-upload-outline" size={18} color={colors.muted} />
+            <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+              Fayl tanlash (rasm yoki PDF)
+            </Text>
+          </Pressable>
+        )}
 
-        <Button className="mt-5" loading={isPending} onPress={handleSubmit}>
+        <Button className="mb-5 mt-5" loading={isPending} onPress={handleSubmit}>
           {isEdit ? "Saqlash" : "Qo'shish"}
         </Button>
-      </View>
-    </Modal>
+      </BottomSheetScrollView>
+    </BottomSheetModal>
   );
-}
+});
 
 export default function ProfileDocumentsScreen() {
   const colors = useThemeColors();
@@ -182,19 +203,11 @@ export default function ProfileDocumentsScreen() {
   const { data: documents, isLoading } = useDocumentListQuery("profile", profileGuid);
   const deleteMutation = useDeleteDocumentMutation("profile", profileGuid);
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editing, setEditing] = useState<IDocument | null>(null);
+  const formSheetRef = useRef<DocumentFormModalHandle>(null);
   const [deletingGuid, setDeletingGuid] = useState<string | null>(null);
 
-  const openAdd = () => {
-    setEditing(null);
-    setModalVisible(true);
-  };
-
-  const openEdit = (item: IDocument) => {
-    setEditing(item);
-    setModalVisible(true);
-  };
+  const openAdd = () => formSheetRef.current?.present(null);
+  const openEdit = (item: IDocument) => formSheetRef.current?.present(item);
 
   const handleDelete = (guid: string) => {
     Alert.alert("Hujjatni o'chirish", "Ushbu hujjatni o'chirishni tasdiqlaysizmi?", [
@@ -236,6 +249,7 @@ export default function ProfileDocumentsScreen() {
           <EmptyState
             icon="document-attach-outline"
             title="Hujjatlar qo'shilmagan"
+            description="Sertifikat va litsenziyalaringizni qo'shib, profilingizga ishonch qo'shing"
             actionLabel="Hujjat qo'shish"
             onAction={openAdd}
           />
@@ -285,7 +299,7 @@ export default function ProfileDocumentsScreen() {
         />
       )}
 
-      <DocumentFormModal visible={modalVisible} profileGuid={profileGuid} item={editing} onClose={() => setModalVisible(false)} />
+      <DocumentFormModal ref={formSheetRef} profileGuid={profileGuid} />
     </View>
   );
 }

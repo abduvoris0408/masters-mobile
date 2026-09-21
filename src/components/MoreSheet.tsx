@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import { BottomSheetModal, BottomSheetScrollView, BottomSheetBackdrop, type BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import { router } from "expo-router";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import { Pressable, Text, View } from "react-native";
 
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -19,9 +20,9 @@ interface MoreSheetItem {
   disabled?: boolean;
 }
 
-interface MoreSheetProps {
-  visible: boolean;
-  onClose: () => void;
+export interface MoreSheetHandle {
+  present: () => void;
+  dismiss: () => void;
 }
 
 // "Ko'proq" tab's destination per mobile-design.md's MobileTabBar spec — a
@@ -29,13 +30,24 @@ interface MoreSheetProps {
 // row per link from the web project's MobileMoreSheet.tsx. Master/organization
 // onboarding have no RN screen yet — they render disabled/"Tez orada" instead
 // of being left out, so the full menu structure is visible up front.
-export function MoreSheet({ visible, onClose }: MoreSheetProps) {
-  const insets = useSafeAreaInsets();
+//
+// Built on @gorhom/bottom-sheet (react-native-reanimated + gesture-handler)
+// instead of a plain RN <Modal> — gives the platform's native-feel spring
+// physics, drag-to-dismiss, and backdrop fade instead of a hand-rolled slide
+// animation. Imperative present()/dismiss() via ref (gorhom's own pattern),
+// so FloatingTabBar holds a ref instead of a visible/onClose boolean prop.
+export const MoreSheet = forwardRef<MoreSheetHandle>(function MoreSheet(_props, ref) {
+  const sheetRef = useRef<BottomSheetModal>(null);
   const colors = useThemeColors();
   const user = useAuthStore((s) => s.user);
   const isWorker = user?.user_type === EUserType.WORKER;
-  const { data: unreadSummary } = useChatUnreadSummaryQuery(visible);
+  const { data: unreadSummary } = useChatUnreadSummaryQuery(true);
   const unreadChatCount = getChatUnreadTotal(unreadSummary);
+
+  useImperativeHandle(ref, () => ({
+    present: () => sheetRef.current?.present(),
+    dismiss: () => sheetRef.current?.dismiss(),
+  }));
 
   const allItems: MoreSheetItem[] = [
     { key: "my-applications", label: "Mening elonlarim", icon: "document-text-outline", href: "/more/my-applications" },
@@ -56,65 +68,78 @@ export function MoreSheet({ visible, onClose }: MoreSheetProps) {
     { key: "legal-help", label: "Huquqiy yordam", icon: "shield-checkmark-outline", href: "/more/legal-help" },
     { key: "applications-create", label: "E'lon berish", icon: "add-circle-outline", href: "/applications/create" },
     { key: "blog", label: "Blog", icon: "newspaper-outline", href: "/more/blog" },
-    { key: "settings", label: "Sozlamalar", icon: "settings-outline", href: "/more/settings" },
   ];
   const items = allItems.filter((item) => !item.onlyFor || (item.onlyFor === EUserType.WORKER ? isWorker : !isWorker));
 
   const go = (href?: string) => {
     if (!href) return;
-    onClose();
+    sheetRef.current?.dismiss();
     router.push(href as never);
   };
 
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable className="flex-1 bg-black/40" onPress={onClose} />
-      <View className="max-h-[75%] rounded-t-3xl bg-background" style={{ paddingBottom: insets.bottom + 12 }}>
-        <View className="items-center py-3">
-          <View className="h-1.5 w-10 rounded-full bg-border" />
-        </View>
-        <View className="flex-row items-center justify-between px-5 pb-3">
-          <Text className="text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-            Ko'proq
-          </Text>
-          <Pressable
-            onPress={onClose}
-            hitSlop={8}
-            className="h-8 w-8 items-center justify-center rounded-full bg-surface"
-          >
-            <Ionicons name="close" size={18} color={colors.foreground} />
-          </Pressable>
-        </View>
-        <ScrollView contentContainerClassName="px-2 pb-2">
-          {items.map((item) => (
-            <Pressable
-              key={item.key}
-              onPress={() => !item.disabled && go(item.href)}
-              disabled={item.disabled}
-              className={`flex-row items-center gap-3 rounded-2xl px-3.5 py-3.5 ${item.disabled ? "opacity-40" : ""}`}
-            >
-              <View className="h-9 w-9 items-center justify-center rounded-xl bg-surface">
-                <Ionicons name={item.icon} size={18} color={colors.foreground} />
-              </View>
-              <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                {item.label}
-              </Text>
-              {item.key === "chat" && unreadChatCount > 0 ? (
-                <View className="mr-1 h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5">
-                  <Text className="text-[11px] text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                    {unreadChatCount > 9 ? "9+" : unreadChatCount}
-                  </Text>
-                </View>
-              ) : null}
-              {item.disabled ? (
-                <Text className="text-xs text-muted">Tez orada</Text>
-              ) : (
-                <Ionicons name="chevron-forward" size={16} color={colors.muted} />
-              )}
-            </Pressable>
-          ))}
-        </ScrollView>
-      </View>
-    </Modal>
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.4} />
+    ),
+    [],
   );
-}
+
+  return (
+    <BottomSheetModal
+      ref={sheetRef}
+      snapPoints={["75%"]}
+      enableDynamicSizing={false}
+      backdropComponent={renderBackdrop}
+      backgroundStyle={{ backgroundColor: colors.background, borderRadius: 24 }}
+      handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
+    >
+      <View className="flex-row items-center justify-between px-5 pb-3">
+        <Text className="text-xl text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+          Ko'proq
+        </Text>
+        <Pressable
+          onPress={() => sheetRef.current?.dismiss()}
+          hitSlop={8}
+          className="h-9 w-9 items-center justify-center rounded-full bg-surface"
+        >
+          <Ionicons name="close" size={20} color={colors.foreground} />
+        </Pressable>
+      </View>
+      <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 24 }}>
+        {items.map((item) => (
+          <Pressable
+            key={item.key}
+            onPress={() => !item.disabled && go(item.href)}
+            disabled={item.disabled}
+            className={`flex-row items-center gap-3 rounded-2xl px-3.5 py-3.5 ${item.disabled ? "opacity-40" : ""}`}
+          >
+            <View className="h-10 w-10 items-center justify-center rounded-xl bg-surface">
+              <Ionicons name={item.icon} size={19} color={colors.foreground} />
+            </View>
+            <Text
+              className="flex-1 text-base text-foreground"
+              style={{ fontFamily: GOLOS_WEIGHTS.medium }}
+              numberOfLines={1}
+            >
+              {item.label}
+            </Text>
+            {item.key === "chat" && unreadChatCount > 0 ? (
+              <View className="mr-1 h-6 min-w-6 items-center justify-center rounded-full bg-danger px-1.5">
+                <Text className="text-xs text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                  {unreadChatCount > 9 ? "9+" : unreadChatCount}
+                </Text>
+              </View>
+            ) : null}
+            {item.disabled ? (
+              <Text className="text-xs text-muted" numberOfLines={1}>
+                Tez orada
+              </Text>
+            ) : (
+              <Ionicons name="chevron-forward" size={17} color={colors.muted} />
+            )}
+          </Pressable>
+        ))}
+      </BottomSheetScrollView>
+    </BottomSheetModal>
+  );
+});

@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as ImagePicker from "expo-image-picker";
 import { ActivityIndicator, Alert, Image, Pressable, Text, View } from "react-native";
 
@@ -26,23 +27,10 @@ const MAX_IMAGES = 10;
 export function WizardStepImages({ images, onChange }: WizardStepImagesProps) {
   const colors = useThemeColors();
   const uploadImageMutation = useUploadApplicationImageMutation();
+  const { showActionSheetWithOptions } = useActionSheet();
 
-  const pickImages = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert("Ruxsat kerak", "Rasm tanlash uchun galereyaga ruxsat bering.");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsMultipleSelection: true,
-      selectionLimit: Math.max(0, MAX_IMAGES - images.length),
-      quality: 0.8,
-    });
-    if (result.canceled || result.assets.length === 0) return;
-
-    const accepted: IPendingApplicationImage[] = result.assets.slice(0, MAX_IMAGES - images.length).map((asset) => ({
+  const uploadAssets = (assets: ImagePicker.ImagePickerAsset[]) => {
+    const accepted: IPendingApplicationImage[] = assets.slice(0, MAX_IMAGES - images.length).map((asset) => ({
       localId: `${Date.now()}-${Math.random()}`,
       uri: asset.uri,
       serverId: null,
@@ -65,6 +53,47 @@ export function WizardStepImages({ images, onChange }: WizardStepImagesProps) {
         },
       );
     });
+  };
+
+  const pickFromCamera = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Ruxsat kerak", "Kameradan foydalanish uchun ruxsat bering.");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
+    if (result.canceled || result.assets.length === 0) return;
+    uploadAssets(result.assets);
+  };
+
+  const pickFromLibrary = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Ruxsat kerak", "Rasm tanlash uchun galereyaga ruxsat bering.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsMultipleSelection: true,
+      selectionLimit: Math.max(0, MAX_IMAGES - images.length),
+      quality: 0.8,
+    });
+    if (result.canceled || result.assets.length === 0) return;
+    uploadAssets(result.assets);
+  };
+
+  const pickImages = () => {
+    showActionSheetWithOptions(
+      {
+        options: ["Kamera", "Galereya", "Bekor qilish"],
+        cancelButtonIndex: 2,
+      },
+      (selectedIndex) => {
+        if (selectedIndex === 0) pickFromCamera();
+        else if (selectedIndex === 1) pickFromLibrary();
+      },
+    );
   };
 
   const removeImage = (localId: string) => onChange((prev) => prev.filter((img) => img.localId !== localId));

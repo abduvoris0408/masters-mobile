@@ -97,13 +97,16 @@ export default function OrganizationDetailScreen() {
               Ma'lumot
             </Text>
             <View className="gap-2.5">
-              {data.country ? (
+              {(data.operates_regions && data.regions) || (data.operates_districts && data.districts) ? (
                 <View className="flex-row items-center gap-2">
                   <Ionicons name="location-outline" size={16} color={colors.muted} />
                   <Text className="flex-1 text-sm text-foreground">
-                    {data.country}
-                    {data.operates_regions && data.regions ? `, ${data.regions}` : ""}
-                    {data.operates_districts && data.districts ? `, ${data.districts}` : ""}
+                    {[
+                      data.operates_regions && data.regions ? data.regions : null,
+                      data.operates_districts && data.districts ? data.districts : null,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}
                   </Text>
                 </View>
               ) : null}

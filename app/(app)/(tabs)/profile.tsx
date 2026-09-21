@@ -105,22 +105,22 @@ export default function ProfileScreen() {
         <View className="items-center gap-3">
           <View>
             {user?.avatar ? (
-              <Image source={{ uri: user.avatar }} style={{ width: 100, height: 100, borderRadius: 50 }} />
+              <Image source={{ uri: user.avatar }} style={{ width: 140, height: 140, borderRadius: 70 }} />
             ) : (
               <View
                 className="items-center justify-center rounded-full bg-emerald-100"
-                style={{ width: 100, height: 100 }}
+                style={{ width: 140, height: 140 }}
               >
-                <Text className="text-3xl font-bold text-primary">
+                <Text className="text-5xl font-bold text-primary">
                   {(user?.first_name?.trim()?.[0] ?? "?").toUpperCase()}
                 </Text>
               </View>
             )}
             <View
-              className="absolute -bottom-1 -right-1 h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-surface"
+              className="absolute -bottom-1 -right-1 h-10 w-10 items-center justify-center rounded-full border-2 border-background bg-surface"
               style={{ shadowColor: "#0F172A", shadowOpacity: 0.15, shadowRadius: 6, elevation: 4 }}
             >
-              <Ionicons name="pencil" size={14} color={colors.foreground} />
+              <Ionicons name="pencil" size={17} color={colors.foreground} />
             </View>
           </View>
           <Text className="text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>

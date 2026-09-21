@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
@@ -8,10 +8,10 @@ import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { extractChatGuid, extractChatId, useStartChatMutation } from "@/services/chat";
 import { useMasterCatalogDetailQuery } from "@/services/master";
-import type { IUserServiceCatalogServiceDetail, IUserServiceCategoryRef } from "@/types";
+import type { IUserServiceCategoryRef } from "@/types";
 import { showError } from "@/utils/toast";
 
-import { CreateOrderModal } from "./components/CreateOrderModal";
+import { CreateOrderModal, type CreateOrderModalHandle } from "./components/CreateOrderModal";
 import { IntroVideoSection } from "./components/IntroVideoSection";
 import { MasterDetailTabs, type ServiceGroup } from "./components/MasterDetailTabs";
 import { MasterHeaderCard } from "./components/MasterHeaderCard";
@@ -25,7 +25,7 @@ export default function MasterDetailScreen() {
   const { data: master, isLoading, isError } = useMasterCatalogDetailQuery(guid ?? null);
   const startChatMutation = useStartChatMutation();
 
-  const [orderTarget, setOrderTarget] = useState<IUserServiceCatalogServiceDetail | null>(null);
+  const orderSheetRef = useRef<CreateOrderModalHandle>(null);
   const [reviewsPage, setReviewsPage] = useState(1);
   const [reviewsSummary, setReviewsSummary] = useState<{ averageRating: number | null; count: number } | null>(null);
 
@@ -87,7 +87,7 @@ export default function MasterDetailScreen() {
 
           <MasterDetailTabs
             groups={groups}
-            onOrder={(service) => setOrderTarget(service)}
+            onOrder={(service) => orderSheetRef.current?.present(service)}
             profileGuid={master.guid}
           />
 
@@ -101,13 +101,7 @@ export default function MasterDetailScreen() {
         </ScrollView>
       )}
 
-      {master ? (
-        <CreateOrderModal
-          service={orderTarget}
-          onClose={() => setOrderTarget(null)}
-          masterUserId={Number(master.user_id)}
-        />
-      ) : null}
+      {master ? <CreateOrderModal ref={orderSheetRef} masterUserId={Number(master.user_id)} /> : null}
     </View>
   );
 }

@@ -49,7 +49,7 @@ export default function OrganizationsCatalogScreen() {
         </View>
       ) : items.length === 0 ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState icon="business-outline" title="Tashkilotlar topilmadi" />
+          <EmptyState icon="business-outline" title="Tashkilotlar topilmadi" description="Boshqa so'z yoki filtr bilan urinib ko'ring" />
         </View>
       ) : (
         <FlatList

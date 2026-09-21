@@ -1,7 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  BottomSheetModal,
+  BottomSheetScrollView,
+  BottomSheetTextInput,
+  BottomSheetBackdrop,
+  type BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import { Button } from "@/components/ui/Button";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -15,20 +21,26 @@ import { formatPrice } from "@/utils/format";
 import { showError, showSuccess } from "@/utils/toast";
 
 interface Props {
-  service: IUserServiceCatalogServiceDetail | null;
-  onClose: () => void;
   /** Real user pk of the master (catalog's `user_id`, not the catalog row's
    *  own id) — used to auto-drop a chat invite once the order is created. */
   masterUserId: number;
 }
 
-export function CreateOrderModal({ service, onClose, masterUserId }: Props) {
+export interface CreateOrderModalHandle {
+  present: (service: IUserServiceCatalogServiceDetail) => void;
+}
+
+export const CreateOrderModal = forwardRef<CreateOrderModalHandle, Props>(function CreateOrderModal(
+  { masterUserId },
+  ref,
+) {
   const colors = useThemeColors();
-  const insets = useSafeAreaInsets();
+  const sheetRef = useRef<BottomSheetModal>(null);
   const currentUserId = useAuthStore((s) => s.user?.id);
   const createOrderMutation = useCreateOrderMutation();
   const sendInvite = useSendChatInvite();
 
+  const [service, setService] = useState<IUserServiceCatalogServiceDetail | null>(null);
   const [address, setAddress] = useState("");
   const [comment, setComment] = useState("");
   const [step, setStep] = useState<"form" | "contract">("form");
@@ -47,14 +59,18 @@ export function CreateOrderModal({ service, onClose, masterUserId }: Props) {
     }
   }, [preview?.content]);
 
-  useEffect(() => {
-    if (service) {
+  useImperativeHandle(ref, () => ({
+    present: (nextService) => {
+      setService(nextService);
       setAddress("");
       setComment("");
       setStep("form");
       setSucceeded(false);
-    }
-  }, [service]);
+      sheetRef.current?.present();
+    },
+  }));
+
+  const onClose = () => sheetRef.current?.dismiss();
 
   const handleContinue = () => {
     if (!address.trim()) {
@@ -88,10 +104,25 @@ export function CreateOrderModal({ service, onClose, masterUserId }: Props) {
     }
   };
 
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.4} />
+    ),
+    [],
+  );
+
   return (
-    <Modal visible={!!service} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable className="flex-1 bg-black/40" onPress={onClose} />
-      <View className="rounded-t-3xl bg-background px-5 pt-5" style={{ paddingBottom: insets.bottom + 16, maxHeight: "88%" }}>
+    <BottomSheetModal
+      ref={sheetRef}
+      snapPoints={["88%"]}
+      enableDynamicSizing={false}
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
+      backdropComponent={renderBackdrop}
+      backgroundStyle={{ backgroundColor: colors.background, borderRadius: 24 }}
+      handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
+    >
+      <View className="px-5">
         <View className="mb-4 flex-row items-center justify-between">
           <Text className="text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
             {step === "contract" ? "Shartnoma" : "Buyurtma berish"}
@@ -100,126 +131,126 @@ export function CreateOrderModal({ service, onClose, masterUserId }: Props) {
             <Ionicons name="close" size={22} color={colors.muted} />
           </Pressable>
         </View>
+      </View>
 
-        {service && succeeded ? (
-          <View className="items-center gap-3 py-8">
-            <Ionicons name="checkmark-circle" size={52} color={colors.accent} />
-            <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-              Buyurtma muvaffaqiyatli yaratildi
+      {service && succeeded ? (
+        <View className="items-center gap-3 py-8">
+          <Ionicons name="checkmark-circle" size={52} color={colors.accent} />
+          <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+            Buyurtma muvaffaqiyatli yaratildi
+          </Text>
+        </View>
+      ) : service && step === "form" ? (
+        <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}>
+          <Text className="mb-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+            {service.service_name ?? "Xizmat"}
+          </Text>
+          <View className="mb-4 self-start rounded-full bg-emerald-50 px-3 py-1 dark:bg-accent/15">
+            <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+              {formatPrice(Number(service.price))}
             </Text>
           </View>
-        ) : service && step === "form" ? (
-          <ScrollView>
-            <Text className="mb-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-              {service.service_name ?? "Xizmat"}
-            </Text>
-            <View className="mb-4 self-start rounded-full bg-emerald-50 px-3 py-1 dark:bg-accent/15">
-              <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                {formatPrice(Number(service.price))}
-              </Text>
-            </View>
 
-            <Text className="mb-1.5 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-              Manzil
-            </Text>
-            <TextInput
-              value={address}
-              onChangeText={setAddress}
-              placeholder="Ish bajariladigan manzil"
-              placeholderTextColor={colors.muted}
-              className="mb-4 rounded-2xl bg-surface px-4 py-3 text-base text-foreground"
-              style={{ color: colors.foreground }}
-            />
+          <Text className="mb-1.5 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+            Manzil
+          </Text>
+          <BottomSheetTextInput
+            value={address}
+            onChangeText={setAddress}
+            placeholder="Ish bajariladigan manzil"
+            placeholderTextColor={colors.muted}
+            className="mb-4 rounded-2xl bg-surface px-4 py-3 text-base text-foreground"
+            style={{ color: colors.foreground }}
+          />
 
-            <Text className="mb-1.5 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-              Izoh
-            </Text>
-            <TextInput
-              value={comment}
-              onChangeText={setComment}
-              multiline
-              placeholder="Ish haqida qisqacha ma'lumot"
-              placeholderTextColor={colors.muted}
-              className="mb-5 rounded-2xl bg-surface px-4 py-3 text-base text-foreground"
-              style={{ minHeight: 90, textAlignVertical: "top", color: colors.foreground }}
-            />
+          <Text className="mb-1.5 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+            Izoh
+          </Text>
+          <BottomSheetTextInput
+            value={comment}
+            onChangeText={setComment}
+            multiline
+            placeholder="Ish haqida qisqacha ma'lumot"
+            placeholderTextColor={colors.muted}
+            className="mb-5 rounded-2xl bg-surface px-4 py-3 text-base text-foreground"
+            style={{ minHeight: 90, textAlignVertical: "top", color: colors.foreground }}
+          />
 
-            <Button onPress={handleContinue}>Davom etish</Button>
-          </ScrollView>
-        ) : service && step === "contract" ? (
-          <ScrollView>
-            {previewLoading ? (
-              <ActivityIndicator color={colors.accent} style={{ marginVertical: 24 }} />
-            ) : !preview ? (
-              <Text className="py-6 text-center text-sm text-muted">Shartnomani yuklab bo'lmadi</Text>
-            ) : (
-              <>
-                <View className="mb-3 flex-row items-center gap-2">
-                  <Ionicons name="document-text-outline" size={18} color={colors.foreground} />
-                  <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                    {preview.contract_title}
-                  </Text>
-                </View>
+          <Button onPress={handleContinue}>Davom etish</Button>
+        </BottomSheetScrollView>
+      ) : service && step === "contract" ? (
+        <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}>
+          {previewLoading ? (
+            <ActivityIndicator color={colors.accent} style={{ marginVertical: 24 }} />
+          ) : !preview ? (
+            <Text className="py-6 text-center text-sm text-muted">Shartnomani yuklab bo'lmadi</Text>
+          ) : (
+            <>
+              <View className="mb-3 flex-row items-center gap-2">
+                <Ionicons name="document-text-outline" size={18} color={colors.foreground} />
+                <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+                  {preview.contract_title}
+                </Text>
+              </View>
 
-                <View className="mb-3 gap-2 rounded-2xl bg-surface p-3.5">
-                  {[
-                    ["Xizmat turi", preview.category?.name],
-                    ["Usta", [preview.master?.name, preview.master?.surname].filter(Boolean).join(" ")],
-                    ["Narx", formatPrice(Number(preview.price))],
-                    ["Manzil", address],
-                    ...(comment ? [["Izoh", comment]] : []),
-                  ].map(([label, value]) => (
-                    <View key={label} className="flex-row items-start justify-between gap-3">
-                      <Text className="text-xs text-muted">{label}</Text>
-                      <Text className="flex-1 text-right text-xs text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                        {value}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-
-                {content ? (
-                  <View className="mb-2 gap-2.5 rounded-2xl bg-background p-3.5">
-                    {content.header ? <Text className="text-xs text-muted">{content.header}</Text> : null}
-                    {[1, 2].map((n) => {
-                      const title = content[`title${n}` as keyof IAgreementContractContent];
-                      const body = content[`body${n}` as keyof IAgreementContractContent];
-                      if (!title && !body) return null;
-                      return (
-                        <View key={n} className="gap-0.5">
-                          {title ? (
-                            <Text className="text-xs text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                              {title}
-                            </Text>
-                          ) : null}
-                          {body ? (
-                            <Text className="text-xs leading-5 text-muted" numberOfLines={3}>
-                              {body}
-                            </Text>
-                          ) : null}
-                        </View>
-                      );
-                    })}
+              <View className="mb-3 gap-2 rounded-2xl bg-surface p-3.5">
+                {[
+                  ["Xizmat turi", preview.category?.name],
+                  ["Usta", [preview.master?.name, preview.master?.surname].filter(Boolean).join(" ")],
+                  ["Narx", formatPrice(Number(preview.price))],
+                  ["Manzil", address],
+                  ...(comment ? [["Izoh", comment]] : []),
+                ].map(([label, value]) => (
+                  <View key={label} className="flex-row items-start justify-between gap-3">
+                    <Text className="text-xs text-muted">{label}</Text>
+                    <Text className="flex-1 text-right text-xs text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+                      {value}
+                    </Text>
                   </View>
-                ) : null}
+                ))}
+              </View>
 
-                <View className="mt-3 flex-row gap-2.5">
-                  <View className="flex-1">
-                    <Button variant="outline" onPress={() => setStep("form")}>
-                      Orqaga
-                    </Button>
-                  </View>
-                  <View className="flex-1">
-                    <Button loading={createOrderMutation.isPending} onPress={handleConfirm}>
-                      Roziman
-                    </Button>
-                  </View>
+              {content ? (
+                <View className="mb-2 gap-2.5 rounded-2xl bg-background p-3.5">
+                  {content.header ? <Text className="text-xs text-muted">{content.header}</Text> : null}
+                  {[1, 2].map((n) => {
+                    const title = content[`title${n}` as keyof IAgreementContractContent];
+                    const body = content[`body${n}` as keyof IAgreementContractContent];
+                    if (!title && !body) return null;
+                    return (
+                      <View key={n} className="gap-0.5">
+                        {title ? (
+                          <Text className="text-xs text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+                            {title}
+                          </Text>
+                        ) : null}
+                        {body ? (
+                          <Text className="text-xs leading-5 text-muted" numberOfLines={3}>
+                            {body}
+                          </Text>
+                        ) : null}
+                      </View>
+                    );
+                  })}
                 </View>
-              </>
-            )}
-          </ScrollView>
-        ) : null}
-      </View>
-    </Modal>
+              ) : null}
+
+              <View className="mt-3 flex-row gap-2.5">
+                <View className="flex-1">
+                  <Button variant="outline" onPress={() => setStep("form")}>
+                    Orqaga
+                  </Button>
+                </View>
+                <View className="flex-1">
+                  <Button loading={createOrderMutation.isPending} onPress={handleConfirm}>
+                    Roziman
+                  </Button>
+                </View>
+              </View>
+            </>
+          )}
+        </BottomSheetScrollView>
+      ) : null}
+    </BottomSheetModal>
   );
-}
+});

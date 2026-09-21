@@ -93,7 +93,11 @@ export default function NotificationsScreen() {
       {isLoading ? (
         <ActivityIndicator className="mt-10" color={colors.accent} />
       ) : notifications.length === 0 ? (
-        <EmptyState icon="notifications-outline" title="Bildirishnomalar yo'q" />
+        <EmptyState
+          icon="notifications-outline"
+          title="Bildirishnomalar yo'q"
+          description="Yangi xabarlar va yangilanishlar shu yerda paydo bo'ladi"
+        />
       ) : (
         <FlatList
           data={notifications}

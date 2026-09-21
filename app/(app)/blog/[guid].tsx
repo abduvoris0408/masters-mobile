@@ -49,7 +49,7 @@ export default function BlogDetailScreen() {
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
       ) : isError || !data ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState icon="alert-circle-outline" title="Maqola topilmadi" />
+          <EmptyState icon="alert-circle-outline" title="Maqola topilmadi" description="Ehtimol o'chirilgan yoki mavjud emas" />
         </View>
       ) : (
         <ScrollView contentContainerClassName="gap-4 px-4 pb-10" contentContainerStyle={{ paddingTop: headerHeight + 12 }}>

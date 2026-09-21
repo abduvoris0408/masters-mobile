@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Modal, Pressable, RefreshControl, Text, View } from "react-native";
+import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop, type BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { router } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -59,18 +59,24 @@ function TransactionRow({ item }: { item: IBalanceTransaction }) {
   );
 }
 
-function DepositModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  const insets = useSafeAreaInsets();
+interface DepositModalHandle {
+  present: () => void;
+}
+
+const DepositModal = forwardRef<DepositModalHandle>(function DepositModal(_props, ref) {
+  const colors = useThemeColors();
+  const sheetRef = useRef<BottomSheetModal>(null);
   const [amount, setAmount] = useState("");
   const [succeeded, setSucceeded] = useState(false);
   const depositMutation = useDepositBalanceMutation();
 
-  useEffect(() => {
-    if (visible) {
+  useImperativeHandle(ref, () => ({
+    present: () => {
       setAmount("");
       setSucceeded(false);
-    }
-  }, [visible]);
+      sheetRef.current?.present();
+    },
+  }));
 
   const numericAmount = Number(amount.replace(/\D/g, ""));
   const canSubmit = numericAmount > 0;
@@ -81,16 +87,31 @@ function DepositModal({ visible, onClose }: { visible: boolean; onClose: () => v
       await depositMutation.mutateAsync(numericAmount);
       setSucceeded(true);
       showSuccess("Hisob to'ldirildi");
-      setTimeout(onClose, 1200);
+      setTimeout(() => sheetRef.current?.dismiss(), 1200);
     } catch {
       showError("Hisobni to'ldirib bo'lmadi");
     }
   };
 
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.4} />
+    ),
+    [],
+  );
+
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable className="flex-1 bg-black/40" onPress={onClose} />
-      <View className="rounded-t-3xl bg-background px-5 pt-5" style={{ paddingBottom: insets.bottom + 16 }}>
+    <BottomSheetModal
+      ref={sheetRef}
+      snapPoints={["40%"]}
+      enableDynamicSizing={false}
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
+      backdropComponent={renderBackdrop}
+      backgroundStyle={{ backgroundColor: colors.background, borderRadius: 24 }}
+      handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
+    >
+      <BottomSheetView style={{ padding: 20 }}>
         <Text className="mb-4 text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
           Hisobni to'ldirish
         </Text>
@@ -111,27 +132,22 @@ function DepositModal({ visible, onClose }: { visible: boolean; onClose: () => v
               keyboardType="numeric"
               placeholder="100 000"
             />
-            <Button
-              className="mt-5"
-              loading={depositMutation.isPending}
-              disabled={!canSubmit}
-              onPress={handleSubmit}
-            >
+            <Button className="mt-5" loading={depositMutation.isPending} disabled={!canSubmit} onPress={handleSubmit}>
               To'ldirish
             </Button>
           </>
         )}
-      </View>
-    </Modal>
+      </BottomSheetView>
+    </BottomSheetModal>
   );
-}
+});
 
 export default function BalanceScreen() {
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const [page, setPage] = useState(1);
   const [items, setItems] = useState<IBalanceTransaction[]>([]);
-  const [depositVisible, setDepositVisible] = useState(false);
+  const depositSheetRef = useRef<DepositModalHandle>(null);
 
   const { data: balance, isLoading: balanceLoading, isFetching: balanceFetching, refetch: refetchBalance } = useBalanceQuery();
   const { data, isLoading, isFetching, isError, refetch } = useBalanceTransactionsQuery(page, PAGE_SIZE);
@@ -184,7 +200,7 @@ export default function BalanceScreen() {
 
             <View className="flex-row gap-2.5">
               <Pressable
-                onPress={() => setDepositVisible(true)}
+                onPress={() => depositSheetRef.current?.present()}
                 className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-emerald-50 py-3.5 dark:bg-accent/15"
               >
                 <Ionicons name="arrow-down-circle-outline" size={18} color={colors.accent} />
@@ -232,7 +248,7 @@ export default function BalanceScreen() {
         }
       />
 
-      <DepositModal visible={depositVisible} onClose={() => setDepositVisible(false)} />
+      <DepositModal ref={depositSheetRef} />
     </View>
   );
 }

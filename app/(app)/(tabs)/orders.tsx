@@ -21,7 +21,7 @@ import {
   useMyOrdersQuery,
 } from "@/services/application";
 import type { IMasterOrder, TOrderStatus } from "@/types";
-import { formatDate, formatPhoneNumber, formatPrice } from "@/utils/format";
+import { formatAddress, formatDate, formatPhoneNumber, formatPrice } from "@/utils/format";
 import { ORDER_STATUS_LABEL } from "@/utils/orderStatus";
 import { appendUniquePage } from "@/utils/pagination";
 import { showError, showSuccess } from "@/utils/toast";
@@ -109,7 +109,7 @@ function OrderCard({ order, perspective, onMessage, onFinish, finishing, onCompl
       <View className="flex-row items-center gap-1.5">
         <Ionicons name="location-outline" size={14} color={colors.muted} />
         <Text className="flex-1 text-xs text-muted" numberOfLines={1}>
-          {order.address}
+          {formatAddress(order.address)}
         </Text>
       </View>
 
@@ -229,18 +229,35 @@ function OrdersList({ perspective }: { perspective: "client" | "worker" }) {
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: 24 }} />
       ) : isError ? (
-        <EmptyState
-          icon="alert-circle-outline"
-          title="Yuklashda xatolik"
-          description="Qayta urinib ko'ring"
-          actionLabel="Qayta urinish"
-          onAction={() => refetch()}
-        />
+        <View style={{ flex: 1, marginTop: -44 }}>
+          <EmptyState
+            icon="alert-circle-outline"
+            title="Yuklashda xatolik"
+            description="Qayta urinib ko'ring"
+            actionLabel="Qayta urinish"
+            onAction={() => refetch()}
+          />
+        </View>
       ) : items.length === 0 ? (
-        <EmptyState
-          icon="document-text-outline"
-          title={perspective === "worker" ? "Hali birorta buyurtma qabul qilmadingiz" : "Hali birorta buyurtmangiz yo'q"}
-        />
+        <View style={{ flex: 1, marginTop: -44 }}>
+          <EmptyState
+            icon="document-text-outline"
+            title={
+              status === "all"
+                ? perspective === "worker"
+                  ? "Hali birorta buyurtma qabul qilmadingiz"
+                  : "Hali birorta buyurtmangiz yo'q"
+                : `"${STATUS_FILTERS.find((f) => f.value === status)?.label ?? ""}" holatida buyurtma yo'q`
+            }
+            description={
+              status === "all"
+                ? perspective === "worker"
+                  ? "Yangi buyurtmalar shu yerda ko'rinadi"
+                  : "Usta yoki tashkilotga buyurtma bering, u shu yerda paydo bo'ladi"
+                : "Boshqa holatni tanlab ko'ring yoki keyinroq qayta tekshiring"
+            }
+          />
+        </View>
       ) : (
         <FlatList
           data={items}

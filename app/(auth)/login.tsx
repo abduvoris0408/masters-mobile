@@ -8,7 +8,7 @@ import { PhoneInput } from "@/components/ui/PhoneInput";
 import { TextField } from "@/components/ui/TextField";
 import { DEMO_TOKEN } from "@/lib/axios";
 import { useLoginMutation } from "@/services/auth";
-import { useAuthStore } from "@/stores";
+import { useAuthStore, useOnboardingStore } from "@/stores";
 import { EUserType } from "@/types";
 import { showError } from "@/utils/toast";
 
@@ -90,6 +90,22 @@ export default function LoginScreen() {
             }}
           >
             <Text className="text-xs text-muted underline">Demo ko'rish (dev, backend'siz)</Text>
+          </Pressable>
+        ) : null}
+
+        {/* Dev-only: onboarding is a one-time, persisted flag (AsyncStorage),
+            so once it's completed it never shows again — this replays it
+            without needing to reinstall the app or clear storage manually.
+            Never ships — __DEV__ is stripped from production/release builds. */}
+        {__DEV__ ? (
+          <Pressable
+            className="mt-3 self-center"
+            onPress={() => {
+              useOnboardingStore.getState().setHasSeenOnboarding(false);
+              router.replace("/(onboarding)");
+            }}
+          >
+            <Text className="text-xs text-muted underline">Onboarding'ni qayta ko'rish (dev)</Text>
           </Pressable>
         ) : null}
       </ScrollView>

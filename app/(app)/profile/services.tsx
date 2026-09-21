@@ -143,7 +143,11 @@ export default function ProfileServicesScreen() {
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
       ) : !services?.length ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState icon="construct-outline" title="Xizmatlar qo'shilmagan" />
+          <EmptyState
+            icon="construct-outline"
+            title="Xizmatlar qo'shilmagan"
+            description="Ko'rsatadigan xizmatlaringizni qo'shib, buyurtmalar qabul qilishni boshlang"
+          />
         </View>
       ) : (
         <ScrollView

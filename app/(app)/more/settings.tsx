@@ -32,7 +32,7 @@ export default function SettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Sozlamalar" onBackPress={() => router.back()} />
+      <Header title="Sozlamalar" onBackPress={() => router.back()} hideSettings />
 
       <View className="gap-6 px-4 py-4" style={{ paddingTop: headerHeight + 16 }}>
         <View className="gap-2">

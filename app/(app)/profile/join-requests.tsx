@@ -214,7 +214,7 @@ export default function ProfileJoinRequestsScreen() {
           onAction={() => refetch()}
         />
       ) : items.length === 0 ? (
-        <EmptyState icon="send-outline" title="So'rovlar yo'q" />
+        <EmptyState icon="send-outline" title="So'rovlar yo'q" description="Tashkilotga qo'shilish so'rovlari shu yerda ko'rinadi" />
       ) : (
         <FlatList
           data={items}

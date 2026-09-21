@@ -1,16 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import {
-  ActivityIndicator,
-  Image,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop, type BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
+import { useCallback, useRef, useState } from "react";
+import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
 import { Avatar } from "@/components/ui/Avatar";
@@ -19,8 +10,8 @@ import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { LocationMap } from "@/components/ui/LocationMap";
 import { Rating } from "@/components/ui/Rating";
-import { StaticMap } from "@/components/ui/StaticMap";
 import { TextField } from "@/components/ui/TextField";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -29,7 +20,7 @@ import { useCreateOfferMutation } from "@/services/application";
 import { useApplicationPublicDetailQuery } from "@/services/application";
 import { useAuthStore } from "@/stores";
 import { EUserType } from "@/types";
-import { formatDate, formatPrice, fromNow } from "@/utils/format";
+import { formatAddress, formatDate, formatPrice, fromNow } from "@/utils/format";
 import { showError, showSuccess } from "@/utils/toast";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -50,29 +41,41 @@ const STATUS_COLOR: Record<string, string> = {
   closed: "#79748A",
 };
 
+// Tag-style spec row: a small icon chip + label on its own line, the value
+// below in full width — replaces the old single-card striped table (which
+// squeezed long addresses/descriptions into a cramped two-column layout).
+// Each row sits directly on the page background, separated by a hairline.
 function DetailRow({
   label,
   value,
-  index,
   icon,
+  last,
 }: {
   label: string;
   value: React.ReactNode;
-  index: number;
   icon?: keyof typeof Ionicons.glyphMap;
+  last?: boolean;
 }) {
   const colors = useThemeColors();
   return (
-    <View
-      className={`gap-1 px-4 py-3.5 sm:flex-row sm:items-start sm:gap-3 ${index % 2 === 1 ? "bg-background" : "bg-surface"}`}
-    >
-      <View className="flex-row items-center gap-1.5 sm:w-[130px]">
-        {icon ? <Ionicons name={icon} size={14} color={colors.muted} /> : null}
+    <View className={`gap-2 px-1 py-4 ${last ? "" : "border-b border-border"}`}>
+      <View className="flex-row items-center gap-2">
+        {icon ? (
+          <View className="h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-accent/15">
+            <Ionicons name={icon} size={15} color={colors.accent} />
+          </View>
+        ) : null}
         <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
           {label}
         </Text>
       </View>
-      <View className="flex-1">{typeof value === "string" ? <Text className="text-sm text-foreground">{value}</Text> : value}</View>
+      {typeof value === "string" ? (
+        <Text className="text-base leading-6 text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+          {value}
+        </Text>
+      ) : (
+        value
+      )}
     </View>
   );
 }
@@ -85,7 +88,7 @@ export default function ListingDetailScreen() {
   const user = useAuthStore((s) => s.user);
   const createOfferMutation = useCreateOfferMutation();
 
-  const [offerVisible, setOfferVisible] = useState(false);
+  const offerSheetRef = useRef<BottomSheetModal>(null);
   const [price, setPrice] = useState("");
   const [comment, setComment] = useState("");
   const [succeeded, setSucceeded] = useState(false);
@@ -93,6 +96,16 @@ export default function ListingDetailScreen() {
   const isOwnListing = !!data && !!user && data.customer.guid === (user as { guid?: string }).guid;
   const isOpenStatus = data?.status === "open" || data?.status === "new";
   const canOffer = !!data && isOpenStatus && !isOwnListing && user?.user_type === EUserType.WORKER;
+  const hasAdditionalWorks = !!data?.additional_works && data.additional_works.length > 0;
+  const hasImages = !!data?.images && data.images.length > 0;
+  const hasOffers = !!data && data.offers_count > 0;
+
+  const renderOfferBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.4} />
+    ),
+    [],
+  );
 
   const submitOffer = async () => {
     if (!data) return;
@@ -110,7 +123,7 @@ export default function ListingDetailScreen() {
       setSucceeded(true);
       showSuccess("Taklif muvaffaqiyatli yuborildi");
       setTimeout(() => {
-        setOfferVisible(false);
+        offerSheetRef.current?.dismiss();
         router.push("/");
       }, 1600);
     } catch {
@@ -126,7 +139,7 @@ export default function ListingDetailScreen() {
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
       ) : isError || !data ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState icon="alert-circle-outline" title="Elon topilmadi" />
+          <EmptyState icon="alert-circle-outline" title="Elon topilmadi" description="Ehtimol o'chirilgan yoki mavjud emas" />
         </View>
       ) : (
         <>
@@ -135,18 +148,17 @@ export default function ListingDetailScreen() {
             contentContainerStyle={{ paddingTop: headerHeight + 16, paddingBottom: canOffer ? 120 : 32 }}
           >
             {/* Title + meta */}
-            <View className="gap-2">
-              <View className="flex-row items-start justify-between gap-3">
-                <Text className="flex-1 text-xl text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                  {data.title}
+            <View className="gap-2.5">
+              <Text className="text-xl text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                {data.title}
+              </Text>
+
+              <View className="self-start rounded-full bg-amber-100 px-3 py-1.5 dark:bg-amber-500/20">
+                <Text className="text-sm text-amber-700 dark:text-amber-400" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                  {data.budget_from === data.budget_to
+                    ? formatPrice(Number(data.budget_from))
+                    : `${formatPrice(Number(data.budget_from))} – ${formatPrice(Number(data.budget_to))}`}
                 </Text>
-                <View className="rounded-full bg-amber-100 px-3 py-1.5 dark:bg-amber-500/20">
-                  <Text className="text-xs text-amber-700 dark:text-amber-400" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                    {data.budget_from === data.budget_to
-                      ? formatPrice(Number(data.budget_from))
-                      : `${formatPrice(Number(data.budget_from))} – ${formatPrice(Number(data.budget_to))}`}
-                  </Text>
-                </View>
               </View>
 
               <View className="flex-row flex-wrap items-center gap-2">
@@ -174,14 +186,15 @@ export default function ListingDetailScreen() {
             </View>
 
             {data.latitude && data.longitude ? (
-              <StaticMap lat={Number(data.latitude)} lng={Number(data.longitude)} height={180} />
+              <LocationMap lat={Number(data.latitude)} lng={Number(data.longitude)} height={180} />
             ) : null}
 
-            {/* Spec table */}
-            <View className="overflow-hidden rounded-3xl border border-border">
-              <DetailRow index={0} icon="location-outline" label="Manzil" value={data.address || "Ko'rsatilmagan"} />
+            {/* Spec rows — sit directly on the page background instead of a
+                single card, so a long address/description isn't squeezed
+                into a fixed-width two-column table row. */}
+            <View>
+              <DetailRow icon="location-outline" label="Manzil" value={formatAddress(data.address) || "Ko'rsatilmagan"} />
               <DetailRow
-                index={1}
                 icon="calendar-outline"
                 label="Bajarish muddati"
                 value={
@@ -193,7 +206,6 @@ export default function ListingDetailScreen() {
                 }
               />
               <DetailRow
-                index={2}
                 icon="wallet-outline"
                 label="Byudjet"
                 value={
@@ -203,47 +215,38 @@ export default function ListingDetailScreen() {
                 }
               />
               <DetailRow
-                index={3}
                 icon="card-outline"
                 label="To'lov"
-                value={
-                  data.payment_type === "escrow"
-                    ? "Xavfsiz bitim (escrow)"
-                    : "Ish yakunlangach, to'g'ridan-to'g'ri mutaxassisga"
-                }
+                value={data.payment_type === "escrow" ? "Xavfsiz bitim (escrow)" : "Ish yakunlangach, to'g'ridan-to'g'ri mutaxassisga"}
               />
               <DetailRow
-                index={4}
                 icon="document-text-outline"
                 label="Tavsif"
-                value={
-                  <View className="rounded-xl bg-background p-3">
-                    <Text className="text-sm leading-5 text-foreground">{data.description}</Text>
-                  </View>
-                }
+                value={data.description}
+                last={!hasAdditionalWorks && !hasImages && !hasOffers}
               />
-              {data.additional_works && data.additional_works.length > 0 ? (
+              {hasAdditionalWorks ? (
                 <DetailRow
-                  index={5}
                   icon="add-circle-outline"
                   label="Qo'shimcha"
+                  last={!hasImages && !hasOffers}
                   value={
                     <View className="flex-row flex-wrap gap-1.5">
-                      {data.additional_works.map((w) => (
+                      {data.additional_works!.map((w) => (
                         <Chip key={w.id} label={w.name} tone="neutral" />
                       ))}
                     </View>
                   }
                 />
               ) : null}
-              {data.images && data.images.length > 0 ? (
+              {hasImages ? (
                 <DetailRow
-                  index={6}
                   icon="image-outline"
                   label="Rasmlar"
+                  last={!hasOffers}
                   value={
                     <View className="flex-row flex-wrap gap-2">
-                      {data.images.map((img) => (
+                      {data.images!.map((img) => (
                         <Image
                           key={img.id}
                           source={{ uri: img.image }}
@@ -255,13 +258,8 @@ export default function ListingDetailScreen() {
                   }
                 />
               ) : null}
-              {data.offers_count > 0 ? (
-                <View className="flex-row items-center justify-end gap-2 border-t border-border px-4 py-3">
-                  <Ionicons name="people-outline" size={16} color={colors.muted} />
-                  <Text className="text-sm text-foreground">
-                    <Text style={{ fontFamily: GOLOS_WEIGHTS.bold }}>{data.offers_count} ta mutaxassis</Text> taklif yubordi
-                  </Text>
-                </View>
+              {hasOffers ? (
+                <DetailRow icon="people-outline" label="Takliflar" value={`${data.offers_count} ta mutaxassis taklif yubordi`} last />
               ) : null}
             </View>
 
@@ -315,7 +313,7 @@ export default function ListingDetailScreen() {
           {/* Floating CTA */}
           {canOffer ? (
             <Pressable
-              onPress={() => setOfferVisible(true)}
+              onPress={() => offerSheetRef.current?.present()}
               className="absolute inset-x-4 flex-row items-center gap-3 rounded-2xl bg-accent px-4 shadow-lg"
               style={{ bottom: 24, height: 56 }}
             >
@@ -330,56 +328,59 @@ export default function ListingDetailScreen() {
           ) : null}
 
           {/* Offer form sheet */}
-          <Modal visible={offerVisible} transparent animationType="slide" onRequestClose={() => setOfferVisible(false)}>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === "ios" ? "padding" : undefined}
-              className="flex-1 justify-end"
-            >
-              <Pressable className="flex-1" onPress={() => setOfferVisible(false)} />
-              <View className="gap-4 rounded-t-3xl bg-background p-5">
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                    Taklif yuborish
-                  </Text>
-                  <Pressable onPress={() => setOfferVisible(false)} hitSlop={8}>
-                    <Ionicons name="close" size={22} color={colors.muted} />
-                  </Pressable>
-                </View>
-
-                {succeeded ? (
-                  <View className="items-center gap-2 py-6">
-                    <Ionicons name="checkmark-circle" size={48} color={colors.accent} />
-                    <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                      Taklif muvaffaqiyatli yuborildi
-                    </Text>
-                  </View>
-                ) : (
-                  <>
-                    <TextField
-                      label="Sizning narxingiz"
-                      value={price}
-                      onChangeText={setPrice}
-                      placeholder="masalan, 150 000"
-                      keyboardType="number-pad"
-                    />
-                    <TextField
-                      label="Izoh"
-                      value={comment}
-                      onChangeText={setComment}
-                      placeholder="Taklifingiz va muddatlarni tasvirlab bering"
-                      multiline
-                      numberOfLines={3}
-                      maxLength={500}
-                      style={{ height: 90, textAlignVertical: "top", paddingTop: 12 }}
-                    />
-                    <Button loading={createOfferMutation.isPending} onPress={submitOffer}>
-                      Taklif yuborish
-                    </Button>
-                  </>
-                )}
+          <BottomSheetModal
+            ref={offerSheetRef}
+            snapPoints={["55%"]}
+            enableDynamicSizing={false}
+            keyboardBehavior="interactive"
+            keyboardBlurBehavior="restore"
+            backdropComponent={renderOfferBackdrop}
+            backgroundStyle={{ backgroundColor: colors.background, borderRadius: 24 }}
+            handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
+          >
+            <BottomSheetView style={{ gap: 16, padding: 20 }}>
+              <View className="flex-row items-center justify-between">
+                <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                  Taklif yuborish
+                </Text>
+                <Pressable onPress={() => offerSheetRef.current?.dismiss()} hitSlop={8}>
+                  <Ionicons name="close" size={22} color={colors.muted} />
+                </Pressable>
               </View>
-            </KeyboardAvoidingView>
-          </Modal>
+
+              {succeeded ? (
+                <View className="items-center gap-2 py-6">
+                  <Ionicons name="checkmark-circle" size={48} color={colors.accent} />
+                  <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+                    Taklif muvaffaqiyatli yuborildi
+                  </Text>
+                </View>
+              ) : (
+                <>
+                  <TextField
+                    label="Sizning narxingiz"
+                    value={price}
+                    onChangeText={setPrice}
+                    placeholder="masalan, 150 000"
+                    keyboardType="number-pad"
+                  />
+                  <TextField
+                    label="Izoh"
+                    value={comment}
+                    onChangeText={setComment}
+                    placeholder="Taklifingiz va muddatlarni tasvirlab bering"
+                    multiline
+                    numberOfLines={3}
+                    maxLength={500}
+                    style={{ height: 90, textAlignVertical: "top", paddingTop: 12 }}
+                  />
+                  <Button loading={createOfferMutation.isPending} onPress={submitOffer}>
+                    Taklif yuborish
+                  </Button>
+                </>
+              )}
+            </BottomSheetView>
+          </BottomSheetModal>
         </>
       )}
     </View>

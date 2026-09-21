@@ -179,7 +179,11 @@ export default function ProfileIntroVideoScreen() {
 
           {!videos?.length ? (
             <View style={{ paddingTop: 12 }}>
-              <EmptyState icon="videocam-outline" title="Hali video qo'shilmagan" />
+              <EmptyState
+                icon="videocam-outline"
+                title="Hali video qo'shilmagan"
+                description="O'zingizni tanishtiruvchi qisqa video qo'shing, mijozlar ishonchi ortadi"
+              />
             </View>
           ) : (
             videos.map((video) => (
