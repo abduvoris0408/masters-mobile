@@ -1,15 +1,19 @@
 import { useMemo, useRef, useState } from "react";
-import { ActivityIndicator, ScrollView, View } from "react-native";
+import { useTranslation } from "react-i18next";
+import { ActivityIndicator, Alert, ScrollView, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
+import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
+import { useProfilePerspective } from "@/hooks/useProfilePerspective";
 import { useThemeColors } from "@/lib/theme/colors";
 import { extractChatGuid, extractChatId, useStartChatMutation } from "@/services/chat";
 import { useMasterCatalogDetailQuery } from "@/services/master";
+import { useInviteJoinRequestMutation } from "@/services/organization-join-request";
 import type { IUserServiceCategoryRef } from "@/types";
-import { showError } from "@/utils/toast";
+import { showError, showSuccess } from "@/utils/toast";
 
 import { CreateOrderModal, type CreateOrderModalHandle } from "./components/CreateOrderModal";
 import { IntroVideoSection } from "./components/IntroVideoSection";
@@ -19,11 +23,34 @@ import { MasterStatisticsCards } from "./components/MasterStatisticsCards";
 import { ReviewsSection } from "./components/ReviewsSection";
 
 export default function MasterDetailScreen() {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const { guid } = useLocalSearchParams<{ guid: string }>();
   const { data: master, isLoading, isError } = useMasterCatalogDetailQuery(guid ?? null);
   const startChatMutation = useStartChatMutation();
+  const { isOrganization, organization } = useProfilePerspective();
+  const inviteMutation = useInviteJoinRequestMutation();
+
+  const canInvite = isOrganization && !master?.organization;
+
+  const handleInvite = () => {
+    if (!master || !organization) return;
+    Alert.alert(t("master_detail_invite_title"), t("master_detail_invite_message"), [
+      { text: t("common_cancel"), style: "cancel" },
+      {
+        text: t("master_detail_invite_send"),
+        onPress: async () => {
+          try {
+            await inviteMutation.mutateAsync({ organization: organization.id, profile: master.id });
+            showSuccess(t("master_detail_invite_success"));
+          } catch {
+            showError(t("master_detail_invite_error"));
+          }
+        },
+      },
+    ]);
+  };
 
   const orderSheetRef = useRef<CreateOrderModalHandle>(null);
   const [reviewsPage, setReviewsPage] = useState(1);
@@ -49,24 +76,24 @@ export default function MasterDetailScreen() {
       const chatGuid = extractChatGuid(result);
       const chatId = extractChatId(result);
       if (!chatGuid || !chatId) {
-        showError("Suhbatni ochishda xatolik yuz berdi");
+        showError(t("common_chat_open_error"));
         return;
       }
       router.push({ pathname: "/chat/[guid]", params: { guid: chatGuid, id: String(chatId) } });
     } catch {
-      showError("Suhbatni ochishda xatolik yuz berdi");
+      showError(t("common_chat_open_error"));
     }
   };
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Mutaxassis" onBackPress={() => router.back()} />
+      <Header title={t("master_detail_title")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
       ) : isError || !master ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState icon="alert-circle-outline" title="Mutaxassis topilmadi" />
+          <EmptyState icon="alert-circle-outline" title={t("master_detail_not_found")} />
         </View>
       ) : (
         <ScrollView
@@ -98,6 +125,12 @@ export default function MasterDetailScreen() {
             onPageChange={setReviewsPage}
             onSummary={setReviewsSummary}
           />
+
+          {canInvite ? (
+            <Button variant="outline" loading={inviteMutation.isPending} onPress={handleInvite}>
+              {t("master_detail_invite_button")}
+            </Button>
+          ) : null}
         </ScrollView>
       )}
 

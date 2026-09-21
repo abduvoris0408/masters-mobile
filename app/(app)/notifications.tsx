@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, Modal, Pressable, RefreshControl, Text, View } from "react-native";
 import { router } from "expo-router";
 
@@ -30,18 +31,19 @@ const NOTIF_TYPE_STYLE: Record<string, { icon: keyof typeof Ionicons.glyphMap; c
   payment_received: { icon: "wallet-outline", color: "#059669" },
 };
 
-const FILTERS: { key: string; label: string }[] = [
-  { key: "all", label: "Barchasi" },
-  { key: ENotificationType.NEW_APPLICATION, label: "Yangi elonlar" },
-  { key: ENotificationType.ADMIN_BROADCAST, label: "E'lonlar" },
-  { key: ENotificationType.ADMIN_DIRECT, label: "Shaxsiy xabarlar" },
-];
-
 const PAGE_SIZE = 20;
 
 export default function NotificationsScreen() {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
+
+  const FILTERS: { key: string; label: string }[] = [
+    { key: "all", label: t("common_all") },
+    { key: ENotificationType.NEW_APPLICATION, label: t("notifications_filter_new_applications") },
+    { key: ENotificationType.ADMIN_BROADCAST, label: t("notifications_filter_announcements") },
+    { key: ENotificationType.ADMIN_DIRECT, label: t("notifications_filter_direct_messages") },
+  ];
   const [typeFilter, setTypeFilter] = useState("all");
   const [detailGuid, setDetailGuid] = useState<string | null>(null);
   const { data, isLoading, isFetching, refetch } = useNotificationsQuery(
@@ -65,7 +67,7 @@ export default function NotificationsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Bildirishnomalar" onBackPress={() => router.back()} hideRight />
+      <Header title={t("notifications_header")} onBackPress={() => router.back()} hideRight />
 
       <View className="pb-2" style={{ paddingTop: headerHeight }}>
         <FlatList
@@ -95,8 +97,8 @@ export default function NotificationsScreen() {
       ) : notifications.length === 0 ? (
         <EmptyState
           icon="notifications-outline"
-          title="Bildirishnomalar yo'q"
-          description="Yangi xabarlar va yangilanishlar shu yerda paydo bo'ladi"
+          title={t("notifications_empty_title")}
+          description={t("notifications_empty_description")}
         />
       ) : (
         <FlatList
@@ -110,7 +112,7 @@ export default function NotificationsScreen() {
             const canOpen = isAdmin || !!notif.application;
             const label =
               notif.category?.name ??
-              (isAdmin ? (notif.type === ENotificationType.ADMIN_DIRECT ? "Shaxsiy xabar" : "E'lon") : null);
+              (isAdmin ? (notif.type === ENotificationType.ADMIN_DIRECT ? t("notifications_direct_message_label") : t("notifications_announcement_label")) : null);
 
             return (
               <Pressable
@@ -144,7 +146,7 @@ export default function NotificationsScreen() {
                   >
                     <Ionicons name="checkmark" size={12} color={colors.accent} />
                     <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                      O'qildi deb belgilash
+                      {t("notifications_mark_as_read")}
                     </Text>
                   </Pressable>
                 ) : null}
@@ -160,6 +162,7 @@ export default function NotificationsScreen() {
 }
 
 function NotificationDetailModal({ guid, onClose }: { guid: string | null; onClose: () => void }) {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const { data, isLoading } = useNotificationDetailQuery(guid);
 
@@ -179,7 +182,7 @@ function NotificationDetailModal({ guid, onClose }: { guid: string | null; onClo
           ) : null}
           <Pressable onPress={onClose} className="mt-2 items-center rounded-full bg-accent py-3">
             <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-              Yopish
+              {t("common_close")}
             </Text>
           </Pressable>
         </Pressable>

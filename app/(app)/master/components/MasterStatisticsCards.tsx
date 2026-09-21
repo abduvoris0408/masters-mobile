@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Text, View } from "react-native";
 
 import { useThemeColors } from "@/lib/theme/colors";
@@ -18,21 +19,22 @@ interface StatItem {
 // milestone/verification/early-master badges are achievements that only
 // appear once their backing flag is true.
 export function MasterStatisticsCards({ guid, completedOrders }: { guid: string; completedOrders: number }) {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const { data: statistics, isLoading } = useProfileStatisticsQuery(guid);
 
   const items: StatItem[] = [
-    { key: "count", icon: "briefcase-outline", color: colors.accent, label: "Bajarilgan buyurtmalar", value: completedOrders },
-    statistics?.is_10_orders_completed && { key: "10", icon: "trophy-outline", color: "#F59E0B", label: "10 ta ish" },
-    statistics?.is_50_orders_completed && { key: "50", icon: "trophy-outline", color: "#F59E0B", label: "50 ta ish" },
-    statistics?.is_100_orders_completed && { key: "100", icon: "trophy-outline", color: "#F59E0B", label: "100+ ta ish" },
+    { key: "count", icon: "briefcase-outline", color: colors.accent, label: t("master_stats_completed_orders"), value: completedOrders },
+    statistics?.is_10_orders_completed && { key: "10", icon: "trophy-outline", color: "#F59E0B", label: t("master_stats_10_orders") },
+    statistics?.is_50_orders_completed && { key: "50", icon: "trophy-outline", color: "#F59E0B", label: t("master_stats_50_orders") },
+    statistics?.is_100_orders_completed && { key: "100", icon: "trophy-outline", color: "#F59E0B", label: t("master_stats_100_orders") },
     statistics?.is_fully_verified && {
       key: "verified",
       icon: "shield-checkmark-outline",
       color: "#059669",
-      label: "To'liq tekshirilgan",
+      label: t("master_stats_fully_verified"),
     },
-    statistics?.is_early_master && { key: "early", icon: "rocket-outline", color: "#8B5CF6", label: "Birinchi 100 mutaxassis" },
+    statistics?.is_early_master && { key: "early", icon: "rocket-outline", color: "#8B5CF6", label: t("master_stats_early_master") },
   ].filter((item): item is StatItem => !!item);
 
   if (isLoading) {

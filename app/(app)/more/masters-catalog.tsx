@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, RefreshControl, View } from "react-native";
 import { router } from "expo-router";
 
@@ -18,21 +19,22 @@ import { useMastersCatalogQuery } from "@/services/master";
 import type { IUserServiceCatalogSummary } from "@/types";
 import { appendUniquePage } from "@/utils/pagination";
 
-function toMasterCard(item: IUserServiceCatalogSummary): MasterCardData {
+function toMasterCard(item: IUserServiceCatalogSummary, t: (key: string, options?: Record<string, unknown>) => string): MasterCardData {
   const firstService = item.services[0];
   return {
     id: item.guid,
     name: `${item.name} ${item.surname}`.trim(),
     photo: item.photo,
-    category: firstService?.service_name ?? "Mutaxassis",
+    category: firstService?.service_name ?? t("masters_catalog_fallback_category"),
     rating: item.rating,
-    fromPrice: firstService ? `${firstService.price} so'mdan` : "Narx kelishiladi",
+    fromPrice: firstService ? t("masters_catalog_price_from", { price: firstService.price }) : t("masters_catalog_price_negotiable"),
   };
 }
 
 const PAGE_SIZE = 12;
 
 export default function MastersCatalogScreen() {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const [searchInput, setSearchInput] = useState("");
@@ -69,24 +71,24 @@ export default function MastersCatalogScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Mutaxassislar" onBackPress={() => router.back()} />
+      <Header title={t("masters_catalog_title")} onBackPress={() => router.back()} />
       <View className="px-4 pb-2" style={{ paddingTop: headerHeight }}>
-        <SearchBar placeholder="Mutaxassis yoki xizmat qidirish..." value={searchInput} onChangeText={setSearchInput} />
+        <SearchBar placeholder={t("masters_catalog_search_placeholder")} value={searchInput} onChangeText={setSearchInput} />
       </View>
 
       {isLoading ? (
         <ActivityIndicator className="mt-10" color={colors.accent} />
       ) : isError ? (
-        <EmptyState icon="alert-circle-outline" title="Yuklashda xatolik" description="Qayta urinib ko'ring" actionLabel="Qayta urinish" onAction={() => refetch()} />
+        <EmptyState icon="alert-circle-outline" title={t("common_load_error_title")} description={t("common_retry_description")} actionLabel={t("common_retry_action")} onAction={() => refetch()} />
       ) : items.length === 0 ? (
-        <EmptyState icon="search-outline" title="Hech narsa topilmadi" description="Boshqa so'z yoki filtr bilan urinib ko'ring" />
+        <EmptyState icon="search-outline" title={t("common_nothing_found_title")} description={t("common_nothing_found_description")} />
       ) : (
         <FlatList
           data={items}
           keyExtractor={(item) => item.guid}
           contentContainerClassName="gap-3 px-4 py-4"
           renderItem={({ item }) => (
-            <MasterCard item={toMasterCard(item)} onPress={() => router.push(`/master/${item.guid}`)} />
+            <MasterCard item={toMasterCard(item, t)} onPress={() => router.push(`/master/${item.guid}`)} />
           )}
           onEndReachedThreshold={0.4}
           onEndReached={() => hasMore && !isFetching && setPage((p) => p + 1)}
@@ -96,7 +98,7 @@ export default function MastersCatalogScreen() {
       )}
 
       <FilterFab
-        label={activeFilterCount > 0 ? `Filtr (${activeFilterCount})` : "Filtr"}
+        label={activeFilterCount > 0 ? t("masters_catalog_filter_count", { count: activeFilterCount }) : t("masters_catalog_filter")}
         onPress={() => filterSheetRef.current?.present()}
       />
 

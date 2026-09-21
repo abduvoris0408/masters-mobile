@@ -1,6 +1,6 @@
 import { ENDPOINTS } from "@/constants";
 import { axiosInstance } from "@/lib/axios";
-import type { IJoinRequest, IJoinRequestCreateRequest } from "@/types";
+import type { IJoinRequest, IJoinRequestCreateRequest, IJoinRequestInviteRequest } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 // Both lists mix requests and invites together, so any action has to refresh
@@ -19,9 +19,17 @@ export const useCreateJoinRequestMutation = () => {
   });
 };
 
-// Cancelled by whichever side initiated it — only while still pending. The
-// mobile app only exposes the usta side, so this is the only action needed
-// here (accept/reject are the organization owner's, a web-only surface).
+// Organization owner invites an existing master to join.
+export const useInviteJoinRequestMutation = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: IJoinRequestInviteRequest): Promise<IJoinRequest> =>
+      axiosInstance.post(ENDPOINTS.ORGANIZATION_JOIN_REQUEST.INVITE, data).then((r) => r.data),
+    onSuccess: () => invalidateJoinRequests(qc),
+  });
+};
+
+// Cancelled by whichever side initiated it — only while still pending.
 export const useCancelJoinRequestMutation = () => {
   const qc = useQueryClient();
   return useMutation({

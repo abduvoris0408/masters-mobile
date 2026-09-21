@@ -125,6 +125,8 @@ export const ENDPOINTS = {
   USER: {
     PHOTO_UPDATE: "/user/photo-update/",
     ROLE_UPDATE: "/user/role-update/",
+    // A plain (non-master) user's own name/surname/middle_name.
+    PROFILE_UPDATE: "/user/user-profile-update/",
   },
   CATEGORY: {
     LIST: "/category/list/",

@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -70,8 +71,9 @@ function InviteDetailRow({ icon, label, value }: { icon: keyof typeof Ionicons.g
 // being crammed onto shared lines, which used to wrap unpredictably and read
 // as garbled on longer addresses/comments.
 function InviteBubble({ message }: { message: IChatMessage }) {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
-  const label = CHAT_INVITE_LABEL[message.type] ?? "Yangi xabar";
+  const label = CHAT_INVITE_LABEL[message.type] ?? t("chat_new_message_label");
   const icon: keyof typeof Ionicons.glyphMap =
     message.type === EChatMessageType.ORDER_INVITE
       ? "clipboard-outline"
@@ -95,15 +97,15 @@ function InviteBubble({ message }: { message: IChatMessage }) {
           <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
             {formatPrice(Number(message.order.price))}
           </Text>
-          {message.order.address ? <InviteDetailRow icon="location-outline" label="Manzil" value={formatAddress(message.order.address)} /> : null}
-          {message.order.comment ? <InviteDetailRow icon="chatbox-ellipses-outline" label="Izoh" value={message.order.comment} /> : null}
+          {message.order.address ? <InviteDetailRow icon="location-outline" label={t("chat_invite_address")} value={formatAddress(message.order.address)} /> : null}
+          {message.order.comment ? <InviteDetailRow icon="chatbox-ellipses-outline" label={t("chat_invite_comment")} value={message.order.comment} /> : null}
         </View>
       ) : message.offer ? (
         <View className="gap-2 border-t border-border pt-3">
           <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
             {formatPrice(Number(message.offer.price))}
           </Text>
-          {message.offer.comment ? <InviteDetailRow icon="chatbox-ellipses-outline" label="Izoh" value={message.offer.comment} /> : null}
+          {message.offer.comment ? <InviteDetailRow icon="chatbox-ellipses-outline" label={t("chat_invite_comment")} value={message.offer.comment} /> : null}
         </View>
       ) : message.application ? (
         <View className="gap-2 border-t border-border pt-3">
@@ -113,7 +115,7 @@ function InviteBubble({ message }: { message: IChatMessage }) {
               {message.application.budget_to ? ` – ${formatPrice(Number(message.application.budget_to))}` : ""}
             </Text>
           ) : null}
-          <InviteDetailRow icon="document-text-outline" label="Tavsif" value={message.application.description} />
+          <InviteDetailRow icon="document-text-outline" label={t("chat_invite_description")} value={message.application.description} />
         </View>
       ) : null}
     </View>
@@ -131,6 +133,7 @@ function MessageBubble({
   showAvatar: boolean;
   onLongPress: () => void;
 }) {
+  const { t } = useTranslation("orders");
   const isInvite = !!CHAT_INVITE_LABEL[message.type];
   if (isInvite) return <InviteBubble message={message} />;
 
@@ -162,7 +165,7 @@ function MessageBubble({
         ) : null}
         <View className="flex-row items-center justify-end gap-1">
           {message.updated_at && message.updated_at !== message.created_at ? (
-            <Text className={`text-[10px] ${isOwn ? "text-white/70" : "text-muted"}`}>tahrirlangan</Text>
+            <Text className={`text-[10px] ${isOwn ? "text-white/70" : "text-muted"}`}>{t("chat_message_edited")}</Text>
           ) : null}
           <Text className={`text-[10px] ${isOwn ? "text-white/70" : "text-muted"}`}>{time}</Text>
           {isOwn ? (
@@ -175,6 +178,7 @@ function MessageBubble({
 }
 
 export default function ChatThreadScreen() {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const insets = useSafeAreaInsets();
@@ -209,7 +213,7 @@ export default function ChatThreadScreen() {
   }, [data]);
 
   const hasMore = (data?.count ?? 0) > messages.length;
-  const otherName = messages.find((m) => m.sender.id !== currentUserId)?.sender.name ?? "Suhbat";
+  const otherName = messages.find((m) => m.sender.id !== currentUserId)?.sender.name ?? t("chat_default_title");
 
   type Row =
     | { kind: "divider"; key: string; label: string }
@@ -219,8 +223,8 @@ export default function ChatThreadScreen() {
     const out: Row[] = [];
     let prev: IChatMessage | null = null;
     messages.forEach((msg) => {
-      const label = formatRelativeDay(msg.created_at, "Bugun", "Kecha");
-      const prevLabel = prev ? formatRelativeDay(prev.created_at, "Bugun", "Kecha") : null;
+      const label = formatRelativeDay(msg.created_at, t("chat_today"), t("chat_yesterday"));
+      const prevLabel = prev ? formatRelativeDay(prev.created_at, t("chat_today"), t("chat_yesterday")) : null;
       if (label !== prevLabel) out.push({ kind: "divider", key: `divider-${msg.id}`, label });
 
       const isOwn = msg.sender.id === currentUserId;
@@ -239,7 +243,7 @@ export default function ChatThreadScreen() {
   const pickImages = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Ruxsat kerak", "Rasm tanlash uchun galereyaga ruxsat bering.");
+      Alert.alert(t("permission_required_title"), t("permission_gallery_message"));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -287,7 +291,7 @@ export default function ChatThreadScreen() {
         setEditingGuid(null);
         setDraft("");
       } catch {
-        showError("Xabarni tahrirlashda xatolik yuz berdi");
+        showError(t("chat_edit_message_error"));
       }
       return;
     }
@@ -302,7 +306,7 @@ export default function ChatThreadScreen() {
         images: imageIds.length > 0 ? imageIds : undefined,
       });
     } catch {
-      showError("Xabar yuborishda xatolik yuz berdi");
+      showError(t("chat_send_message_error"));
     }
   };
 
@@ -311,7 +315,7 @@ export default function ChatThreadScreen() {
     const options: { text: string; style?: "destructive" | "cancel"; onPress?: () => void }[] = [];
     if (isOwn && message.type === EChatMessageType.TEXT) {
       options.push({
-        text: "Tahrirlash",
+        text: t("common_edit"),
         onPress: () => {
           setEditingGuid(message.guid);
           setDraft(message.text ?? "");
@@ -320,14 +324,14 @@ export default function ChatThreadScreen() {
     }
     if (isOwn) {
       options.push({
-        text: "O'chirish",
+        text: t("common_delete"),
         style: "destructive",
         onPress: () => deleteMutation.mutate(message.guid),
       });
     }
     if (options.length === 0) return;
-    options.push({ text: "Bekor qilish", style: "cancel" });
-    Alert.alert("Xabar", undefined, options);
+    options.push({ text: t("common_cancel"), style: "cancel" });
+    Alert.alert(t("chat_message_action_title"), undefined, options);
   };
 
   return (
@@ -361,8 +365,8 @@ export default function ChatThreadScreen() {
             <View style={{ height: 420 }}>
               <EmptyState
                 icon="chatbubble-ellipses-outline"
-                title="Hali xabarlar yo'q"
-                description="Birinchi bo'lib yozing va suhbatni boshlang"
+                title={t("chat_no_messages_title")}
+                description={t("chat_no_messages_description")}
               />
             </View>
           }
@@ -373,7 +377,7 @@ export default function ChatThreadScreen() {
         <View className="flex-row items-center gap-2 border-t border-border bg-surface px-4 py-2">
           <Ionicons name="pencil" size={14} color={colors.accent} />
           <Text className="flex-1 text-xs text-muted" numberOfLines={1}>
-            Xabarni tahrirlash
+            {t("chat_editing_message")}
           </Text>
           <Pressable
             onPress={() => {
@@ -419,7 +423,7 @@ export default function ChatThreadScreen() {
           <TextInput
             value={draft}
             onChangeText={setDraft}
-            placeholder="Xabar yozing..."
+            placeholder={t("chat_input_placeholder")}
             placeholderTextColor={colors.muted}
             multiline
             style={{ maxHeight: 100, paddingVertical: 10, fontSize: 15, color: colors.foreground, flex: 1 }}

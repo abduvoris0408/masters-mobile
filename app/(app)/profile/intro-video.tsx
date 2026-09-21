@@ -3,20 +3,21 @@ import { useState } from "react";
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
-import { useMasterProfileQuery } from "@/services/master";
+import { useProfilePerspective } from "@/hooks/useProfilePerspective";
 import {
   useCreateIntroVideoMutation,
   useDeleteIntroVideoMutation,
   useIntroVideoListQuery,
   useUpdateIntroVideoMutation,
 } from "@/services/intro-video";
-import type { IIntroVideo } from "@/types";
+import type { IIntroVideo, TIntroVideoOwnerKind } from "@/types";
 import { showError, showSuccess } from "@/utils/toast";
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024;
@@ -34,6 +35,7 @@ function VideoRow({
   replacing: boolean;
   deleting: boolean;
 }) {
+  const { t } = useTranslation("profile");
   const colors = useThemeColors();
   return (
     <View className="gap-3 rounded-3xl bg-surface p-4">
@@ -45,7 +47,7 @@ function VideoRow({
           <Ionicons name="play" size={18} color={colors.accent} />
         </View>
         <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-          Videoni ko'rish
+          {t("intro_video_watch")}
         </Text>
         <Ionicons name="open-outline" size={16} color={colors.muted} />
       </Pressable>
@@ -62,7 +64,7 @@ function VideoRow({
             <Ionicons name="refresh" size={14} color={colors.foreground} />
           )}
           <Text className="text-xs text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-            Almashtirish
+            {t("replace")}
           </Text>
         </Pressable>
         <Pressable
@@ -76,7 +78,7 @@ function VideoRow({
             <Ionicons name="trash-outline" size={14} color={colors.danger} />
           )}
           <Text className="text-xs text-danger" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-            O'chirish
+            {t("delete")}
           </Text>
         </Pressable>
       </View>
@@ -85,24 +87,25 @@ function VideoRow({
 }
 
 export default function ProfileIntroVideoScreen() {
+  const { t } = useTranslation("profile");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
-  const { data: profile } = useMasterProfileQuery();
-  const masterProfile = profile?.master_profile ? profile : null;
-  const profileGuid = masterProfile?.guid ?? null;
-  const profileId = masterProfile?.id ?? null;
+  const { masterProfile, isOrganization, organization } = useProfilePerspective();
+  const kind: TIntroVideoOwnerKind = isOrganization ? "organization" : "profile";
+  const ownerGuid = isOrganization ? (organization?.guid ?? null) : (masterProfile?.guid ?? null);
+  const ownerId = isOrganization ? (organization?.id ?? null) : (masterProfile?.id ?? null);
 
-  const { data: videos, isLoading } = useIntroVideoListQuery("profile", profileGuid);
-  const createMutation = useCreateIntroVideoMutation("profile", profileGuid);
-  const updateMutation = useUpdateIntroVideoMutation("profile", profileGuid);
-  const deleteMutation = useDeleteIntroVideoMutation("profile", profileGuid);
+  const { data: videos, isLoading } = useIntroVideoListQuery(kind, ownerGuid);
+  const createMutation = useCreateIntroVideoMutation(kind, ownerGuid);
+  const updateMutation = useUpdateIntroVideoMutation(kind, ownerGuid);
+  const deleteMutation = useDeleteIntroVideoMutation(kind, ownerGuid);
   const [replaceTargetGuid, setReplaceTargetGuid] = useState<string | null>(null);
   const [deletingGuid, setDeletingGuid] = useState<string | null>(null);
 
   const pickAndUpload = async (targetGuid: string | null) => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Ruxsat kerak", "Video tanlash uchun galereyaga ruxsat bering.");
+      Alert.alert(t("permission_required"), t("intro_video_gallery_permission"));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["videos"], quality: 0.8 });
@@ -110,7 +113,7 @@ export default function ProfileIntroVideoScreen() {
 
     const asset = result.assets[0];
     if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
-      showError("Fayl hajmi 100 MB dan oshmasligi kerak");
+      showError(t("intro_video_file_too_large"));
       return;
     }
 
@@ -120,37 +123,37 @@ export default function ProfileIntroVideoScreen() {
       setReplaceTargetGuid(targetGuid);
       try {
         await updateMutation.mutateAsync({ guid: targetGuid, video });
-        showSuccess("Video yangilandi");
+        showSuccess(t("intro_video_updated"));
       } catch {
-        showError("Videoni yangilashda xatolik yuz berdi");
+        showError(t("intro_video_update_error"));
       } finally {
         setReplaceTargetGuid(null);
       }
       return;
     }
 
-    if (!profileId) return;
+    if (!ownerId) return;
     try {
-      await createMutation.mutateAsync({ ownerId: profileId, video });
-      showSuccess("Video qo'shildi");
+      await createMutation.mutateAsync({ ownerId, video });
+      showSuccess(t("intro_video_added"));
     } catch {
-      showError("Videoni yuklashda xatolik yuz berdi");
+      showError(t("intro_video_upload_error"));
     }
   };
 
   const handleDelete = (guid: string) => {
-    Alert.alert("Videoni o'chirish", "Ushbu videoni o'chirishni tasdiqlaysizmi?", [
-      { text: "Bekor qilish", style: "cancel" },
+    Alert.alert(t("intro_video_delete_title"), t("intro_video_delete_message"), [
+      { text: t("cancel"), style: "cancel" },
       {
-        text: "O'chirish",
+        text: t("delete"),
         style: "destructive",
         onPress: async () => {
           setDeletingGuid(guid);
           try {
             await deleteMutation.mutateAsync(guid);
-            showSuccess("Video o'chirildi");
+            showSuccess(t("intro_video_deleted"));
           } catch {
-            showError("Videoni o'chirishda xatolik yuz berdi");
+            showError(t("intro_video_delete_error"));
           } finally {
             setDeletingGuid(null);
           }
@@ -161,7 +164,7 @@ export default function ProfileIntroVideoScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Tanishtiruv video" onBackPress={() => router.back()} />
+      <Header title={t("intro_video_title")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
@@ -173,7 +176,7 @@ export default function ProfileIntroVideoScreen() {
           <View className="flex-row items-center gap-2 rounded-2xl bg-emerald-50 px-3.5 py-3 dark:bg-accent/15">
             <Ionicons name="film-outline" size={16} color={colors.accent} />
             <Text className="flex-1 text-xs text-foreground">
-              Mijozlar sizni yaxshiroq tanishi uchun o'zingiz va ishingiz haqida qisqa video qo'shing
+              {t("intro_video_hint")}
             </Text>
           </View>
 
@@ -181,8 +184,8 @@ export default function ProfileIntroVideoScreen() {
             <View style={{ paddingTop: 12 }}>
               <EmptyState
                 icon="videocam-outline"
-                title="Hali video qo'shilmagan"
-                description="O'zingizni tanishtiruvchi qisqa video qo'shing, mijozlar ishonchi ortadi"
+                title={t("intro_video_empty_title")}
+                description={t("intro_video_empty_description")}
               />
             </View>
           ) : (
@@ -209,7 +212,7 @@ export default function ProfileIntroVideoScreen() {
               <>
                 <Ionicons name="cloud-upload-outline" size={18} color={colors.muted} />
                 <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                  Video qo'shish
+                  {t("intro_video_add")}
                 </Text>
               </>
             )}

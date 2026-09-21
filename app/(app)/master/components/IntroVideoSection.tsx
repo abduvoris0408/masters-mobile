@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useVideoPlayer, VideoView } from "expo-video";
 
@@ -13,6 +14,7 @@ import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 // idea as the course screen's lesson list driving one shared VideoView
 // instead of rendering N independent players.
 export function IntroVideoSection({ videos }: { videos: string[] }) {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const [activeIndex, setActiveIndex] = useState(0);
   const source = videos[activeIndex] ?? null;
@@ -27,7 +29,7 @@ export function IntroVideoSection({ videos }: { videos: string[] }) {
       <View className="flex-row items-center gap-2">
         <Ionicons name="videocam-outline" size={16} color={colors.accent} />
         <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-          Tanishtiruv video
+          {t("intro_video_title")}
         </Text>
       </View>
 
@@ -49,7 +51,7 @@ export function IntroVideoSection({ videos }: { videos: string[] }) {
                   className={`text-xs ${active ? "text-white" : "text-muted"}`}
                   style={{ fontFamily: active ? GOLOS_WEIGHTS.semibold : GOLOS_WEIGHTS.medium }}
                 >
-                  Video {index + 1}
+                  {t("intro_video_index", { index: index + 1 })}
                 </Text>
               </Pressable>
             );

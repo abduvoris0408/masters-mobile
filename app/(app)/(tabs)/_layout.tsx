@@ -11,9 +11,9 @@ import { FloatingTabBar } from "@/components/FloatingTabBar";
 export default function TabsLayout() {
   return (
     <Tabs tabBar={(props) => <FloatingTabBar {...props} />} screenOptions={{ headerShown: false }}>
-      <Tabs.Screen name="index" options={{ title: "Asosiy" }} />
-      <Tabs.Screen name="orders" options={{ title: "Buyurtmalarim" }} />
-      <Tabs.Screen name="profile" options={{ title: "Profil" }} />
+      <Tabs.Screen name="index" />
+      <Tabs.Screen name="orders" />
+      <Tabs.Screen name="profile" />
     </Tabs>
   );
 }

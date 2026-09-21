@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { router } from "expo-router";
 
@@ -63,6 +64,7 @@ function StatTile({
 }
 
 export default function DashboardScreen() {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const { data: profile, isLoading: profileLoading } = useMasterProfileQuery();
@@ -74,13 +76,13 @@ export default function DashboardScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Dashboard" onBackPress={() => router.back()} />
+      <Header title={t("dashboard_title")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
       ) : !masterProfile ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState icon="speedometer-outline" title="Mutaxassis profili topilmadi" />
+          <EmptyState icon="speedometer-outline" title={t("dashboard_profile_not_found")} />
         </View>
       ) : (
         <ScrollView contentContainerClassName="gap-4 px-4" contentContainerStyle={{ paddingTop: headerHeight + 16, paddingBottom: 32 }}>
@@ -91,7 +93,7 @@ export default function DashboardScreen() {
                   <Ionicons name="ribbon-outline" size={20} color={colors.accent} />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-xs text-muted">Mutaxassis darajasi</Text>
+                  <Text className="text-xs text-muted">{t("dashboard_master_level")}</Text>
                   <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
                     {masterProfile.level.current.name}
                   </Text>
@@ -101,7 +103,7 @@ export default function DashboardScreen() {
                 <View className="gap-1.5">
                   <View className="flex-row items-center justify-between">
                     <Text className="text-xs text-muted">
-                      {masterProfile.completed_orders_count}/{masterProfile.level.next.min_orders} buyurtma
+                      {t("dashboard_level_progress", { count: masterProfile.completed_orders_count, total: masterProfile.level.next.min_orders })}
                     </Text>
                     <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
                       {Math.min(
@@ -127,12 +129,14 @@ export default function DashboardScreen() {
                     />
                   </View>
                   <Text className="text-xs text-muted">
-                    "{masterProfile.level.next.name}" darajasigacha yana{" "}
-                    {Math.max(0, masterProfile.level.next.min_orders - masterProfile.completed_orders_count)} ta buyurtma
+                    {t("dashboard_next_level_progress", {
+                      name: masterProfile.level.next.name,
+                      remaining: Math.max(0, masterProfile.level.next.min_orders - masterProfile.completed_orders_count),
+                    })}
                   </Text>
                 </View>
               ) : (
-                <Text className="text-xs text-muted">Eng yuqori daraja qo'lga kiritildi</Text>
+                <Text className="text-xs text-muted">{t("dashboard_max_level_reached")}</Text>
               )}
             </View>
           ) : null}
@@ -140,26 +144,26 @@ export default function DashboardScreen() {
           <View className="flex-row flex-wrap gap-3">
             <StatTile
               icon="briefcase-outline"
-              label="Bajarilgan buyurtmalar"
+              label={t("dashboard_stat_completed_orders")}
               value={String(stats?.completed_orders_count ?? masterProfile.completed_orders_count ?? 0)}
               tone="sky"
             />
-            <StatTile icon="trophy-outline" label="10 ta ish" achieved={stats?.is_10_orders_completed} tone="amber" />
-            <StatTile icon="trophy-outline" label="50 ta ish" achieved={stats?.is_50_orders_completed} tone="orange" />
-            <StatTile icon="trophy-outline" label="100+ ta ish" achieved={stats?.is_100_orders_completed} tone="rose" />
-            <StatTile icon="shield-checkmark-outline" label="To'liq tekshirilgan" achieved={stats?.is_fully_verified} tone="emerald" />
-            <StatTile icon="star-outline" label="Birinchi 100 mutaxassis" achieved={stats?.is_early_master} tone="violet" />
+            <StatTile icon="trophy-outline" label={t("dashboard_stat_10_orders")} achieved={stats?.is_10_orders_completed} tone="amber" />
+            <StatTile icon="trophy-outline" label={t("dashboard_stat_50_orders")} achieved={stats?.is_50_orders_completed} tone="orange" />
+            <StatTile icon="trophy-outline" label={t("dashboard_stat_100_orders")} achieved={stats?.is_100_orders_completed} tone="rose" />
+            <StatTile icon="shield-checkmark-outline" label={t("dashboard_stat_fully_verified")} achieved={stats?.is_fully_verified} tone="emerald" />
+            <StatTile icon="star-outline" label={t("dashboard_stat_early_master")} achieved={stats?.is_early_master} tone="violet" />
           </View>
 
           <View className="gap-2">
             <Text className="px-1 text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-              So'nggi buyurtmalar
+              {t("dashboard_recent_orders")}
             </Text>
             {ordersLoading ? (
               <ActivityIndicator color={colors.accent} />
             ) : !orders?.results.length ? (
               <View className="items-center rounded-3xl bg-surface p-6">
-                <Text className="text-sm text-muted">Hozircha buyurtmalar yo'q</Text>
+                <Text className="text-sm text-muted">{t("dashboard_no_orders")}</Text>
               </View>
             ) : (
               orders.results.map((order) => (

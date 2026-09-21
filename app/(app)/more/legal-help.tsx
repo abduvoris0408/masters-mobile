@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 
@@ -22,21 +23,6 @@ import { appendUniquePage } from "@/utils/pagination";
 import { showError, showSuccess } from "@/utils/toast";
 
 const HISTORY_PAGE_SIZE = 10;
-
-const TRUST_BADGES: { icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
-  { icon: "flash-outline", label: "Bepul birinchi konsultatsiya" },
-  { icon: "time-outline", label: "24 soat ichida javob" },
-  { icon: "lock-closed-outline", label: "Maxfiy va xavfsiz" },
-];
-
-const STATUS_META: Record<string, { tone: ChipTone; label: string }> = {
-  pending: { tone: "warning", label: "Kutilmoqda" },
-  in_review: { tone: "info", label: "Ko'rib chiqilmoqda" },
-  reviewing: { tone: "info", label: "Ko'rib chiqilmoqda" },
-  resolved: { tone: "success", label: "Hal qilindi" },
-  rejected: { tone: "danger", label: "Rad etildi" },
-  closed: { tone: "neutral", label: "Yopilgan" },
-};
 
 // Fallback icon set for categories the backend didn't attach an icon to —
 // keyed off the category id so the same category always gets the same icon.
@@ -84,16 +70,25 @@ function CategoryCard({
 }
 
 function RequestHistoryRow({ item }: { item: ILegalSupportRequestListItem }) {
+  const { t } = useTranslation("orders");
+  const STATUS_META: Record<string, { tone: ChipTone; label: string }> = {
+    pending: { tone: "warning", label: t("legal_status_pending") },
+    in_review: { tone: "info", label: t("legal_status_reviewing") },
+    reviewing: { tone: "info", label: t("legal_status_reviewing") },
+    resolved: { tone: "success", label: t("legal_status_resolved") },
+    rejected: { tone: "danger", label: t("legal_status_rejected") },
+    closed: { tone: "neutral", label: t("status_closed") },
+  };
   const status = STATUS_META[item.status] ?? { tone: "neutral" as ChipTone, label: item.status };
   return (
     <View className="flex-row items-center justify-between gap-3 rounded-2xl bg-surface p-3.5">
       <View className="flex-1 gap-1">
         <View className="flex-row items-center gap-2">
           <Text className="text-xs text-muted">{formatDateTime(item.created_at)}</Text>
-          {item.is_priority ? <Chip label="Ustuvor" tone="warning" /> : null}
+          {item.is_priority ? <Chip label={t("legal_priority_badge")} tone="warning" /> : null}
         </View>
         <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={2}>
-          {item.category.name} — Ish № {item.order.order_number}
+          {t("legal_request_row_title", { category: item.category.name, orderNumber: item.order.order_number })}
         </Text>
       </View>
       <Chip label={status.label} tone={status.tone} />
@@ -102,8 +97,15 @@ function RequestHistoryRow({ item }: { item: ILegalSupportRequestListItem }) {
 }
 
 export default function LegalHelpScreen() {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
+
+  const TRUST_BADGES: { icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
+    { icon: "flash-outline", label: t("legal_trust_badge_free_consult") },
+    { icon: "time-outline", label: t("legal_trust_badge_response_time") },
+    { icon: "lock-closed-outline", label: t("legal_trust_badge_confidential") },
+  ];
 
   const { data: categoriesData, isLoading: categoriesLoading } = useLegalSupportCategoriesQuery();
   const categories = categoriesData?.results ?? [];
@@ -132,7 +134,7 @@ export default function LegalHelpScreen() {
 
   const handleSubmit = async () => {
     if (!orderNumber.trim() || !categoryId || !description.trim() || !againstPerson.trim()) {
-      showError("Barcha maydonlarni to'ldiring");
+      showError(t("legal_all_fields_required"));
       return;
     }
     try {
@@ -142,19 +144,19 @@ export default function LegalHelpScreen() {
         description: description.trim(),
         against_person: againstPerson.trim(),
       });
-      showSuccess("Murojaatingiz qabul qilindi — yuristimiz tez orada siz bilan bog'lanadi");
+      showSuccess(t("legal_request_success"));
       setOrderNumber("");
       setAgainstPerson("");
       setDescription("");
       setHistoryPage(1);
     } catch {
-      showError("Murojaatni yuborib bo'lmadi, qaytadan urinib ko'ring");
+      showError(t("legal_request_error"));
     }
   };
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Huquqiy yordam" onBackPress={() => router.back()} />
+      <Header title={t("legal_help_header")} onBackPress={() => router.back()} />
 
       <FlatList
         data={historyItems}
@@ -168,11 +170,10 @@ export default function LegalHelpScreen() {
                 <Ionicons name="shield-checkmark-outline" size={22} color={colors.danger} />
               </View>
               <Text className="text-center text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                Huquqiy yordam
+                {t("legal_help_header")}
               </Text>
               <Text className="text-center text-sm leading-5 text-muted">
-                Pulingizni ololmadingizmi yoki shartnoma shartlari buzildimi? Bu yerdan to'g'ridan-to'g'ri Masters
-                yuristiga murojaat qilishingiz mumkin — bepul va tez.
+                {t("legal_help_intro")}
               </Text>
               <View className="flex-row flex-wrap justify-center gap-2">
                 {TRUST_BADGES.map((badge) => (
@@ -186,12 +187,12 @@ export default function LegalHelpScreen() {
 
             <View className="gap-2.5">
               <Text className="px-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                Muammoingiz nima?
+                {t("legal_problem_type_title")}
               </Text>
               {categoriesLoading ? (
                 <ActivityIndicator color={colors.accent} style={{ marginVertical: 16 }} />
               ) : categories.length === 0 ? (
-                <Text className="px-1 text-sm text-muted">Muammo turlarini yuklab bo'lmadi</Text>
+                <Text className="px-1 text-sm text-muted">{t("legal_categories_load_error")}</Text>
               ) : (
                 <View className="flex-row flex-wrap justify-between gap-y-2.5">
                   {categories.map((category) => (
@@ -209,23 +210,23 @@ export default function LegalHelpScreen() {
             <Card className="gap-3">
               <View className="gap-1">
                 <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                  Murojaat qoldiring
+                  {t("legal_form_title")}
                 </Text>
                 <Text className="text-xs text-muted">
-                  Ish raqami va tafsilotlarni kiriting — yuristimiz 24 soat ichida siz bilan bog'lanadi
+                  {t("legal_form_subtitle")}
                 </Text>
               </View>
 
               <View className="gap-1.5">
                 <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                  Ish raqami
+                  {t("legal_order_number_label")}
                 </Text>
                 <View className="flex-row items-center gap-2 rounded-2xl bg-background px-4">
                   <Ionicons name="pricetag-outline" size={15} color={colors.muted} />
                   <TextInput
                     value={orderNumber}
                     onChangeText={setOrderNumber}
-                    placeholder="№ BZ-4501"
+                    placeholder={t("legal_order_number_placeholder")}
                     placeholderTextColor={colors.muted}
                     className="flex-1 py-3 text-base text-foreground"
                     style={{ color: colors.foreground }}
@@ -235,14 +236,14 @@ export default function LegalHelpScreen() {
 
               <View className="gap-1.5">
                 <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                  Kimga nisbatan shikoyat
+                  {t("legal_against_person_label")}
                 </Text>
                 <View className="flex-row items-center gap-2 rounded-2xl bg-background px-4">
                   <Ionicons name="person-outline" size={15} color={colors.muted} />
                   <TextInput
                     value={againstPerson}
                     onChangeText={setAgainstPerson}
-                    placeholder="Ism yoki tashkilot nomini kiriting"
+                    placeholder={t("legal_against_person_placeholder")}
                     placeholderTextColor={colors.muted}
                     className="flex-1 py-3 text-base text-foreground"
                     style={{ color: colors.foreground }}
@@ -252,13 +253,13 @@ export default function LegalHelpScreen() {
 
               <View className="gap-1.5">
                 <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                  Nima bo'lganini qisqacha yozing
+                  {t("legal_description_label")}
                 </Text>
                 <TextInput
                   value={description}
                   onChangeText={setDescription}
                   multiline
-                  placeholder="Ishni 20-iyulda yakunladim, mijoz tasdiqladi, lekin pul hisobimga hali tushmadi..."
+                  placeholder={t("legal_description_placeholder")}
                   placeholderTextColor={colors.muted}
                   className="rounded-2xl bg-background px-4 py-3 text-base text-foreground"
                   style={{ minHeight: 90, textAlignVertical: "top", color: colors.foreground }}
@@ -268,13 +269,12 @@ export default function LegalHelpScreen() {
               <View className="flex-row items-start gap-2 rounded-2xl bg-amber-50 px-3.5 py-3 dark:bg-amber-500/15">
                 <Ionicons name="warning-outline" size={15} color="#D97706" style={{ marginTop: 1 }} />
                 <Text className="flex-1 text-xs text-foreground">
-                  Agar summa katta (500 000 so'mdan yuqori) bo'lsa, murojaatingiz avtomatik ustuvor tartibda ko'rib
-                  chiqiladi
+                  {t("legal_priority_notice")}
                 </Text>
               </View>
 
               <Button loading={createMutation.isPending} onPress={handleSubmit}>
-                Murojaatni yuborish
+                {t("legal_submit_button")}
               </Button>
             </Card>
 
@@ -284,18 +284,17 @@ export default function LegalHelpScreen() {
                   <Ionicons name="call-outline" size={16} color={colors.accent} />
                 </View>
                 <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                  Yurist bilan to'g'ridan-to'g'ri bog'lanish
+                  {t("legal_direct_contact_title")}
                 </Text>
               </View>
               <Text className="text-xs leading-5 text-muted">
-                Murakkab holatlarda, murojaatingiz ko'rib chiqilgach, Masters shtatidagi yurist siz bilan bevosita
-                bog'lanadi — telefon orqali yoki ilova ichidagi chat orqali.
+                {t("legal_direct_contact_description")}
               </Text>
               <View className="gap-2">
                 {[
-                  "Murojaat yuborasiz",
-                  "24 soat ichida dastlabki javob olasiz",
-                  "Kerak bo'lsa, yurist siz bilan qo'ng'iroq orqali bog'lanadi",
+                  t("legal_step_1"),
+                  t("legal_step_2"),
+                  t("legal_step_3"),
                 ].map((step, i) => (
                   <View key={step} className="flex-row items-center gap-2.5">
                     <View className="h-5 w-5 items-center justify-center rounded-full bg-emerald-50 dark:bg-accent/15">
@@ -311,15 +310,15 @@ export default function LegalHelpScreen() {
                 <Text className="text-2xl text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
                   870+
                 </Text>
-                <Text className="text-xs text-muted">murojaat muvaffaqiyatli hal qilingan</Text>
+                <Text className="text-xs text-muted">{t("legal_requests_resolved_label")}</Text>
               </View>
-              <Button variant="outline" onPress={() => showError("Bu funksiya tez orada ishga tushadi")}>
-                Hoziroq bog'lanish
+              <Button variant="outline" onPress={() => showError(t("legal_feature_coming_soon"))}>
+                {t("legal_contact_now_button")}
               </Button>
             </Card>
 
             <Text className="px-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-              Sizning murojaatlaringiz
+              {t("legal_your_requests_title")}
             </Text>
           </View>
         }
@@ -330,12 +329,12 @@ export default function LegalHelpScreen() {
           ) : isError ? (
             <EmptyState
               icon="alert-circle-outline"
-              title="Murojaatlar ro'yxatini yuklab bo'lmadi"
-              actionLabel="Qayta urinish"
+              title={t("legal_requests_load_error")}
+              actionLabel={t("common_try_again")}
               onAction={() => refetch()}
             />
           ) : (
-            <EmptyState icon="shield-checkmark-outline" title="Hozircha murojaatlaringiz yo'q" />
+            <EmptyState icon="shield-checkmark-outline" title={t("legal_no_requests")} />
           )
         }
         onEndReachedThreshold={0.4}

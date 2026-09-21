@@ -88,3 +88,11 @@ export interface IUserPhotoUpdateRequest {
   photo?: File | null;
   remove_photo?: boolean;
 }
+
+// PATCH /user/user-profile-update/ — a plain (non-master) user's own
+// name/surname/middle_name, shown on the client profile edit screen.
+export interface IUserProfileUpdateRequest {
+  name: string;
+  surname: string;
+  middle_name?: string;
+}

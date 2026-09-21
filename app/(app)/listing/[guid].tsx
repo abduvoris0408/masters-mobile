@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop, type BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import { useCallback, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
@@ -22,15 +23,6 @@ import { useAuthStore } from "@/stores";
 import { EUserType } from "@/types";
 import { formatAddress, formatDate, formatPrice, fromNow } from "@/utils/format";
 import { showError, showSuccess } from "@/utils/toast";
-
-const STATUS_LABEL: Record<string, string> = {
-  open: "Ochiq",
-  new: "Ochiq",
-  in_progress: "Jarayonda",
-  completed: "Yakunlangan",
-  cancelled: "Bekor qilingan",
-  closed: "Yopilgan",
-};
 
 const STATUS_COLOR: Record<string, string> = {
   open: "#059669",
@@ -81,12 +73,22 @@ function DetailRow({
 }
 
 export default function ListingDetailScreen() {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const { guid } = useLocalSearchParams<{ guid: string }>();
   const { data, isLoading, isError } = useApplicationPublicDetailQuery(guid ?? null);
   const user = useAuthStore((s) => s.user);
   const createOfferMutation = useCreateOfferMutation();
+
+  const STATUS_LABEL: Record<string, string> = {
+    open: t("status_open"),
+    new: t("status_open"),
+    in_progress: t("status_in_progress"),
+    completed: t("status_completed"),
+    cancelled: t("status_cancelled"),
+    closed: t("status_closed"),
+  };
 
   const offerSheetRef = useRef<BottomSheetModal>(null);
   const [price, setPrice] = useState("");
@@ -111,35 +113,35 @@ export default function ListingDetailScreen() {
     if (!data) return;
     const numericPrice = Number(price.replace(/\D/g, ""));
     if (!numericPrice) {
-      showError("Narxingizni kiriting");
+      showError(t("offer_price_required"));
       return;
     }
     if (!comment.trim()) {
-      showError("Izoh kiriting");
+      showError(t("offer_comment_required"));
       return;
     }
     try {
       await createOfferMutation.mutateAsync({ application: data.id, price: numericPrice, comment: comment.trim() });
       setSucceeded(true);
-      showSuccess("Taklif muvaffaqiyatli yuborildi");
+      showSuccess(t("offer_sent_success"));
       setTimeout(() => {
         offerSheetRef.current?.dismiss();
         router.push("/");
       }, 1600);
     } catch {
-      showError("Taklif yuborishda xatolik yuz berdi");
+      showError(t("offer_send_error"));
     }
   };
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Taklif yuborish" onBackPress={() => router.back()} />
+      <Header title={t("send_offer_header")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
       ) : isError || !data ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState icon="alert-circle-outline" title="Elon topilmadi" description="Ehtimol o'chirilgan yoki mavjud emas" />
+          <EmptyState icon="alert-circle-outline" title={t("application_not_found")} description={t("blog_article_not_found_description")} />
         </View>
       ) : (
         <>
@@ -167,13 +169,13 @@ export default function ListingDetailScreen() {
                   <Text className="text-xs text-muted">{STATUS_LABEL[data.status] ?? data.status}</Text>
                 </View>
                 <Text className="text-xs text-muted">·</Text>
-                <Text className="text-xs text-muted">{fromNow(data.created_at)} joylashtirilgan</Text>
+                <Text className="text-xs text-muted">{t("listing_posted_at", { time: fromNow(data.created_at) })}</Text>
                 {data.views_count ? (
                   <>
                     <Text className="text-xs text-muted">·</Text>
                     <View className="flex-row items-center gap-1">
                       <Ionicons name="eye-outline" size={12} color={colors.muted} />
-                      <Text className="text-xs text-muted">{data.views_count} marta ko'rildi</Text>
+                      <Text className="text-xs text-muted">{t("listing_views_count", { count: data.views_count })}</Text>
                     </View>
                   </>
                 ) : null}
@@ -181,7 +183,7 @@ export default function ListingDetailScreen() {
 
               <View className="flex-row flex-wrap gap-2">
                 <Chip label={data.category.name} tone="info" />
-                {data.is_urgent ? <Chip label="Shoshilinch" tone="danger" icon="alarm-outline" /> : null}
+                {data.is_urgent ? <Chip label={t("field_urgent")} tone="danger" icon="alarm-outline" /> : null}
               </View>
             </View>
 
@@ -193,21 +195,21 @@ export default function ListingDetailScreen() {
                 single card, so a long address/description isn't squeezed
                 into a fixed-width two-column table row. */}
             <View>
-              <DetailRow icon="location-outline" label="Manzil" value={formatAddress(data.address) || "Ko'rsatilmagan"} />
+              <DetailRow icon="location-outline" label={t("field_address")} value={formatAddress(data.address) || t("not_specified")} />
               <DetailRow
                 icon="calendar-outline"
-                label="Bajarish muddati"
+                label={t("listing_deadline_label")}
                 value={
                   data.date_from
                     ? `${formatDate(data.date_from)}${data.date_to && data.date_to !== data.date_from ? ` – ${formatDate(data.date_to)}` : ""}`
                     : data.is_urgent
-                      ? "Shoshilinch"
-                      : "Muddat belgilanmagan"
+                      ? t("field_urgent")
+                      : t("deadline_not_set")
                 }
               />
               <DetailRow
                 icon="wallet-outline"
-                label="Byudjet"
+                label={t("field_budget")}
                 value={
                   data.budget_from === data.budget_to
                     ? formatPrice(Number(data.budget_from))
@@ -216,19 +218,19 @@ export default function ListingDetailScreen() {
               />
               <DetailRow
                 icon="card-outline"
-                label="To'lov"
-                value={data.payment_type === "escrow" ? "Xavfsiz bitim (escrow)" : "Ish yakunlangach, to'g'ridan-to'g'ri mutaxassisga"}
+                label={t("listing_payment_label")}
+                value={data.payment_type === "escrow" ? t("payment_escrow_title") : t("payment_direct_full_description")}
               />
               <DetailRow
                 icon="document-text-outline"
-                label="Tavsif"
+                label={t("field_description")}
                 value={data.description}
                 last={!hasAdditionalWorks && !hasImages && !hasOffers}
               />
               {hasAdditionalWorks ? (
                 <DetailRow
                   icon="add-circle-outline"
-                  label="Qo'shimcha"
+                  label={t("listing_additional_label")}
                   last={!hasImages && !hasOffers}
                   value={
                     <View className="flex-row flex-wrap gap-1.5">
@@ -242,7 +244,7 @@ export default function ListingDetailScreen() {
               {hasImages ? (
                 <DetailRow
                   icon="image-outline"
-                  label="Rasmlar"
+                  label={t("listing_images_label")}
                   last={!hasOffers}
                   value={
                     <View className="flex-row flex-wrap gap-2">
@@ -259,7 +261,7 @@ export default function ListingDetailScreen() {
                 />
               ) : null}
               {hasOffers ? (
-                <DetailRow icon="people-outline" label="Takliflar" value={`${data.offers_count} ta mutaxassis taklif yubordi`} last />
+                <DetailRow icon="people-outline" label={t("offers_section_title")} value={t("listing_offers_summary", { count: data.offers_count })} last />
               ) : null}
             </View>
 
@@ -269,14 +271,14 @@ export default function ListingDetailScreen() {
               className="gap-1.5 rounded-3xl bg-surface p-5"
             >
               <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                O'zingiz ham ish joylashtirmoqchimisiz?
+                {t("listing_post_own_banner_title")}
               </Text>
               <Text className="text-sm text-muted">
-                Masters orqali uy-ro'zg'or va ta'mirlash ishlaringiz uchun tez va ishonchli mutaxassis toping.
+                {t("listing_post_own_banner_description")}
               </Text>
               <View className="mt-1 flex-row items-center gap-1">
                 <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                  Ish joylashtirish
+                  {t("create_application_header")}
                 </Text>
                 <Ionicons name="chevron-forward" size={14} color={colors.accent} />
               </View>
@@ -286,17 +288,17 @@ export default function ListingDetailScreen() {
             <Pressable className="flex-row items-center gap-3 rounded-3xl bg-surface p-5">
               <Avatar name={data.customer.name} size={48} />
               <View className="flex-1 gap-1">
-                <Text className="text-xs text-muted">Buyurtmachi</Text>
+                <Text className="text-xs text-muted">{t("listing_customer_label")}</Text>
                 <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
                   {data.customer.name} {data.customer.surname}
                 </Text>
                 <View className="flex-row items-center gap-1.5">
                   <Rating value={data.customer.rating} />
-                  <Text className="text-xs text-muted">({data.customer.reviews_count} sharh)</Text>
+                  <Text className="text-xs text-muted">{t("listing_reviews_count", { count: data.customer.reviews_count })}</Text>
                 </View>
                 <View className="mt-1 flex-row items-center gap-1.5 border-t border-border pt-2">
                   <Ionicons name="clipboard-outline" size={14} color={colors.muted} />
-                  <Text className="text-xs text-muted">{data.customer.applications_count} ta joylashtirilgan ish</Text>
+                  <Text className="text-xs text-muted">{t("listing_customer_applications_count", { count: data.customer.applications_count })}</Text>
                 </View>
               </View>
             </Pressable>
@@ -305,7 +307,7 @@ export default function ListingDetailScreen() {
             <View className="flex-row items-start gap-2.5 rounded-3xl bg-emerald-50 p-4 dark:bg-accent/10">
               <Ionicons name="shield-checkmark-outline" size={18} color={colors.accent} />
               <Text className="flex-1 text-xs leading-5 text-foreground">
-                Taklif yuborishdan oldin ish tafsilotlarini diqqat bilan o'qib chiqing
+                {t("listing_safety_tip")}
               </Text>
             </View>
           </ScrollView>
@@ -321,7 +323,7 @@ export default function ListingDetailScreen() {
                 <Ionicons name="cash-outline" size={18} color="#FFFFFF" />
               </View>
               <Text className="flex-1 text-base text-white" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                Taklif yuborish
+                {t("offer_send_button")}
               </Text>
               <Ionicons name="chevron-forward" size={18} color="#FFFFFF" />
             </Pressable>
@@ -341,7 +343,7 @@ export default function ListingDetailScreen() {
             <BottomSheetView style={{ gap: 16, padding: 20 }}>
               <View className="flex-row items-center justify-between">
                 <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                  Taklif yuborish
+                  {t("send_offer_header")}
                 </Text>
                 <Pressable onPress={() => offerSheetRef.current?.dismiss()} hitSlop={8}>
                   <Ionicons name="close" size={22} color={colors.muted} />
@@ -352,30 +354,30 @@ export default function ListingDetailScreen() {
                 <View className="items-center gap-2 py-6">
                   <Ionicons name="checkmark-circle" size={48} color={colors.accent} />
                   <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                    Taklif muvaffaqiyatli yuborildi
+                    {t("offer_sent_success")}
                   </Text>
                 </View>
               ) : (
                 <>
                   <TextField
-                    label="Sizning narxingiz"
+                    label={t("offer_your_price_label")}
                     value={price}
                     onChangeText={setPrice}
-                    placeholder="masalan, 150 000"
+                    placeholder={t("offer_price_placeholder")}
                     keyboardType="number-pad"
                   />
                   <TextField
-                    label="Izoh"
+                    label={t("field_comment")}
                     value={comment}
                     onChangeText={setComment}
-                    placeholder="Taklifingiz va muddatlarni tasvirlab bering"
+                    placeholder={t("offer_comment_placeholder")}
                     multiline
                     numberOfLines={3}
                     maxLength={500}
                     style={{ height: 90, textAlignVertical: "top", paddingTop: 12 }}
                   />
                   <Button loading={createOfferMutation.isPending} onPress={submitOffer}>
-                    Taklif yuborish
+                    {t("offer_send_button")}
                   </Button>
                 </>
               )}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, Linking, Pressable, RefreshControl, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -28,15 +29,17 @@ import { showError, showSuccess } from "@/utils/toast";
 
 type OrdersView = "worker" | "client";
 
-const STATUS_FILTERS: { value: string; label: string }[] = [
-  { value: "all", label: "Barchasi" },
-  { value: "new", label: ORDER_STATUS_LABEL.new },
-  { value: "accepted", label: ORDER_STATUS_LABEL.accepted },
-  { value: "in_progress", label: ORDER_STATUS_LABEL.in_progress },
-  { value: "awaiting_confirmation", label: ORDER_STATUS_LABEL.awaiting_confirmation },
-  { value: "completed", label: ORDER_STATUS_LABEL.completed },
-  { value: "cancelled", label: ORDER_STATUS_LABEL.cancelled },
-];
+function useStatusFilters(t: (key: string) => string): { value: string; label: string }[] {
+  return [
+    { value: "all", label: t("orders_status_all") },
+    { value: "new", label: ORDER_STATUS_LABEL.new },
+    { value: "accepted", label: ORDER_STATUS_LABEL.accepted },
+    { value: "in_progress", label: ORDER_STATUS_LABEL.in_progress },
+    { value: "awaiting_confirmation", label: ORDER_STATUS_LABEL.awaiting_confirmation },
+    { value: "completed", label: ORDER_STATUS_LABEL.completed },
+    { value: "cancelled", label: ORDER_STATUS_LABEL.cancelled },
+  ];
+}
 
 const STATUS_BADGE_STYLE: Record<TOrderStatus, { bg: string; text: string }> = {
   new: { bg: "bg-blue-50 dark:bg-blue-500/15", text: "text-blue-600 dark:text-blue-400" },
@@ -74,6 +77,7 @@ interface OrderCardProps {
 }
 
 function OrderCard({ order, perspective, onMessage, onFinish, finishing, onComplete, completing }: OrderCardProps) {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const counterpart = perspective === "client" ? order.master : order.customer;
   const needsEscrowPayment = perspective === "client" && order.application?.payment_type === "escrow" && order.has_escrow === false;
@@ -97,7 +101,7 @@ function OrderCard({ order, perspective, onMessage, onFinish, finishing, onCompl
         <Avatar uri={counterpart?.photo} name={counterpart?.name} size={36} />
         <View className="flex-1">
           <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }} numberOfLines={1}>
-            {counterpart?.name || (perspective === "client" ? "Ijrochi" : "Buyurtmachi")}
+            {counterpart?.name || (perspective === "client" ? t("orders_role_worker") : t("orders_role_client"))}
           </Text>
           {counterpart?.phone ? <Text className="text-xs text-muted">{formatPhoneNumber(counterpart.phone)}</Text> : null}
         </View>
@@ -130,13 +134,13 @@ function OrderCard({ order, perspective, onMessage, onFinish, finishing, onCompl
 
       {perspective === "worker" && order.status === "in_progress" && onFinish ? (
         <Button style={{ height: 44 }} loading={finishing} onPress={() => onFinish(order.guid)}>
-          Ishni yakunlash
+          {t("orders_finish_work")}
         </Button>
       ) : null}
 
       {perspective === "client" && order.status === "awaiting_confirmation" && onComplete ? (
         <Button style={{ height: 44 }} loading={completing} onPress={() => onComplete(order.guid)}>
-          Ishni qabul qilish
+          {t("orders_accept_work")}
         </Button>
       ) : null}
 
@@ -146,7 +150,7 @@ function OrderCard({ order, perspective, onMessage, onFinish, finishing, onCompl
           style={{ height: 44 }}
           onPress={() => order.application && router.push(`/applications/${order.application.guid}`)}
         >
-          To'lovni yakunlash
+          {t("orders_complete_payment")}
         </Button>
       ) : null}
     </Card>
@@ -154,7 +158,9 @@ function OrderCard({ order, perspective, onMessage, onFinish, finishing, onCompl
 }
 
 function OrdersList({ perspective }: { perspective: "client" | "worker" }) {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
+  const STATUS_FILTERS = useStatusFilters(t);
   const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
   const [items, setItems] = useState<IMasterOrder[]>([]);
@@ -187,12 +193,12 @@ function OrdersList({ perspective }: { perspective: "client" | "worker" }) {
       const chatGuid = extractChatGuid(result);
       const chatId = extractChatId(result);
       if (!chatGuid || !chatId) {
-        showError("Suhbatni ochishda xatolik yuz berdi");
+        showError(t("common_chat_open_error"));
         return;
       }
       router.push({ pathname: "/chat/[guid]", params: { guid: chatGuid, id: String(chatId) } });
     } catch {
-      showError("Suhbatni ochishda xatolik yuz berdi");
+      showError(t("common_chat_open_error"));
     }
   };
 
@@ -200,9 +206,9 @@ function OrdersList({ perspective }: { perspective: "client" | "worker" }) {
     setFinishingGuid(guid);
     try {
       await finishOrderMutation.mutateAsync(guid);
-      showSuccess("Buyurtma tasdiqlash uchun buyurtmachiga yuborildi");
+      showSuccess(t("orders_finish_success"));
     } catch {
-      showError("Amalni bajarishda xatolik yuz berdi");
+      showError(t("orders_action_error"));
     } finally {
       setFinishingGuid(null);
     }
@@ -212,9 +218,9 @@ function OrdersList({ perspective }: { perspective: "client" | "worker" }) {
     setCompletingGuid(guid);
     try {
       await completeOrderMutation.mutateAsync(guid);
-      showSuccess("Buyurtma muvaffaqiyatli yakunlandi");
+      showSuccess(t("orders_complete_success"));
     } catch {
-      showError("Amalni bajarishda xatolik yuz berdi");
+      showError(t("orders_action_error"));
     } finally {
       setCompletingGuid(null);
     }
@@ -232,9 +238,9 @@ function OrdersList({ perspective }: { perspective: "client" | "worker" }) {
         <View style={{ flex: 1, marginTop: -44 }}>
           <EmptyState
             icon="alert-circle-outline"
-            title="Yuklashda xatolik"
-            description="Qayta urinib ko'ring"
-            actionLabel="Qayta urinish"
+            title={t("common_load_error_title")}
+            description={t("common_retry_description")}
+            actionLabel={t("common_retry_action")}
             onAction={() => refetch()}
           />
         </View>
@@ -245,16 +251,16 @@ function OrdersList({ perspective }: { perspective: "client" | "worker" }) {
             title={
               status === "all"
                 ? perspective === "worker"
-                  ? "Hali birorta buyurtma qabul qilmadingiz"
-                  : "Hali birorta buyurtmangiz yo'q"
-                : `"${STATUS_FILTERS.find((f) => f.value === status)?.label ?? ""}" holatida buyurtma yo'q`
+                  ? t("orders_empty_worker_title")
+                  : t("orders_empty_client_title")
+                : t("orders_empty_status_title", { status: STATUS_FILTERS.find((f) => f.value === status)?.label ?? "" })
             }
             description={
               status === "all"
                 ? perspective === "worker"
-                  ? "Yangi buyurtmalar shu yerda ko'rinadi"
-                  : "Usta yoki tashkilotga buyurtma bering, u shu yerda paydo bo'ladi"
-                : "Boshqa holatni tanlab ko'ring yoki keyinroq qayta tekshiring"
+                  ? t("orders_empty_worker_description")
+                  : t("orders_empty_client_description")
+                : t("orders_empty_status_description")
             }
           />
         </View>
@@ -286,19 +292,20 @@ function OrdersList({ perspective }: { perspective: "client" | "worker" }) {
 }
 
 export default function OrdersScreen() {
+  const { t } = useTranslation("catalog");
   const [view, setView] = useState<OrdersView>("client");
   const headerHeight = useHeaderHeight();
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Buyurtmalarim" onBackPress={() => router.push("/")} />
+      <Header title={t("orders_title")} onBackPress={() => router.push("/")} />
       <View style={{ flex: 1, paddingTop: headerHeight }}>
         <UnderlineTabs
           value={view}
           onChange={setView}
           options={[
-            { value: "worker", label: "Ijrochi sifatida" },
-            { value: "client", label: "Buyurtmachi sifatida" },
+            { value: "worker", label: t("orders_tab_worker") },
+            { value: "client", label: t("orders_tab_client") },
           ]}
         />
         <OrdersList perspective={view} />

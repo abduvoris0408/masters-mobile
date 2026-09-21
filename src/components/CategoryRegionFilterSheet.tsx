@@ -1,5 +1,6 @@
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetBackdrop, type BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 import { Button } from "@/components/ui/Button";
@@ -32,6 +33,7 @@ export interface CategoryRegionFilterSheetHandle {
 // own onChange) replaces the old `visible` prop as the queries' fetch-gate.
 export const CategoryRegionFilterSheet = forwardRef<CategoryRegionFilterSheetHandle, CategoryRegionFilterSheetProps>(
   function CategoryRegionFilterSheet({ value, onApply }, ref) {
+    const { t } = useTranslation("catalog");
     const sheetRef = useRef<BottomSheetModal>(null);
     const colors = useThemeColors();
     const [open, setOpen] = useState(false);
@@ -82,11 +84,11 @@ export const CategoryRegionFilterSheet = forwardRef<CategoryRegionFilterSheetHan
         handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
       >
         <View className="px-5">
-          <Text className="mb-4 text-lg font-semibold text-foreground">Filtr</Text>
+          <Text className="mb-4 text-lg font-semibold text-foreground">{t("filter_sheet_title")}</Text>
         </View>
 
         <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20 }}>
-          <Text className="mb-2 text-sm font-medium text-muted">Kategoriya</Text>
+          <Text className="mb-2 text-sm font-medium text-muted">{t("filter_sheet_category")}</Text>
           <View className="mb-5 flex-row flex-wrap gap-2">
             {categories?.map((c) => {
               const active = category.includes(c.id);
@@ -104,14 +106,14 @@ export const CategoryRegionFilterSheet = forwardRef<CategoryRegionFilterSheetHan
             })}
           </View>
 
-          <Text className="mb-2 text-sm font-medium text-muted">Viloyat</Text>
+          <Text className="mb-2 text-sm font-medium text-muted">{t("filter_sheet_region")}</Text>
           <View className="mb-5 flex-row flex-wrap gap-2">
             <Pressable
               onPress={() => setRegion(null)}
               className={`rounded-full px-3.5 py-2 ${region === null ? "bg-primary" : "bg-surface"}`}
             >
               <Text className={`text-sm font-medium ${region === null ? "text-primary-foreground" : "text-foreground"}`}>
-                Barchasi
+                {t("filter_sheet_all")}
               </Text>
             </Pressable>
             {regions?.map((r) => {
@@ -133,10 +135,10 @@ export const CategoryRegionFilterSheet = forwardRef<CategoryRegionFilterSheetHan
 
         <View className="flex-row gap-3 px-5 pb-4 pt-2">
           <Button variant="outline" color="primary" className="flex-1" onPress={reset}>
-            Tozalash
+            {t("filter_sheet_clear")}
           </Button>
           <Button className="flex-1" onPress={apply}>
-            Qo'llash
+            {t("filter_sheet_apply")}
           </Button>
         </View>
       </BottomSheetModal>

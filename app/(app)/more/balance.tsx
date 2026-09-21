@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop, type BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { router } from "expo-router";
 
@@ -23,15 +24,15 @@ const PAGE_SIZE = 20;
 // Mirrors the web project's four backend-defined transaction types
 // (payments.BalanceTransaction.Type) — each with its own icon/color so
 // in/out money reads at a glance in the list.
-const TYPE_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; direction: "in" | "out"; label: string }> = {
-  top_up: { icon: "wallet-outline", direction: "in", label: "Balansni to'ldirish" },
-  order_earning: { icon: "cash-outline", direction: "in", label: "Buyurtmadan tushum" },
-  order_payment: { icon: "bag-handle-outline", direction: "out", label: "Buyurtma uchun to'lov" },
-  withdrawal: { icon: "arrow-redo-outline", direction: "out", label: "Pul yechib olish" },
-};
-
 function TransactionRow({ item }: { item: IBalanceTransaction }) {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
+  const TYPE_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; direction: "in" | "out"; label: string }> = {
+    top_up: { icon: "wallet-outline", direction: "in", label: t("balance_type_top_up") },
+    order_earning: { icon: "cash-outline", direction: "in", label: t("balance_type_order_earning") },
+    order_payment: { icon: "bag-handle-outline", direction: "out", label: t("balance_type_order_payment") },
+    withdrawal: { icon: "arrow-redo-outline", direction: "out", label: t("balance_type_withdrawal") },
+  };
   const meta = TYPE_META[item.type] ?? { icon: "wallet-outline", direction: "in" as const, label: item.type };
   const isCredit = meta.direction === "in";
 
@@ -53,7 +54,7 @@ function TransactionRow({ item }: { item: IBalanceTransaction }) {
           {isCredit ? "+" : "-"}
           {formatPrice(Math.abs(Number(item.amount)))}
         </Text>
-        <Text className="text-[11px] text-muted">Balans: {formatPrice(Number(item.balance_after))}</Text>
+        <Text className="text-[11px] text-muted">{t("balance_after_label", { amount: formatPrice(Number(item.balance_after)) })}</Text>
       </View>
     </View>
   );
@@ -64,6 +65,7 @@ interface DepositModalHandle {
 }
 
 const DepositModal = forwardRef<DepositModalHandle>(function DepositModal(_props, ref) {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const sheetRef = useRef<BottomSheetModal>(null);
   const [amount, setAmount] = useState("");
@@ -86,10 +88,10 @@ const DepositModal = forwardRef<DepositModalHandle>(function DepositModal(_props
     try {
       await depositMutation.mutateAsync(numericAmount);
       setSucceeded(true);
-      showSuccess("Hisob to'ldirildi");
+      showSuccess(t("balance_deposit_success"));
       setTimeout(() => sheetRef.current?.dismiss(), 1200);
     } catch {
-      showError("Hisobni to'ldirib bo'lmadi");
+      showError(t("balance_deposit_error"));
     }
   };
 
@@ -113,27 +115,27 @@ const DepositModal = forwardRef<DepositModalHandle>(function DepositModal(_props
     >
       <BottomSheetView style={{ padding: 20 }}>
         <Text className="mb-4 text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-          Hisobni to'ldirish
+          {t("balance_topup_title")}
         </Text>
 
         {succeeded ? (
           <View className="items-center gap-3 py-6">
             <Ionicons name="checkmark-circle" size={48} color="#059669" />
             <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-              Hisob to'ldirildi!
+              {t("balance_topup_success")}
             </Text>
           </View>
         ) : (
           <>
             <TextField
-              label="Summa"
+              label={t("balance_amount_label")}
               value={amount}
               onChangeText={(v) => setAmount(v.replace(/\D/g, ""))}
               keyboardType="numeric"
-              placeholder="100 000"
+              placeholder={t("balance_amount_placeholder")}
             />
             <Button className="mt-5" loading={depositMutation.isPending} disabled={!canSubmit} onPress={handleSubmit}>
-              To'ldirish
+              {t("balance_topup_button")}
             </Button>
           </>
         )}
@@ -143,6 +145,7 @@ const DepositModal = forwardRef<DepositModalHandle>(function DepositModal(_props
 });
 
 export default function BalanceScreen() {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const [page, setPage] = useState(1);
@@ -168,7 +171,7 @@ export default function BalanceScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Hisobim" onBackPress={() => router.back()} />
+      <Header title={t("balance_header")} onBackPress={() => router.back()} />
 
       <FlatList
         data={items}
@@ -179,7 +182,7 @@ export default function BalanceScreen() {
           <View className="mb-4 gap-3">
             <GradientCard>
               <View className="flex-row items-center justify-between">
-                <Text className="text-sm text-white/75">Joriy balans</Text>
+                <Text className="text-sm text-white/75">{t("balance_current_label")}</Text>
                 <Pressable onPress={() => refetchBalance()} hitSlop={8}>
                   <Ionicons name="refresh" size={16} color="#FFFFFF" />
                 </Pressable>
@@ -193,7 +196,7 @@ export default function BalanceScreen() {
               )}
               {balance?.created_at ? (
                 <Text className="mt-1 text-xs text-white/60">
-                  Holat sanasi: {formatDateTime(balance.created_at)}
+                  {t("balance_status_date", { date: formatDateTime(balance.created_at) })}
                 </Text>
               ) : null}
             </GradientCard>
@@ -205,22 +208,22 @@ export default function BalanceScreen() {
               >
                 <Ionicons name="arrow-down-circle-outline" size={18} color={colors.accent} />
                 <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                  Pul kiritish
+                  {t("balance_deposit_label")}
                 </Text>
               </Pressable>
               <Pressable
-                onPress={() => showError("Bu funksiya tez orada qo'shiladi")}
+                onPress={() => showError(t("balance_withdraw_coming_soon"))}
                 className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-surface py-3.5"
               >
                 <Ionicons name="arrow-up-circle-outline" size={18} color={colors.muted} />
                 <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                  Pul yechish
+                  {t("balance_withdraw_label")}
                 </Text>
               </Pressable>
             </View>
 
             <Text className="px-1 text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-              Tranzaksiyalar tarixi
+              {t("balance_transaction_history_title")}
             </Text>
           </View>
         }
@@ -231,13 +234,13 @@ export default function BalanceScreen() {
           ) : isError ? (
             <EmptyState
               icon="alert-circle-outline"
-              title="Tarixni yuklab bo'lmadi"
-              description="Qayta urinib ko'ring"
-              actionLabel="Qayta urinish"
+              title={t("balance_history_load_error")}
+              description={t("common_try_again_description")}
+              actionLabel={t("common_try_again")}
               onAction={() => refetch()}
             />
           ) : (
-            <EmptyState icon="receipt-outline" title="Hozircha tranzaksiyalar yo'q" />
+            <EmptyState icon="receipt-outline" title={t("balance_no_transactions")} />
           )
         }
         onEndReachedThreshold={0.4}

@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Platform, Pressable, Text, TextInput, View } from "react-native";
 import type RNMapView from "react-native-maps";
 import type { LatLng, MapPressEvent, Region } from "react-native-maps";
@@ -54,6 +55,7 @@ interface MapLocationPickerProps {
 // the web app's wording exactly.
 export function MapLocationPicker({ value, onChange, onAddressResolved, height = 260 }: MapLocationPickerProps) {
   const colors = useThemeColors();
+  const { t } = useTranslation("common");
   const mapRef = useRef<RNMapView>(null);
   const [searchValue, setSearchValue] = useState("");
   const [searching, setSearching] = useState(false);
@@ -109,7 +111,7 @@ export function MapLocationPicker({ value, onChange, onAddressResolved, height =
 
   return (
     <View className="gap-2">
-      <Text className="text-sm font-medium text-foreground">Xaritadan manzil tanlash</Text>
+      <Text className="text-sm font-medium text-foreground">{t("map_pick_location")}</Text>
 
       <View className="flex-row gap-2">
         <View className="h-11 flex-1 flex-row items-center rounded-2xl bg-surface px-3.5">
@@ -120,7 +122,7 @@ export function MapLocationPicker({ value, onChange, onAddressResolved, height =
             value={searchValue}
             onChangeText={setSearchValue}
             onSubmitEditing={handleSearch}
-            placeholder="Manzilni qidirish..."
+            placeholder={t("map_search_address_placeholder")}
             placeholderTextColor={colors.muted}
             returnKeyType="search"
           />
@@ -161,14 +163,12 @@ export function MapLocationPicker({ value, onChange, onAddressResolved, height =
               ) : null}
             </mapsModule.default>
           </View>
-          <Text className="text-xs text-muted">Manzilni belgilash uchun xaritaga bosing yoki markerni suring</Text>
+          <Text className="text-xs text-muted">{t("map_tap_or_drag_hint")}</Text>
         </>
       ) : (
         <View className="items-center gap-2 rounded-2xl bg-surface px-4 py-6">
           <Ionicons name="map-outline" size={22} color={colors.muted} />
-          <Text className="text-center text-xs text-muted">
-            Interaktiv xarita ushbu ilova versiyasida mavjud emas — manzilni qidiruv orqali tanlang
-          </Text>
+          <Text className="text-center text-xs text-muted">{t("map_interactive_unavailable")}</Text>
         </View>
       )}
     </View>

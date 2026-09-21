@@ -11,6 +11,7 @@ import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "
 import { ActivityIndicator, Alert, FlatList, Image, Pressable, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -44,6 +45,7 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
   { profileGuid },
   ref,
 ) {
+  const { t } = useTranslation("profile");
   const colors = useThemeColors();
   const sheetRef = useRef<BottomSheetModal>(null);
   const { showActionSheetWithOptions } = useActionSheet();
@@ -74,7 +76,7 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
     const accepted: NewImage[] = [];
     for (const asset of assets) {
       if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
-        showError("Rasm hajmi 5 MB dan oshmasligi kerak");
+        showError(t("portfolio_image_too_large"));
         continue;
       }
       accepted.push({ localId: `${Date.now()}-${Math.random()}`, uri: asset.uri, type: "image/jpeg", name: `portfolio-${Date.now()}.jpg` });
@@ -85,7 +87,7 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
   const pickFromCamera = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Ruxsat kerak", "Kameradan foydalanish uchun ruxsat bering.");
+      Alert.alert(t("permission_required"), t("portfolio_camera_permission"));
       return;
     }
     const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
@@ -96,7 +98,7 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
   const pickFromLibrary = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Ruxsat kerak", "Rasm tanlash uchun galereyaga ruxsat bering.");
+      Alert.alert(t("permission_required"), t("portfolio_gallery_permission"));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -112,7 +114,7 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
   const handlePick = () => {
     showActionSheetWithOptions(
       {
-        options: ["Kamera", "Galereya", "Bekor qilish"],
+        options: [t("portfolio_camera"), t("portfolio_gallery"), t("cancel")],
         cancelButtonIndex: 2,
       },
       (selectedIndex) => {
@@ -133,11 +135,11 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
 
   const handleSubmit = async () => {
     if (!description.trim()) {
-      showError("Tavsifni kiriting");
+      showError(t("portfolio_enter_description"));
       return;
     }
     if (!isEdit && newImages.length === 0) {
-      showError("Kamida bitta rasm qo'shing");
+      showError(t("portfolio_add_at_least_one_image"));
       return;
     }
     try {
@@ -148,14 +150,14 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
           newImages,
           removeImageIds: removedIds,
         });
-        showSuccess("Ish yangilandi");
+        showSuccess(t("portfolio_updated"));
       } else {
         await createMutation.mutateAsync({ description: description.trim(), images: newImages });
-        showSuccess("Ish qo'shildi");
+        showSuccess(t("portfolio_added"));
       }
       sheetRef.current?.dismiss();
     } catch {
-      showError(isEdit ? "Yangilashda xatolik yuz berdi" : "Qo'shishda xatolik yuz berdi");
+      showError(isEdit ? t("update_error") : t("add_error"));
     }
   };
 
@@ -179,26 +181,26 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
     >
       <View className="px-5">
         <Text className="mb-4 text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-          {isEdit ? "Ishni tahrirlash" : "Yangi ish qo'shish"}
+          {isEdit ? t("portfolio_edit_title") : t("portfolio_add_title")}
         </Text>
       </View>
 
       <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20 }}>
         <Text className="mb-1.5 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-          Tavsif
+          {t("description")}
         </Text>
         <BottomSheetTextInput
           value={description}
           onChangeText={setDescription}
           multiline
-          placeholder="Bajarilgan ish haqida qisqacha yozing"
+          placeholder={t("portfolio_description_placeholder")}
           placeholderTextColor={colors.muted}
           className="mb-4 rounded-2xl bg-surface px-4 py-3 text-base text-foreground"
           style={{ minHeight: 90, textAlignVertical: "top", color: colors.foreground }}
         />
 
         <Text className="mb-2 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-          Rasmlar {totalImages > 0 ? `(${totalImages})` : ""}
+          {t("portfolio_images_label")} {totalImages > 0 ? `(${totalImages})` : ""}
         </Text>
         <View className="mb-4 flex-row flex-wrap gap-2.5">
           {keptImages.map((img) => (
@@ -229,12 +231,12 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
             style={{ width: 88, height: 88 }}
           >
             <Ionicons name="image-outline" size={20} color={colors.muted} />
-            <Text className="text-[10px] text-muted">Rasm qo'shish</Text>
+            <Text className="text-[10px] text-muted">{t("portfolio_add_image")}</Text>
           </Pressable>
         </View>
 
         <Button className="mb-5" loading={isPending} onPress={handleSubmit}>
-          {isEdit ? "Saqlash" : "Qo'shish"}
+          {isEdit ? t("save") : t("add")}
         </Button>
       </BottomSheetScrollView>
     </BottomSheetModal>
@@ -242,6 +244,7 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
 });
 
 export default function ProfilePortfolioScreen() {
+  const { t } = useTranslation("profile");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const { data: profile } = useMasterProfileQuery();
@@ -256,18 +259,18 @@ export default function ProfilePortfolioScreen() {
   const openEdit = (item: IPortfolioWork) => formSheetRef.current?.present(item);
 
   const handleDelete = (guid: string) => {
-    Alert.alert("Ishni o'chirish", "Ushbu ishni o'chirishni tasdiqlaysizmi?", [
-      { text: "Bekor qilish", style: "cancel" },
+    Alert.alert(t("portfolio_delete_title"), t("portfolio_delete_message"), [
+      { text: t("cancel"), style: "cancel" },
       {
-        text: "O'chirish",
+        text: t("delete"),
         style: "destructive",
         onPress: async () => {
           setDeletingGuid(guid);
           try {
             await deleteMutation.mutateAsync(guid);
-            showSuccess("Ish o'chirildi");
+            showSuccess(t("portfolio_deleted"));
           } catch {
-            showError("O'chirishda xatolik yuz berdi");
+            showError(t("delete_error"));
           } finally {
             setDeletingGuid(null);
           }
@@ -279,7 +282,7 @@ export default function ProfilePortfolioScreen() {
   return (
     <View className="flex-1 bg-background">
       <Header
-        title="Portfolio"
+        title={t("portfolio_title")}
         onBackPress={() => router.back()}
         right={
           <Pressable onPress={openAdd} hitSlop={8}>
@@ -294,9 +297,9 @@ export default function ProfilePortfolioScreen() {
         <View style={{ flex: 1, paddingTop: headerHeight }}>
           <EmptyState
             icon="images-outline"
-            title="Portfolio bo'sh"
-            description="Hali bajarilgan ishlar qo'shilmagan"
-            actionLabel="Ish qo'shish"
+            title={t("portfolio_empty_title")}
+            description={t("portfolio_empty_description")}
+            actionLabel={t("portfolio_add_action")}
             onAction={openAdd}
           />
         </View>

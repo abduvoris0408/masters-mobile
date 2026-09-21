@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { router } from "expo-router";
 
@@ -24,18 +25,19 @@ import { fromNow } from "@/utils/format";
 const PAGE_SIZE_STEP = 20;
 
 function ChatRow({ chat }: { chat: IChatListItem }) {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const otherUser = normalizeChatUser(chat.other_user);
   const lastMessage = normalizeLastMessage(chat.last_message);
   const unreadCount = toUnreadCount(chat.unread_count);
-  const name = chatUserDisplayName(otherUser) || "Foydalanuvchi";
+  const name = chatUserDisplayName(otherUser) || t("chat_default_user");
 
   const preview = lastMessage?.type && CHAT_INVITE_LABEL[lastMessage.type]
     ? CHAT_INVITE_LABEL[lastMessage.type]
     : lastMessage?.text
       ? lastMessage.text
       : lastMessage?.hasImages
-        ? "📷 Rasm"
+        ? t("chat_image_preview")
         : " ";
 
   return (
@@ -76,6 +78,7 @@ function ChatRow({ chat }: { chat: IChatListItem }) {
 }
 
 export default function ChatListScreen() {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const [pageSize, setPageSize] = useState(PAGE_SIZE_STEP);
@@ -97,19 +100,19 @@ export default function ChatListScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Xabarlar" onBackPress={() => router.back()} />
+      <Header title={t("chat_list_header")} onBackPress={() => router.back()} />
 
       <View className="px-4 pb-2" style={{ paddingTop: headerHeight }}>
-        <SearchBar placeholder="Suhbat qidirish..." value={search} onChangeText={setSearch} />
+        <SearchBar placeholder={t("chat_search_placeholder")} value={search} onChangeText={setSearch} />
       </View>
 
       {isLoading ? (
         <ActivityIndicator className="mt-10" color={colors.accent} />
       ) : filtered.length === 0 ? (
         search ? (
-          <EmptyState icon="search-outline" title="Mos suhbat topilmadi" />
+          <EmptyState icon="search-outline" title={t("chat_no_matching_chat")} />
         ) : (
-          <EmptyState icon="chatbubble-outline" title="Hozircha suhbatlar yo'q" />
+          <EmptyState icon="chatbubble-outline" title={t("chat_no_chats")} />
         )
       ) : (
         <FlatList

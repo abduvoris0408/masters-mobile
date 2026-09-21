@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-native";
 import { router } from "expo-router";
 
@@ -16,6 +17,7 @@ import { appendUniquePage } from "@/utils/pagination";
 const PAGE_SIZE = 12;
 
 export default function CoursesScreen() {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const [page, setPage] = useState(1);
@@ -33,7 +35,7 @@ export default function CoursesScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Kurslarim" onBackPress={() => router.back()} />
+      <Header title={t("courses_header")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
@@ -41,15 +43,15 @@ export default function CoursesScreen() {
         <View style={{ flex: 1, paddingTop: headerHeight }}>
           <EmptyState
             icon="alert-circle-outline"
-            title="Yuklashda xatolik"
-            description="Qayta urinib ko'ring"
-            actionLabel="Qayta urinish"
+            title={t("common_load_error")}
+            description={t("common_try_again_description")}
+            actionLabel={t("common_try_again")}
             onAction={() => refetch()}
           />
         </View>
       ) : items.length === 0 ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState icon="school-outline" title="Hozircha majburiy kurslar yo'q" />
+          <EmptyState icon="school-outline" title={t("courses_empty")} />
         </View>
       ) : (
         <FlatList
@@ -70,7 +72,7 @@ export default function CoursesScreen() {
                 <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                   {item.title}
                 </Text>
-                <Text className="text-sm text-muted">{item.lessons_count} ta dars</Text>
+                <Text className="text-sm text-muted">{t("courses_lessons_count", { count: item.lessons_count })}</Text>
               </View>
             </PressableCard>
           )}

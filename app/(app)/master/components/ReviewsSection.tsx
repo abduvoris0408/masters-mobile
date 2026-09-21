@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import { Avatar } from "@/components/ui/Avatar";
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function ReviewsSection({ profileGuid, fallbackRating, page, onPageChange, onSummary }: Props) {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const { data, isLoading } = useProfileReviewsQuery(profileGuid, page, PAGE_SIZE);
 
@@ -38,7 +40,7 @@ export function ReviewsSection({ profileGuid, fallbackRating, page, onPageChange
     <View className="gap-3 rounded-3xl bg-surface p-4">
       <View className="flex-row items-center justify-between gap-2">
         <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-          Sharhlar
+          {t("reviews_title")}
         </Text>
         {!isLoading && count > 0 ? (
           <View className="flex-row items-center gap-2">
@@ -51,7 +53,7 @@ export function ReviewsSection({ profileGuid, fallbackRating, page, onPageChange
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginVertical: 16 }} />
       ) : count === 0 ? (
-        <EmptyState icon="chatbubbles-outline" title="Hozircha sharhlar yo'q" />
+        <EmptyState icon="chatbubbles-outline" title={t("reviews_empty_title")} />
       ) : (
         <View className="gap-2.5">
           {reviews.map((review) => (
@@ -77,9 +79,7 @@ export function ReviewsSection({ profileGuid, fallbackRating, page, onPageChange
           <Pressable onPress={() => onPageChange(Math.max(1, page - 1))} disabled={page <= 1} hitSlop={8}>
             <Ionicons name="chevron-back" size={18} color={page <= 1 ? colors.muted : colors.foreground} />
           </Pressable>
-          <Text className="text-xs text-muted">
-            {page} / {totalPages}
-          </Text>
+          <Text className="text-xs text-muted">{t("reviews_page_indicator", { page, totalPages })}</Text>
           <Pressable onPress={() => onPageChange(Math.min(totalPages, page + 1))} disabled={page >= totalPages} hitSlop={8}>
             <Ionicons name="chevron-forward" size={18} color={page >= totalPages ? colors.muted : colors.foreground} />
           </Pressable>

@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Image, Linking, Pressable, ScrollView, Text, View } from "react-native";
 
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -17,18 +18,22 @@ export interface ServiceGroup {
 
 type TabKey = "services" | "documents" | "portfolio";
 
-const TAB_META: { key: TabKey; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { key: "services", label: "Xizmatlar", icon: "construct-outline" },
-  { key: "documents", label: "Hujjatlar", icon: "document-attach-outline" },
-  { key: "portfolio", label: "Portfolio", icon: "images-outline" },
-];
+function useTabMeta(t: (key: string) => string): { key: TabKey; label: string; icon: keyof typeof Ionicons.glyphMap }[] {
+  return [
+    { key: "services", label: t("master_tabs_services"), icon: "construct-outline" },
+    { key: "documents", label: t("master_tabs_documents"), icon: "document-attach-outline" },
+    { key: "portfolio", label: t("master_tabs_portfolio"), icon: "images-outline" },
+  ];
+}
 
 // Card-style tab picker — mirrors the profile screen's NavRow rows (icon
 // tile + label, accent-highlighted when active) instead of the web app's
 // underlined pill tabs, so the detail screen's chrome matches the rest of
 // the app's navigation language.
 function TabPicker({ value, onChange }: { value: TabKey; onChange: (key: TabKey) => void }) {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
+  const TAB_META = useTabMeta(t);
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2.5">
       {TAB_META.map((tab) => {
@@ -54,8 +59,9 @@ function TabPicker({ value, onChange }: { value: TabKey; onChange: (key: TabKey)
 }
 
 function ServicesTab({ groups, onOrder }: { groups: ServiceGroup[]; onOrder?: (service: IUserServiceCatalogServiceDetail) => void }) {
+  const { t } = useTranslation("catalog");
   if (groups.length === 0) {
-    return <EmptyState icon="construct-outline" title="Xizmatlar qo'shilmagan" />;
+    return <EmptyState icon="construct-outline" title={t("master_tabs_services_empty")} />;
   }
 
   return (
@@ -70,7 +76,7 @@ function ServicesTab({ groups, onOrder }: { groups: ServiceGroup[]; onOrder?: (s
               <View key={service.guid} className="gap-2 rounded-2xl bg-background p-3.5">
                 <View className="flex-row items-center justify-between gap-2">
                   <Text className="flex-1 text-sm text-foreground" numberOfLines={1}>
-                    {service.service_name ?? "Xizmat"}
+                    {service.service_name ?? t("master_tabs_service_fallback")}
                   </Text>
                   <View className="flex-row items-baseline gap-1">
                     <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
@@ -84,7 +90,7 @@ function ServicesTab({ groups, onOrder }: { groups: ServiceGroup[]; onOrder?: (s
                 {onOrder ? (
                   <Pressable onPress={() => onOrder(service)} className="self-start rounded-full bg-accent px-3.5 py-1.5">
                     <Text className="text-xs text-white" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                      Buyurtma berish
+                      {t("master_tabs_order_service")}
                     </Text>
                   </Pressable>
                 ) : null}
@@ -102,11 +108,12 @@ function isPdfFile(url: string) {
 }
 
 function DocumentsTab({ profileGuid }: { profileGuid: string }) {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const { data, isLoading } = useDocumentListQuery("profile", profileGuid);
 
   if (isLoading) return <ActivityIndicator color={colors.accent} style={{ marginVertical: 24 }} />;
-  if (!data?.length) return <EmptyState icon="document-attach-outline" title="Hujjatlar qo'shilmagan" />;
+  if (!data?.length) return <EmptyState icon="document-attach-outline" title={t("master_tabs_documents_empty")} />;
 
   return (
     <View className="gap-2.5">
@@ -144,11 +151,12 @@ function DocumentsTab({ profileGuid }: { profileGuid: string }) {
 }
 
 function PortfolioTab({ profileGuid }: { profileGuid: string }) {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const { data, isLoading } = usePortfolioListQuery(profileGuid);
 
   if (isLoading) return <ActivityIndicator color={colors.accent} style={{ marginVertical: 24 }} />;
-  if (!data?.length) return <EmptyState icon="images-outline" title="Portfolio bo'sh" />;
+  if (!data?.length) return <EmptyState icon="images-outline" title={t("master_tabs_portfolio_empty")} />;
 
   return (
     <View className="gap-3">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-native";
 import { router } from "expo-router";
 
@@ -16,6 +17,7 @@ import { appendUniquePage } from "@/utils/pagination";
 const PAGE_SIZE = 12;
 
 export default function OrganizationsCatalogScreen() {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const [page, setPage] = useState(1);
@@ -33,7 +35,7 @@ export default function OrganizationsCatalogScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Tashkilotlar katalogi" onBackPress={() => router.back()} />
+      <Header title={t("orgs_catalog_title")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
@@ -41,15 +43,15 @@ export default function OrganizationsCatalogScreen() {
         <View style={{ flex: 1, paddingTop: headerHeight }}>
           <EmptyState
             icon="alert-circle-outline"
-            title="Yuklashda xatolik"
-            description="Qayta urinib ko'ring"
-            actionLabel="Qayta urinish"
+            title={t("common_load_error_title")}
+            description={t("common_retry_description")}
+            actionLabel={t("common_retry_action")}
             onAction={() => refetch()}
           />
         </View>
       ) : items.length === 0 ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState icon="business-outline" title="Tashkilotlar topilmadi" description="Boshqa so'z yoki filtr bilan urinib ko'ring" />
+          <EmptyState icon="business-outline" title={t("orgs_catalog_empty_title")} description={t("common_nothing_found_description")} />
         </View>
       ) : (
         <FlatList
@@ -65,7 +67,7 @@ export default function OrganizationsCatalogScreen() {
                   {item.name}
                 </Text>
                 <Text className="text-sm text-muted">
-                  {item.categories.map((c) => c.name).join(", ") || "Kategoriya ko'rsatilmagan"}
+                  {item.categories.map((c) => c.name).join(", ") || t("orgs_catalog_category_not_specified")}
                 </Text>
               </View>
             </PressableCard>

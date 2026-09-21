@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Switch, Text, View } from "react-native";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
@@ -14,6 +15,7 @@ import type { IUserService, IUserServiceCategoryRef } from "@/types";
 import { showError, showSuccess } from "@/utils/toast";
 
 function ServiceRow({ service, profileGuid }: { service: IUserService; profileGuid: string | null }) {
+  const { t } = useTranslation("profile");
   const colors = useThemeColors();
   const [price, setPrice] = useState(service.price ? String(Math.round(Number(service.price))) : "");
   const [isPublished, setIsPublished] = useState(service.is_published);
@@ -28,7 +30,7 @@ function ServiceRow({ service, profileGuid }: { service: IUserService; profileGu
   const handleSave = async (nextPublished = isPublished, nextUnitGuid = unitGuid) => {
     const numericPrice = Number(price);
     if (nextPublished && (!price || Number.isNaN(numericPrice) || numericPrice < 0)) {
-      showError("Narxni to'g'ri kiriting");
+      showError(t("services_enter_valid_price"));
       return;
     }
     try {
@@ -36,9 +38,9 @@ function ServiceRow({ service, profileGuid }: { service: IUserService; profileGu
         guid: service.guid,
         data: { price: price || "0", is_published: nextPublished, pricing_unit: nextUnitGuid },
       });
-      showSuccess("Xizmat yangilandi");
+      showSuccess(t("services_updated"));
     } catch {
-      showError("Saqlashda xatolik yuz berdi");
+      showError(t("edit_save_error"));
     }
   };
 
@@ -51,7 +53,7 @@ function ServiceRow({ service, profileGuid }: { service: IUserService; profileGu
       ) : null}
 
       <View className="flex-row items-center justify-between gap-2">
-        <Text className="text-sm text-muted">Katalogda ko'rsatish</Text>
+        <Text className="text-sm text-muted">{t("services_show_in_catalog")}</Text>
         <Switch
           value={isPublished}
           onValueChange={(next) => {
@@ -68,7 +70,7 @@ function ServiceRow({ service, profileGuid }: { service: IUserService; profileGu
             value={price}
             onChangeText={setPrice}
             keyboardType="numeric"
-            placeholder="Narx"
+            placeholder={t("services_price")}
             editable={isPublished}
           />
         </View>
@@ -87,7 +89,7 @@ function ServiceRow({ service, profileGuid }: { service: IUserService; profileGu
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
             <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-              Saqlash
+              {t("save")}
             </Text>
           )}
         </Pressable>
@@ -118,6 +120,7 @@ function CategoryGroup({
 }
 
 export default function ProfileServicesScreen() {
+  const { t } = useTranslation("profile");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const { data: profile } = useMasterProfileQuery();
@@ -137,7 +140,7 @@ export default function ProfileServicesScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Xizmatlar" onBackPress={() => router.back()} />
+      <Header title={t("services_title")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
@@ -145,8 +148,8 @@ export default function ProfileServicesScreen() {
         <View style={{ flex: 1, paddingTop: headerHeight }}>
           <EmptyState
             icon="construct-outline"
-            title="Xizmatlar qo'shilmagan"
-            description="Ko'rsatadigan xizmatlaringizni qo'shib, buyurtmalar qabul qilishni boshlang"
+            title={t("services_empty_title")}
+            description={t("services_empty_description")}
           />
         </View>
       ) : (
@@ -157,7 +160,7 @@ export default function ProfileServicesScreen() {
           <View className="flex-row items-center gap-2 rounded-2xl bg-amber-50 px-3.5 py-3 dark:bg-amber-500/15">
             <Ionicons name="information-circle-outline" size={16} color="#D97706" />
             <Text className="flex-1 text-xs text-foreground">
-              Narxlarni va katalogda ko'rinish holatini shu yerdan boshqarasiz
+              {t("services_manage_hint")}
             </Text>
           </View>
 

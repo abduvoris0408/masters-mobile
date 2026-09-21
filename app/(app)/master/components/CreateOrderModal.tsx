@@ -7,6 +7,7 @@ import {
   type BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import { Button } from "@/components/ui/Button";
@@ -34,6 +35,7 @@ export const CreateOrderModal = forwardRef<CreateOrderModalHandle, Props>(functi
   { masterUserId },
   ref,
 ) {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const sheetRef = useRef<BottomSheetModal>(null);
   const currentUserId = useAuthStore((s) => s.user?.id);
@@ -74,11 +76,11 @@ export const CreateOrderModal = forwardRef<CreateOrderModalHandle, Props>(functi
 
   const handleContinue = () => {
     if (!address.trim()) {
-      showError("Manzilni kiriting");
+      showError(t("create_order_address_required"));
       return;
     }
     if (!comment.trim()) {
-      showError("Izohni kiriting");
+      showError(t("create_order_comment_required"));
       return;
     }
     setStep("contract");
@@ -100,7 +102,7 @@ export const CreateOrderModal = forwardRef<CreateOrderModalHandle, Props>(functi
         sendInvite({ user: masterUserId }, { type: EChatMessageType.ORDER_INVITE, order: order.id }).catch(() => {});
       }
     } catch {
-      showError("Buyurtma berishda xatolik yuz berdi");
+      showError(t("create_order_error"));
     }
   };
 
@@ -125,7 +127,7 @@ export const CreateOrderModal = forwardRef<CreateOrderModalHandle, Props>(functi
       <View className="px-5">
         <View className="mb-4 flex-row items-center justify-between">
           <Text className="text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-            {step === "contract" ? "Shartnoma" : "Buyurtma berish"}
+            {step === "contract" ? t("create_order_contract_title") : t("create_order_title")}
           </Text>
           <Pressable onPress={onClose} hitSlop={8}>
             <Ionicons name="close" size={22} color={colors.muted} />
@@ -137,13 +139,13 @@ export const CreateOrderModal = forwardRef<CreateOrderModalHandle, Props>(functi
         <View className="items-center gap-3 py-8">
           <Ionicons name="checkmark-circle" size={52} color={colors.accent} />
           <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-            Buyurtma muvaffaqiyatli yaratildi
+            {t("create_order_success")}
           </Text>
         </View>
       ) : service && step === "form" ? (
         <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}>
           <Text className="mb-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-            {service.service_name ?? "Xizmat"}
+            {service.service_name ?? t("create_order_service_fallback")}
           </Text>
           <View className="mb-4 self-start rounded-full bg-emerald-50 px-3 py-1 dark:bg-accent/15">
             <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
@@ -152,38 +154,38 @@ export const CreateOrderModal = forwardRef<CreateOrderModalHandle, Props>(functi
           </View>
 
           <Text className="mb-1.5 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-            Manzil
+            {t("create_order_address_label")}
           </Text>
           <BottomSheetTextInput
             value={address}
             onChangeText={setAddress}
-            placeholder="Ish bajariladigan manzil"
+            placeholder={t("create_order_address_placeholder")}
             placeholderTextColor={colors.muted}
             className="mb-4 rounded-2xl bg-surface px-4 py-3 text-base text-foreground"
             style={{ color: colors.foreground }}
           />
 
           <Text className="mb-1.5 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-            Izoh
+            {t("create_order_comment_label")}
           </Text>
           <BottomSheetTextInput
             value={comment}
             onChangeText={setComment}
             multiline
-            placeholder="Ish haqida qisqacha ma'lumot"
+            placeholder={t("create_order_comment_placeholder")}
             placeholderTextColor={colors.muted}
             className="mb-5 rounded-2xl bg-surface px-4 py-3 text-base text-foreground"
             style={{ minHeight: 90, textAlignVertical: "top", color: colors.foreground }}
           />
 
-          <Button onPress={handleContinue}>Davom etish</Button>
+          <Button onPress={handleContinue}>{t("common_continue")}</Button>
         </BottomSheetScrollView>
       ) : service && step === "contract" ? (
         <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}>
           {previewLoading ? (
             <ActivityIndicator color={colors.accent} style={{ marginVertical: 24 }} />
           ) : !preview ? (
-            <Text className="py-6 text-center text-sm text-muted">Shartnomani yuklab bo'lmadi</Text>
+            <Text className="py-6 text-center text-sm text-muted">{t("create_order_contract_load_error")}</Text>
           ) : (
             <>
               <View className="mb-3 flex-row items-center gap-2">
@@ -195,11 +197,11 @@ export const CreateOrderModal = forwardRef<CreateOrderModalHandle, Props>(functi
 
               <View className="mb-3 gap-2 rounded-2xl bg-surface p-3.5">
                 {[
-                  ["Xizmat turi", preview.category?.name],
-                  ["Usta", [preview.master?.name, preview.master?.surname].filter(Boolean).join(" ")],
-                  ["Narx", formatPrice(Number(preview.price))],
-                  ["Manzil", address],
-                  ...(comment ? [["Izoh", comment]] : []),
+                  [t("create_order_contract_service_type"), preview.category?.name],
+                  [t("create_order_contract_master"), [preview.master?.name, preview.master?.surname].filter(Boolean).join(" ")],
+                  [t("create_order_contract_price"), formatPrice(Number(preview.price))],
+                  [t("create_order_contract_address"), address],
+                  ...(comment ? [[t("create_order_contract_comment"), comment]] : []),
                 ].map(([label, value]) => (
                   <View key={label} className="flex-row items-start justify-between gap-3">
                     <Text className="text-xs text-muted">{label}</Text>
@@ -238,12 +240,12 @@ export const CreateOrderModal = forwardRef<CreateOrderModalHandle, Props>(functi
               <View className="mt-3 flex-row gap-2.5">
                 <View className="flex-1">
                   <Button variant="outline" onPress={() => setStep("form")}>
-                    Orqaga
+                    {t("common_back")}
                   </Button>
                 </View>
                 <View className="flex-1">
                   <Button loading={createOrderMutation.isPending} onPress={handleConfirm}>
-                    Roziman
+                    {t("create_order_agree")}
                   </Button>
                 </View>
               </View>

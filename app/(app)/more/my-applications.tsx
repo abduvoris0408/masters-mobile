@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, RefreshControl, View } from "react-native";
 import { router } from "expo-router";
 
@@ -13,41 +14,46 @@ import type { IApplication } from "@/types";
 import { formatAddress, formatPostedAt, formatPrice } from "@/utils/format";
 import { appendUniquePage } from "@/utils/pagination";
 
-function toListingCard(item: IApplication): ListingCardData {
-  const sameBudget = item.budget_from === item.budget_to;
-  return {
-    id: item.guid,
-    categoryLabel: item.category.name,
-    title: item.title,
-    description: item.description,
-    address: formatAddress(item.address) || "Manzil ko'rsatilmagan",
-    isUrgent: item.is_urgent,
-    deadlineLabel: item.is_urgent ? "Shoshilinch" : "Muddat kelishiladi",
-    price: sameBudget
-      ? `${formatPrice(Number(item.budget_from))} gacha`
-      : `${formatPrice(Number(item.budget_from))} – ${formatPrice(Number(item.budget_to))}`,
-    paymentType: item.payment_type,
-    offersCount: item.offers_count,
-    postedAtLabel: formatPostedAt(item.created_at, {
-      today: (time) => `Bugun, ${time}`,
-      yesterday: (time) => `Kecha, ${time}`,
-    }),
+function useListingCardMapper() {
+  const { t } = useTranslation("orders");
+  return (item: IApplication): ListingCardData => {
+    const sameBudget = item.budget_from === item.budget_to;
+    return {
+      id: item.guid,
+      categoryLabel: item.category.name,
+      title: item.title,
+      description: item.description,
+      address: formatAddress(item.address) || t("address_not_specified"),
+      isUrgent: item.is_urgent,
+      deadlineLabel: item.is_urgent ? t("field_urgent") : t("deadline_negotiable"),
+      price: sameBudget
+        ? t("price_up_to", { price: formatPrice(Number(item.budget_from)) })
+        : `${formatPrice(Number(item.budget_from))} – ${formatPrice(Number(item.budget_to))}`,
+      paymentType: item.payment_type,
+      offersCount: item.offers_count,
+      postedAtLabel: formatPostedAt(item.created_at, {
+        today: (time) => t("posted_today", { time }),
+        yesterday: (time) => t("posted_yesterday", { time }),
+      }),
+    };
   };
 }
 
 const PAGE_SIZE = 12;
 
-const STATUS_FILTERS: { value: string; label: string }[] = [
-  { value: "all", label: "Barchasi" },
-  { value: "open", label: "Ochiq" },
-  { value: "in_progress", label: "Jarayonda" },
-  { value: "closed", label: "Yopilgan" },
-  { value: "cancelled", label: "Bekor qilingan" },
-];
-
 export default function MyApplicationsScreen() {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
+  const toListingCard = useListingCardMapper();
+
+  const STATUS_FILTERS: { value: string; label: string }[] = [
+    { value: "all", label: t("common_all") },
+    { value: "open", label: t("status_open") },
+    { value: "in_progress", label: t("status_in_progress") },
+    { value: "closed", label: t("status_closed") },
+    { value: "cancelled", label: t("status_cancelled") },
+  ];
   const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
   const [items, setItems] = useState<IApplication[]>([]);
@@ -73,7 +79,7 @@ export default function MyApplicationsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Mening elonlarim" onBackPress={() => router.back()} />
+      <Header title={t("my_applications_header")} onBackPress={() => router.back()} />
 
       <View className="pb-2" style={{ paddingTop: headerHeight }}>
         <FilterChips options={STATUS_FILTERS} value={status} onChange={setStatus} />
@@ -84,16 +90,16 @@ export default function MyApplicationsScreen() {
       ) : isError ? (
         <EmptyState
           icon="alert-circle-outline"
-          title="Yuklashda xatolik"
-          description="Qayta urinib ko'ring"
-          actionLabel="Qayta urinish"
+          title={t("common_load_error")}
+          description={t("common_try_again_description")}
+          actionLabel={t("common_try_again")}
           onAction={() => refetch()}
         />
       ) : items.length === 0 ? (
         <EmptyState
           icon="document-text-outline"
-          title="Siz hali birorta elon joylashtirmagansiz"
-          description="Elon joylashtirib, ustalardan takliflar olishni boshlang"
+          title={t("my_applications_empty_title")}
+          description={t("my_applications_empty_description")}
         />
       ) : (
         <FlatList

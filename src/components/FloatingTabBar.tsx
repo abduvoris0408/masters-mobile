@@ -5,6 +5,7 @@ import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Platform, Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,12 +23,6 @@ const TAB_ICONS: Record<string, { active: keyof typeof Ionicons.glyphMap; inacti
   profile: { active: "person", inactive: "person-outline" },
 };
 
-const TAB_LABELS: Record<string, string> = {
-  index: "Asosiy",
-  orders: "Buyurtmalarim",
-  profile: "Profil",
-};
-
 const SLOT_COUNT = 5;
 
 // Suzuvchi (floating) pill tab bar per mobile-design.md §2a: 5 slots —
@@ -43,6 +38,13 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
   const colors = useThemeColors();
   const user = useAuthStore((s) => s.user);
   const moreSheetRef = useRef<MoreSheetHandle>(null);
+  const { t } = useTranslation("common");
+
+  const TAB_LABELS: Record<string, string> = {
+    index: t("tab_home"),
+    orders: t("my_orders"),
+    profile: t("profile"),
+  };
 
   const routes = state.routes;
   const findRoute = (name: string) => routes.find((r: (typeof routes)[number]) => r.name === name);
@@ -231,7 +233,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
                   />
                   <View className="items-center justify-center gap-1.5 px-2.5 py-1.5">
                     <Ionicons name="grid-outline" size={22} color={colors.muted} />
-                    <Text style={{ fontFamily: GOLOS_WEIGHTS.regular, fontSize: 10, color: colors.muted }}>Ko'proq</Text>
+                    <Text style={{ fontFamily: GOLOS_WEIGHTS.regular, fontSize: 10, color: colors.muted }}>{t("more_sheet_title")}</Text>
                   </View>
                 </View>
               </Pressable>

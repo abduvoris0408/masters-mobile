@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as ImagePicker from "expo-image-picker";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Alert, Image, Pressable, Text, View } from "react-native";
 
 import { useThemeColors } from "@/lib/theme/colors";
@@ -25,6 +26,7 @@ const MAX_IMAGES = 10;
 // it's picked, same as the web wizard — by submit time its server id is
 // already known and just gets collected into ICreateApplicationRequest.images.
 export function WizardStepImages({ images, onChange }: WizardStepImagesProps) {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const uploadImageMutation = useUploadApplicationImageMutation();
   const { showActionSheetWithOptions } = useActionSheet();
@@ -58,7 +60,7 @@ export function WizardStepImages({ images, onChange }: WizardStepImagesProps) {
   const pickFromCamera = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Ruxsat kerak", "Kameradan foydalanish uchun ruxsat bering.");
+      Alert.alert(t("permission_required_title"), t("permission_camera_message"));
       return;
     }
     const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
@@ -69,7 +71,7 @@ export function WizardStepImages({ images, onChange }: WizardStepImagesProps) {
   const pickFromLibrary = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Ruxsat kerak", "Rasm tanlash uchun galereyaga ruxsat bering.");
+      Alert.alert(t("permission_required_title"), t("permission_gallery_message"));
       return;
     }
 
@@ -86,7 +88,7 @@ export function WizardStepImages({ images, onChange }: WizardStepImagesProps) {
   const pickImages = () => {
     showActionSheetWithOptions(
       {
-        options: ["Kamera", "Galereya", "Bekor qilish"],
+        options: [t("wizard_camera_option"), t("wizard_gallery_option"), t("common_cancel")],
         cancelButtonIndex: 2,
       },
       (selectedIndex) => {
@@ -129,12 +131,12 @@ export function WizardStepImages({ images, onChange }: WizardStepImagesProps) {
             className="h-[92px] w-[92px] items-center justify-center gap-1 rounded-2xl border border-dashed border-border bg-background"
           >
             <Ionicons name="image-outline" size={20} color={colors.muted} />
-            <Text className="text-[11px] text-muted">Qo'shish</Text>
+            <Text className="text-[11px] text-muted">{t("wizard_add_image")}</Text>
           </Pressable>
         ) : null}
       </View>
 
-      <Text className="text-xs text-muted">Rasmlar ixtiyoriy, lekin ish haqida ko'proq ma'lumot beradi.</Text>
+      <Text className="text-xs text-muted">{t("wizard_images_hint")}</Text>
     </View>
   );
 }

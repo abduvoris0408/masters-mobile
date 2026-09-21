@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Image, ScrollView, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
@@ -36,6 +37,7 @@ function ContentBlock({ block }: { block: IBlogContentBlock }) {
 }
 
 export default function BlogDetailScreen() {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const { guid } = useLocalSearchParams<{ guid: string }>();
@@ -43,13 +45,13 @@ export default function BlogDetailScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Blog" onBackPress={() => router.back()} />
+      <Header title={t("blog_header")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
       ) : isError || !data ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState icon="alert-circle-outline" title="Maqola topilmadi" description="Ehtimol o'chirilgan yoki mavjud emas" />
+          <EmptyState icon="alert-circle-outline" title={t("blog_article_not_found")} description={t("blog_article_not_found_description")} />
         </View>
       ) : (
         <ScrollView contentContainerClassName="gap-4 px-4 pb-10" contentContainerStyle={{ paddingTop: headerHeight + 12 }}>

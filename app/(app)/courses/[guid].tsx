@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Dimensions, Linking, Pressable, ScrollView, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEventListener } from "expo";
@@ -32,6 +33,7 @@ function LessonListRow({
   active: boolean;
   onPress: () => void;
 }) {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const isVideo = lesson.type === "video";
 
@@ -63,7 +65,7 @@ function LessonListRow({
         >
           {lesson.title}
         </Text>
-        <Text className="text-xs text-muted">{isVideo ? "Video dars" : "Material"}</Text>
+        <Text className="text-xs text-muted">{isVideo ? t("course_lesson_video") : t("course_lesson_material")}</Text>
       </View>
       {!isVideo && lesson.file ? <Ionicons name="open-outline" size={16} color={colors.muted} /> : null}
     </Pressable>
@@ -71,6 +73,7 @@ function LessonListRow({
 }
 
 export default function CourseDetailScreen() {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { guid } = useLocalSearchParams<{ guid: string }>();
@@ -101,9 +104,9 @@ export default function CourseDetailScreen() {
     setMarkingLessonId(lessonId);
     try {
       await markLessonMutation.mutateAsync({ lesson: lessonId });
-      if (!options?.silent) showSuccess("Dars o'qildi deb belgilandi");
+      if (!options?.silent) showSuccess(t("course_lesson_marked_read"));
     } catch {
-      if (!options?.silent) showError("Amalni bajarishda xatolik yuz berdi");
+      if (!options?.silent) showError(t("common_action_error"));
     } finally {
       setMarkingLessonId(null);
     }
@@ -123,10 +126,10 @@ export default function CourseDetailScreen() {
     if (!data) return;
     try {
       await completeCourseMutation.mutateAsync({ course: data.id });
-      showSuccess("Kurs muvaffaqiyatli yakunlandi");
+      showSuccess(t("course_completed_success"));
       router.back();
     } catch {
-      showError("Kursni yakunlashda xatolik yuz berdi");
+      showError(t("course_complete_error"));
     }
   };
 
@@ -146,9 +149,9 @@ export default function CourseDetailScreen() {
         </Pressable>
         <EmptyState
           icon="alert-circle-outline"
-          title="Kurs topilmadi"
-          description="Qayta urinib ko'ring"
-          actionLabel="Qayta urinish"
+          title={t("course_not_found")}
+          description={t("common_try_again_description")}
+          actionLabel={t("common_try_again")}
           onAction={() => refetch()}
         />
       </View>
@@ -166,7 +169,7 @@ export default function CourseDetailScreen() {
         ) : (
           <View className="flex-1 items-center justify-center">
             <Ionicons name="document-text-outline" size={36} color="#FFFFFF" />
-            <Text className="mt-2 text-sm text-white/70">Bu material video emas</Text>
+            <Text className="mt-2 text-sm text-white/70">{t("course_material_not_video")}</Text>
           </View>
         )}
         <Pressable
@@ -197,7 +200,7 @@ export default function CourseDetailScreen() {
             >
               <Ionicons name="document-attach-outline" size={16} color={colors.accent} />
               <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                Materialni ochish
+                {t("course_open_material")}
               </Text>
             </Pressable>
           ) : null}
@@ -209,14 +212,14 @@ export default function CourseDetailScreen() {
               loading={markingLessonId === activeLesson.id}
               onPress={() => handleMarkRead(activeLesson.id)}
             >
-              O'qildi deb belgilash
+              {t("course_mark_as_read")}
             </Button>
           ) : null}
         </View>
 
         <View className="gap-1 px-2 py-2">
           <Text className="px-2 py-1 text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-            Kurs darslari ({lessons.filter((l) => l.is_read).length}/{lessons.length})
+            {t("course_lessons_count", { read: lessons.filter((l) => l.is_read).length, total: lessons.length })}
           </Text>
           {lessons.map((lesson, index) => (
             <LessonListRow
@@ -232,7 +235,7 @@ export default function CourseDetailScreen() {
         {allRead ? (
           <View className="px-4 pt-3">
             <Button loading={completeCourseMutation.isPending} onPress={handleCompleteCourse}>
-              Kursni yakunlash
+              {t("course_complete_button")}
             </Button>
           </View>
         ) : null}

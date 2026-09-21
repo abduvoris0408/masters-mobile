@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, ScrollView, Switch, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
@@ -15,6 +16,7 @@ import type { TPaymentType } from "@/types";
 import { showError, showSuccess } from "@/utils/toast";
 
 export default function EditApplicationScreen() {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const { guid } = useLocalSearchParams<{ guid: string }>();
@@ -43,13 +45,13 @@ export default function EditApplicationScreen() {
   const handleSave = async () => {
     if (!guid) return;
     if (!title.trim()) {
-      showError("Sarlavhani kiriting");
+      showError(t("edit_application_title_required"));
       return;
     }
     const from = Number(budgetFrom.replace(/\D/g, ""));
     const to = Number(budgetTo.replace(/\D/g, ""));
     if (!from || !to || to < from) {
-      showError("Byudjetni to'g'ri kiriting");
+      showError(t("edit_application_budget_invalid"));
       return;
     }
     try {
@@ -65,74 +67,74 @@ export default function EditApplicationScreen() {
           payment_type: paymentType,
         },
       });
-      showSuccess("Elon yangilandi");
+      showSuccess(t("edit_application_success"));
       router.back();
     } catch {
-      showError("Elonni saqlashda xatolik yuz berdi");
+      showError(t("edit_application_error"));
     }
   };
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Elonni tahrirlash" onBackPress={() => router.back()} />
+      <Header title={t("edit_application_header")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
       ) : isError || !data ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState icon="alert-circle-outline" title="Elon topilmadi" />
+          <EmptyState icon="alert-circle-outline" title={t("application_not_found")} />
         </View>
       ) : (
         <ScrollView contentContainerClassName="gap-4 px-4 pb-10" contentContainerStyle={{ paddingTop: headerHeight + 12 }}>
-          <TextField label="Sarlavha" value={title} onChangeText={setTitle} placeholder="Ish nomi" />
+          <TextField label={t("field_title")} value={title} onChangeText={setTitle} placeholder={t("field_title_placeholder")} />
           <TextField
-            label="Tavsif"
+            label={t("field_description")}
             value={description}
             onChangeText={setDescription}
-            placeholder="Ish haqida batafsil"
+            placeholder={t("field_description_placeholder")}
             multiline
             numberOfLines={4}
             style={{ height: 110, textAlignVertical: "top", paddingTop: 12 }}
           />
-          <TextField label="Manzil" value={address} onChangeText={setAddress} placeholder="Manzilingiz" />
+          <TextField label={t("field_address")} value={address} onChangeText={setAddress} placeholder={t("field_address_placeholder")} />
 
           <View className="flex-row gap-3">
             <View className="flex-1">
-              <TextField label="Byudjet (dan)" value={budgetFrom} onChangeText={setBudgetFrom} keyboardType="number-pad" />
+              <TextField label={t("field_budget_from")} value={budgetFrom} onChangeText={setBudgetFrom} keyboardType="number-pad" />
             </View>
             <View className="flex-1">
-              <TextField label="Byudjet (gacha)" value={budgetTo} onChangeText={setBudgetTo} keyboardType="number-pad" />
+              <TextField label={t("field_budget_to")} value={budgetTo} onChangeText={setBudgetTo} keyboardType="number-pad" />
             </View>
           </View>
 
           <View className="flex-row items-center justify-between rounded-2xl bg-surface px-4 py-3.5">
             <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-              Shoshilinch
+              {t("field_urgent")}
             </Text>
             <Switch value={isUrgent} onValueChange={setIsUrgent} trackColor={{ true: colors.accent }} />
           </View>
 
           <View className="gap-2">
             <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-              To'lov turi
+              {t("field_payment_type")}
             </Text>
             <PaymentTypeOption
               active={paymentType === "direct"}
-              title="To'g'ridan-to'g'ri"
-              description="Ish yakunlangach, to'g'ridan-to'g'ri mutaxassisga to'lov qilinadi."
+              title={t("payment_direct_title")}
+              description={t("payment_direct_description")}
               onPress={() => setPaymentType("direct")}
             />
             <PaymentTypeOption
               active={paymentType === "escrow"}
-              title="Xavfsiz bitim (escrow)"
-              badge="Tavsiya etiladi"
-              description="To'lov tizim orqali ushlab turiladi va ish tasdiqlangach mutaxassisga o'tkaziladi."
+              title={t("payment_escrow_title")}
+              badge={t("payment_recommended_badge")}
+              description={t("payment_escrow_description")}
               onPress={() => setPaymentType("escrow")}
             />
           </View>
 
           <Button loading={updateMutation.isPending} onPress={handleSave}>
-            Saqlash
+            {t("common_save")}
           </Button>
         </ScrollView>
       )}

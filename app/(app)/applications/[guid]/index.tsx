@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
@@ -20,20 +21,6 @@ import type { IApplicationOffer } from "@/types";
 import { formatAddress, formatDate, formatPhoneNumber, formatPrice } from "@/utils/format";
 import { showError, showSuccess } from "@/utils/toast";
 
-const STATUS_META: Record<string, { label: string; tone: ChipTone }> = {
-  open: { label: "Ochiq", tone: "success" },
-  new: { label: "Ochiq", tone: "success" },
-  in_progress: { label: "Jarayonda", tone: "warning" },
-  closed: { label: "Yopilgan", tone: "neutral" },
-  cancelled: { label: "Bekor qilingan", tone: "danger" },
-};
-
-const OFFER_STATUS_META: Record<string, { label: string; tone: ChipTone }> = {
-  pending: { label: "Kutilmoqda", tone: "warning" },
-  accepted: { label: "Qabul qilingan", tone: "success" },
-  rejected: { label: "Rad etilgan", tone: "danger" },
-};
-
 function OfferRow({
   offer,
   isOpen,
@@ -45,7 +32,13 @@ function OfferRow({
   onAccept: () => void;
   accepting: boolean;
 }) {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
+  const OFFER_STATUS_META: Record<string, { label: string; tone: ChipTone }> = {
+    pending: { label: t("offer_status_pending"), tone: "warning" },
+    accepted: { label: t("offer_status_accepted"), tone: "success" },
+    rejected: { label: t("offer_status_rejected"), tone: "danger" },
+  };
   const statusMeta = OFFER_STATUS_META[offer.status] ?? { label: offer.status, tone: "neutral" as ChipTone };
 
   return (
@@ -62,7 +55,7 @@ function OfferRow({
       </View>
 
       <View className="flex-row items-center justify-between rounded-xl bg-background px-3 py-2.5">
-        <Text className="text-xs text-muted">Taklif narxi</Text>
+        <Text className="text-xs text-muted">{t("offer_price_label")}</Text>
         <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
           {formatPrice(Number(offer.price))}
         </Text>
@@ -84,7 +77,7 @@ function OfferRow({
             <>
               <Ionicons name="checkmark-circle-outline" size={16} color="#FFFFFF" />
               <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                Qabul qilish
+                {t("offer_accept_button")}
               </Text>
             </>
           )}
@@ -95,6 +88,7 @@ function OfferRow({
 }
 
 export default function ApplicationManageScreen() {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const { guid } = useLocalSearchParams<{ guid: string }>();
@@ -102,25 +96,33 @@ export default function ApplicationManageScreen() {
   const updateMutation = useUpdateApplicationMutation();
   const acceptOfferMutation = useAcceptOfferMutation();
 
+  const STATUS_META: Record<string, { label: string; tone: ChipTone }> = {
+    open: { label: t("status_open"), tone: "success" },
+    new: { label: t("status_open"), tone: "success" },
+    in_progress: { label: t("status_in_progress"), tone: "warning" },
+    closed: { label: t("status_closed"), tone: "neutral" },
+    cancelled: { label: t("status_cancelled"), tone: "danger" },
+  };
+
   const isOpenStatus = data?.status === "open" || data?.status === "new";
   const statusMeta = data ? STATUS_META[data.status] ?? { label: data.status, tone: "neutral" as ChipTone } : null;
 
   const confirmCancel = () => {
     if (!guid) return;
     Alert.alert(
-      "Elon bekor qilinsinmi?",
-      "Bekor qilingan elon takliflarni qabul qilmaydi va qayta faollashtirilmaydi.",
+      t("cancel_application_confirm_title"),
+      t("cancel_application_confirm_message"),
       [
-        { text: "Yo'q", style: "cancel" },
+        { text: t("common_no"), style: "cancel" },
         {
-          text: "Bekor qilish",
+          text: t("common_cancel"),
           style: "destructive",
           onPress: async () => {
             try {
               await updateMutation.mutateAsync({ guid, data: { status: "cancelled" } });
-              showSuccess("Elon bekor qilindi");
+              showSuccess(t("cancel_application_success"));
             } catch {
-              showError("Elonni bekor qilishda xatolik yuz berdi");
+              showError(t("cancel_application_error"));
             }
           },
         },
@@ -131,28 +133,28 @@ export default function ApplicationManageScreen() {
   const handleAccept = async (offerGuid: string) => {
     try {
       await acceptOfferMutation.mutateAsync(offerGuid);
-      showSuccess("Taklif qabul qilindi");
+      showSuccess(t("offer_accept_success"));
     } catch {
-      showError("Taklifni qabul qilishda xatolik yuz berdi");
+      showError(t("offer_accept_error"));
     }
   };
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Elon tafsilotlari" onBackPress={() => router.back()} />
+      <Header title={t("application_details_header")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
       ) : isError || !data ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
-          <EmptyState icon="alert-circle-outline" title="Elon topilmadi" />
+          <EmptyState icon="alert-circle-outline" title={t("application_not_found")} />
         </View>
       ) : (
         <ScrollView contentContainerClassName="gap-4 px-4 pb-10" contentContainerStyle={{ paddingTop: headerHeight + 12 }}>
           <View className="gap-2">
             <View className="flex-row flex-wrap gap-2">
               <Chip label={data.category.name} tone="info" />
-              {data.is_urgent ? <Chip label="Shoshilinch" tone="danger" icon="alarm-outline" /> : null}
+              {data.is_urgent ? <Chip label={t("field_urgent")} tone="danger" icon="alarm-outline" /> : null}
               {statusMeta ? <Chip label={statusMeta.label} tone={statusMeta.tone} /> : null}
             </View>
             <Text className="text-xl text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
@@ -167,13 +169,13 @@ export default function ApplicationManageScreen() {
 
           <Card className="gap-3">
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-muted">Manzil</Text>
+              <Text className="text-xs text-muted">{t("field_address")}</Text>
               <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                {formatAddress(data.address) || "Ko'rsatilmagan"}
+                {formatAddress(data.address) || t("not_specified")}
               </Text>
             </View>
             <View className="flex-row items-center justify-between border-t border-border pt-3">
-              <Text className="text-xs text-muted">Byudjet</Text>
+              <Text className="text-xs text-muted">{t("field_budget")}</Text>
               <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
                 {data.budget_from === data.budget_to
                   ? formatPrice(Number(data.budget_from))
@@ -181,7 +183,7 @@ export default function ApplicationManageScreen() {
               </Text>
             </View>
             <View className="flex-row items-center justify-between border-t border-border pt-3">
-              <Text className="text-xs text-muted">Sana</Text>
+              <Text className="text-xs text-muted">{t("field_date")}</Text>
               <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
                 {formatDate(data.created_at)}
               </Text>
@@ -196,7 +198,7 @@ export default function ApplicationManageScreen() {
               >
                 <Ionicons name="pencil-outline" size={16} color={colors.foreground} />
                 <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                  Tahrirlash
+                  {t("common_edit")}
                 </Text>
               </Pressable>
               <Pressable
@@ -206,7 +208,7 @@ export default function ApplicationManageScreen() {
               >
                 <Ionicons name="ban-outline" size={16} color={colors.danger} />
                 <Text className="text-sm text-danger" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                  Bekor qilish
+                  {t("common_cancel")}
                 </Text>
               </Pressable>
             </View>
@@ -214,12 +216,12 @@ export default function ApplicationManageScreen() {
 
           <View className="gap-2">
             <Text className="px-1 text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-              Takliflar
+              {t("offers_section_title")}
             </Text>
-            <Text className="px-1 text-xs text-muted">Mutaxassislar tomonidan ushbu elonga yuborilgan takliflar</Text>
+            <Text className="px-1 text-xs text-muted">{t("offers_section_subtitle")}</Text>
 
             {!data.offers || data.offers.length === 0 ? (
-              <EmptyState icon="people-outline" title="Hali taklif yo'q" description="Mutaxassislar hali taklif yubormagan" />
+              <EmptyState icon="people-outline" title={t("offers_empty_title")} description={t("offers_empty_description")} />
             ) : (
               data.offers.map((offer) => (
                 <OfferRow

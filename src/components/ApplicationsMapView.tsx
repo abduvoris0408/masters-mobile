@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -32,6 +33,7 @@ interface ApplicationsMapViewProps {
 // bottom (tap the card to open the full detail screen, same destination as
 // the list/grid cards' onPress).
 export function ApplicationsMapView({ items, onSelect }: ApplicationsMapViewProps) {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const [selected, setSelected] = useState<IApplication | null>(null);
 
@@ -44,14 +46,14 @@ export function ApplicationsMapView({ items, onSelect }: ApplicationsMapViewProp
     return (
       <EmptyState
         icon="map-outline"
-        title="Xarita mavjud emas"
-        description="Interaktiv xarita ushbu ilova versiyasida ishlamaydi"
+        title={t("map_unavailable_title")}
+        description={t("map_unavailable_description")}
       />
     );
   }
 
   if (pins.length === 0) {
-    return <EmptyState icon="location-outline" title="Manzili ko'rsatilgan elonlar yo'q" />;
+    return <EmptyState icon="location-outline" title={t("map_no_located_listings")} />;
   }
 
   const initialRegion = {

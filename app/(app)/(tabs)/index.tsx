@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { router } from "expo-router";
 
@@ -24,28 +25,28 @@ import { appendUniquePage } from "@/utils/pagination";
 
 type SortMode = "most_offers" | undefined;
 
-function toListingCard(item: IApplication): ListingCardData {
+function toListingCard(item: IApplication, t: (key: string, options?: Record<string, unknown>) => string): ListingCardData {
   const sameBudget = item.budget_from === item.budget_to;
   return {
     id: item.guid,
     categoryLabel: item.category.name,
     title: item.title,
     description: item.description,
-    address: formatAddress(item.address) || "Manzil ko'rsatilmagan",
+    address: formatAddress(item.address) || t("home_address_not_specified"),
     isUrgent: item.is_urgent,
     deadlineLabel: item.is_urgent
-      ? "Shoshilinch"
+      ? t("home_urgent")
       : item.date_from
-        ? formatPostedAt(item.date_from, { today: () => "Bugun", yesterday: () => "Ertaga" })
-        : "Muddat kelishiladi",
+        ? formatPostedAt(item.date_from, { today: () => t("home_today"), yesterday: () => t("home_tomorrow") })
+        : t("home_deadline_negotiable"),
     price: sameBudget
-      ? `${formatPrice(Number(item.budget_from))} gacha`
-      : `${formatPrice(Number(item.budget_from))} – ${formatPrice(Number(item.budget_to))}`,
+      ? t("home_price_up_to", { price: formatPrice(Number(item.budget_from)) })
+      : t("home_price_range", { from: formatPrice(Number(item.budget_from)), to: formatPrice(Number(item.budget_to)) }),
     paymentType: item.payment_type,
     offersCount: item.offers_count,
     postedAtLabel: formatPostedAt(item.created_at, {
-      today: (time) => `Bugun, ${time}`,
-      yesterday: (time) => `Kecha, ${time}`,
+      today: (time) => t("home_posted_today", { time }),
+      yesterday: (time) => t("home_posted_yesterday", { time }),
     }),
   };
 }
@@ -54,6 +55,7 @@ const PAGE_SIZE = 12;
 const ALL_CATEGORY = "all";
 
 export default function HomeScreen() {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const [categoryFilter, setCategoryFilter] = useState<string>(ALL_CATEGORY);
@@ -74,7 +76,7 @@ export default function HomeScreen() {
 
   const { data: categories } = useAllJobsCategoriesQuery();
   const categoryChips = [
-    { value: ALL_CATEGORY, label: "Barchasi" },
+    { value: ALL_CATEGORY, label: t("home_all_categories") },
     ...(categories ?? []).slice(0, 8).map((c) => ({ value: String(c.id), label: c.name })),
   ];
 
@@ -103,13 +105,13 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Elonlar" onSearchPress={() => setSearchVisible((v) => !v)} />
+      <Header title={t("home_title")} onSearchPress={() => setSearchVisible((v) => !v)} />
 
       <View className="gap-3 pb-3" style={{ paddingTop: headerHeight }}>
         {searchVisible ? (
           <View className="px-4">
             <SearchBar
-              placeholder="Ishlar bo'yicha qidirish..."
+              placeholder={t("home_search_placeholder")}
               value={searchInput}
               onChangeText={setSearchInput}
               autoFocus
@@ -136,7 +138,7 @@ export default function HomeScreen() {
             </Pressable>
             <View className="flex-row items-center gap-1.5">
               <View className="h-2 w-2 rounded-full bg-accent" />
-              <Text className="text-sm text-muted">{totalCount} ta faol elon</Text>
+              <Text className="text-sm text-muted">{t("home_active_count", { count: totalCount })}</Text>
             </View>
           </View>
 
@@ -146,7 +148,7 @@ export default function HomeScreen() {
               className="flex-row items-center gap-1 rounded-xl bg-surface px-3 py-2"
             >
               <Text className="text-sm text-foreground" style={{ fontWeight: "600" }}>
-                {sort === "most_offers" ? "Ko'p taklif" : "Saralash"}
+                {sort === "most_offers" ? t("home_sort_most_offers") : t("home_sort_default")}
               </Text>
               <Ionicons name="chevron-down" size={14} color={colors.muted} />
             </Pressable>
@@ -175,9 +177,9 @@ export default function HomeScreen() {
       {isLoading ? (
         <ActivityIndicator className="mt-10" color={colors.accent} />
       ) : isError ? (
-        <EmptyState icon="alert-circle-outline" title="Yuklashda xatolik" description="Qayta urinib ko'ring" actionLabel="Qayta urinish" onAction={() => refetch()} />
+        <EmptyState icon="alert-circle-outline" title={t("common_load_error_title")} description={t("common_retry_description")} actionLabel={t("common_retry_action")} onAction={() => refetch()} />
       ) : items.length === 0 ? (
-        <EmptyState icon="search-outline" title="Hech narsa topilmadi" description="Boshqa so'z yoki filtr bilan urinib ko'ring" />
+        <EmptyState icon="search-outline" title={t("common_nothing_found_title")} description={t("common_nothing_found_description")} />
       ) : viewMode === "map" ? (
         <View style={{ flex: 1 }}>
           <ApplicationsMapView items={items} onSelect={(item) => router.push(`/listing/${item.guid}`)} />
@@ -194,7 +196,7 @@ export default function HomeScreen() {
           renderItem={({ item }) => (
             <View style={viewMode === "grid" ? { flex: 1 } : undefined}>
               <ListingCard
-                item={toListingCard(item)}
+                item={toListingCard(item, t)}
                 variant={viewMode === "grid" ? "grid" : "list"}
                 onPress={() => router.push(`/listing/${item.guid}`)}
                 onOfferPress={() => router.push(`/listing/${item.guid}`)}

@@ -10,6 +10,7 @@ import { ActivityIndicator, Alert, FlatList, Pressable, Text, View } from "react
 import * as DocumentPicker from "expo-document-picker";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -25,8 +26,8 @@ import {
   useUpdateDocumentMutation,
   type IPickedDocumentFile,
 } from "@/services/document";
-import { useMasterProfileQuery } from "@/services/master";
-import type { IDocument } from "@/types";
+import { useProfilePerspective } from "@/hooks/useProfilePerspective";
+import type { IDocument, TDocumentOwnerKind } from "@/types";
 import { formatDate } from "@/utils/format";
 import { showError, showSuccess } from "@/utils/toast";
 
@@ -41,10 +42,11 @@ interface DocumentFormModalHandle {
   present: (item: IDocument | null) => void;
 }
 
-const DocumentFormModal = forwardRef<DocumentFormModalHandle, { profileGuid: string | null }>(function DocumentFormModal(
-  { profileGuid },
-  ref,
-) {
+const DocumentFormModal = forwardRef<
+  DocumentFormModalHandle,
+  { kind: TDocumentOwnerKind; ownerGuid: string | null }
+>(function DocumentFormModal({ kind, ownerGuid }, ref) {
+  const { t } = useTranslation("profile");
   const colors = useThemeColors();
   const sheetRef = useRef<BottomSheetModal>(null);
   const [item, setItem] = useState<IDocument | null>(null);
@@ -55,8 +57,8 @@ const DocumentFormModal = forwardRef<DocumentFormModalHandle, { profileGuid: str
   const [issuedAt, setIssuedAt] = useState("");
   const [file, setFile] = useState<IPickedDocumentFile | null>(null);
 
-  const createMutation = useCreateDocumentMutation("profile", profileGuid);
-  const updateMutation = useUpdateDocumentMutation("profile", profileGuid);
+  const createMutation = useCreateDocumentMutation(kind, ownerGuid);
+  const updateMutation = useUpdateDocumentMutation(kind, ownerGuid);
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   useImperativeHandle(ref, () => ({
@@ -75,7 +77,7 @@ const DocumentFormModal = forwardRef<DocumentFormModalHandle, { profileGuid: str
     if (result.canceled || !result.assets?.length) return;
     const picked = result.assets[0];
     if (picked.size && picked.size > MAX_FILE_SIZE) {
-      showError("Fayl hajmi 10 MB dan oshmasligi kerak");
+      showError(t("documents_file_too_large"));
       return;
     }
     setFile({ uri: picked.uri, mimeType: picked.mimeType, name: picked.name });
@@ -83,19 +85,19 @@ const DocumentFormModal = forwardRef<DocumentFormModalHandle, { profileGuid: str
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      showError("Nomini kiriting");
+      showError(t("documents_enter_title"));
       return;
     }
     if (!issuedBy.trim()) {
-      showError("Kim tomonidan berilganini kiriting");
+      showError(t("documents_enter_issued_by"));
       return;
     }
     if (!DATE_PATTERN.test(issuedAt)) {
-      showError("Sanani YYYY-MM-DD formatida kiriting");
+      showError(t("documents_enter_date_format"));
       return;
     }
     if (!isEdit && !file) {
-      showError("Faylni tanlang");
+      showError(t("documents_select_file"));
       return;
     }
     try {
@@ -107,14 +109,14 @@ const DocumentFormModal = forwardRef<DocumentFormModalHandle, { profileGuid: str
           issuedAt,
           file: file ?? undefined,
         });
-        showSuccess("Hujjat yangilandi");
+        showSuccess(t("documents_updated"));
       } else if (file) {
         await createMutation.mutateAsync({ title: title.trim(), issued_by: issuedBy.trim(), issued_at: issuedAt, file });
-        showSuccess("Hujjat qo'shildi");
+        showSuccess(t("documents_added"));
       }
       sheetRef.current?.dismiss();
     } catch {
-      showError(isEdit ? "Yangilashda xatolik yuz berdi" : "Qo'shishda xatolik yuz berdi");
+      showError(isEdit ? t("update_error") : t("add_error"));
     }
   };
 
@@ -138,20 +140,20 @@ const DocumentFormModal = forwardRef<DocumentFormModalHandle, { profileGuid: str
     >
       <View className="px-5">
         <Text className="mb-4 text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-          {isEdit ? "Hujjatni tahrirlash" : "Yangi hujjat qo'shish"}
+          {isEdit ? t("documents_edit_title") : t("documents_add_title")}
         </Text>
       </View>
 
       <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20 }}>
-        <TextField label="Nomi" value={title} onChangeText={setTitle} placeholder="Sertifikat nomi" />
+        <TextField label={t("documents_name")} value={title} onChangeText={setTitle} placeholder={t("documents_name_placeholder")} />
         <View style={{ height: 12 }} />
-        <TextField label="Kim tomonidan berilgan" value={issuedBy} onChangeText={setIssuedBy} placeholder="Tashkilot nomi" />
+        <TextField label={t("documents_issued_by")} value={issuedBy} onChangeText={setIssuedBy} placeholder={t("documents_issued_by_placeholder")} />
         <View style={{ height: 12 }} />
-        <TextField label="Berilgan sana" value={issuedAt} onChangeText={setIssuedAt} placeholder="2025-01-31" />
+        <TextField label={t("documents_issued_at")} value={issuedAt} onChangeText={setIssuedAt} placeholder="2025-01-31" />
         <View style={{ height: 16 }} />
 
         <Text className="mb-2 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-          Fayl
+          {t("documents_file")}
         </Text>
         {file ? (
           <View className="flex-row items-center gap-2.5 rounded-2xl bg-surface px-3.5 py-3">
@@ -167,11 +169,11 @@ const DocumentFormModal = forwardRef<DocumentFormModalHandle, { profileGuid: str
           <View className="flex-row items-center gap-2.5 rounded-2xl bg-surface px-3.5 py-3">
             <Ionicons name="document-text-outline" size={18} color={colors.muted} />
             <Text className="flex-1 text-xs text-muted" numberOfLines={1}>
-              Joriy fayl saqlanadi
+              {t("documents_current_file_kept")}
             </Text>
             <Pressable onPress={handlePick}>
               <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                Almashtirish
+                {t("replace")}
               </Text>
             </Pressable>
           </View>
@@ -182,13 +184,13 @@ const DocumentFormModal = forwardRef<DocumentFormModalHandle, { profileGuid: str
           >
             <Ionicons name="cloud-upload-outline" size={18} color={colors.muted} />
             <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-              Fayl tanlash (rasm yoki PDF)
+              {t("documents_pick_file")}
             </Text>
           </Pressable>
         )}
 
         <Button className="mb-5 mt-5" loading={isPending} onPress={handleSubmit}>
-          {isEdit ? "Saqlash" : "Qo'shish"}
+          {isEdit ? t("save") : t("add")}
         </Button>
       </BottomSheetScrollView>
     </BottomSheetModal>
@@ -196,12 +198,14 @@ const DocumentFormModal = forwardRef<DocumentFormModalHandle, { profileGuid: str
 });
 
 export default function ProfileDocumentsScreen() {
+  const { t } = useTranslation("profile");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
-  const { data: profile } = useMasterProfileQuery();
-  const profileGuid = profile?.master_profile ? profile.guid : null;
-  const { data: documents, isLoading } = useDocumentListQuery("profile", profileGuid);
-  const deleteMutation = useDeleteDocumentMutation("profile", profileGuid);
+  const { profileGuid, isOrganization, organizationGuid } = useProfilePerspective();
+  const kind: TDocumentOwnerKind = isOrganization ? "organization" : "profile";
+  const ownerGuid = isOrganization ? organizationGuid : profileGuid;
+  const { data: documents, isLoading } = useDocumentListQuery(kind, ownerGuid);
+  const deleteMutation = useDeleteDocumentMutation(kind, ownerGuid);
 
   const formSheetRef = useRef<DocumentFormModalHandle>(null);
   const [deletingGuid, setDeletingGuid] = useState<string | null>(null);
@@ -210,18 +214,18 @@ export default function ProfileDocumentsScreen() {
   const openEdit = (item: IDocument) => formSheetRef.current?.present(item);
 
   const handleDelete = (guid: string) => {
-    Alert.alert("Hujjatni o'chirish", "Ushbu hujjatni o'chirishni tasdiqlaysizmi?", [
-      { text: "Bekor qilish", style: "cancel" },
+    Alert.alert(t("documents_delete_title"), t("documents_delete_message"), [
+      { text: t("cancel"), style: "cancel" },
       {
-        text: "O'chirish",
+        text: t("delete"),
         style: "destructive",
         onPress: async () => {
           setDeletingGuid(guid);
           try {
             await deleteMutation.mutateAsync(guid);
-            showSuccess("Hujjat o'chirildi");
+            showSuccess(t("documents_deleted"));
           } catch {
-            showError("O'chirishda xatolik yuz berdi");
+            showError(t("delete_error"));
           } finally {
             setDeletingGuid(null);
           }
@@ -233,7 +237,7 @@ export default function ProfileDocumentsScreen() {
   return (
     <View className="flex-1 bg-background">
       <Header
-        title="Hujjatlar"
+        title={t("documents_title")}
         onBackPress={() => router.back()}
         right={
           <Pressable onPress={openAdd} hitSlop={8}>
@@ -248,9 +252,9 @@ export default function ProfileDocumentsScreen() {
         <View style={{ flex: 1, paddingTop: headerHeight }}>
           <EmptyState
             icon="document-attach-outline"
-            title="Hujjatlar qo'shilmagan"
-            description="Sertifikat va litsenziyalaringizni qo'shib, profilingizga ishonch qo'shing"
-            actionLabel="Hujjat qo'shish"
+            title={t("documents_empty_title")}
+            description={t("documents_empty_description")}
+            actionLabel={t("documents_add_action")}
             onAction={openAdd}
           />
         </View>
@@ -299,7 +303,7 @@ export default function ProfileDocumentsScreen() {
         />
       )}
 
-      <DocumentFormModal ref={formSheetRef} profileGuid={profileGuid} />
+      <DocumentFormModal ref={formSheetRef} kind={kind} ownerGuid={ownerGuid} />
     </View>
   );
 }

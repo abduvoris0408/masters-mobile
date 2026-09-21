@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
@@ -12,9 +12,11 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { BlurView } from "expo-blur";
 import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
 import { BrowseIllustration } from "@/components/onboarding/BrowseIllustration";
 import { FastOrderIllustration } from "@/components/onboarding/FastOrderIllustration";
@@ -22,6 +24,15 @@ import { TrustIllustration } from "@/components/onboarding/TrustIllustration";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useThemeColors } from "@/lib/theme/colors";
 import { useOnboardingStore } from "@/stores";
+import { useLanguageStore, type AppLanguage } from "@/stores/language.store";
+import { useThemeStore } from "@/stores/theme.store";
+import { ETheme } from "@/types";
+
+const LANGUAGE_OPTIONS: { value: AppLanguage; label: string; short: string }[] = [
+  { value: "uz", label: "O'zbekcha", short: "UZ" },
+  { value: "ru", label: "Русский", short: "RU" },
+  { value: "en", label: "English", short: "EN" },
+];
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -36,6 +47,46 @@ const SLIDES = [
   { key: "fast", Illustration: FastOrderIllustration },
 ];
 
+// Illustration + copy ease in (fade + rise) each time their slide becomes the
+// active one, instead of just snapping into place with the paging scroll —
+// small touch that keeps the 3-slide beat from feeling static.
+function OnboardingSlide({
+  Illustration,
+  title,
+  subtitle,
+  isActive,
+}: {
+  Illustration: (typeof SLIDES)[number]["Illustration"];
+  title: string;
+  subtitle: string;
+  isActive: boolean;
+}) {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = 0;
+    progress.value = withTiming(isActive ? 1 : 0, { duration: 420 });
+  }, [isActive, progress]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ translateY: (1 - progress.value) * 18 }],
+  }));
+
+  return (
+    <View style={{ width: SCREEN_WIDTH }} className="flex-1 items-center justify-center px-8">
+      <Animated.View style={[{ marginBottom: 32, height: 240, width: 240, alignItems: "center", justifyContent: "center" }, animatedStyle]}>
+        <Illustration width="100%" height="100%" />
+      </Animated.View>
+
+      <Animated.View style={animatedStyle}>
+        <Text className="text-center text-2xl font-bold text-foreground">{title}</Text>
+        <Text className="mt-3 text-center text-sm leading-5 text-muted">{subtitle}</Text>
+      </Animated.View>
+    </View>
+  );
+}
+
 export default function OnboardingScreen() {
   const { t } = useTranslation("onboarding");
   const colors = useThemeColors();
@@ -44,8 +95,23 @@ export default function OnboardingScreen() {
   const isDark = colorScheme === "dark";
   const listRef = useRef<FlatList>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const { showActionSheetWithOptions } = useActionSheet();
+  const language = useLanguageStore((s) => s.language);
+  const setLanguage = useLanguageStore((s) => s.setLanguage);
+  const setThemePreference = useThemeStore((s) => s.setPreference);
 
   const isLastSlide = activeIndex === SLIDES.length - 1;
+
+  const toggleTheme = () => setThemePreference(isDark ? ETheme.LIGHT : ETheme.DARK);
+
+  const openLanguagePicker = () => {
+    const labels = [...LANGUAGE_OPTIONS.map((o) => o.label), t("cancel", { defaultValue: "Bekor qilish" })];
+    const cancelButtonIndex = labels.length - 1;
+    showActionSheetWithOptions({ options: labels, cancelButtonIndex }, (selectedIndex) => {
+      if (selectedIndex == null || selectedIndex === cancelButtonIndex) return;
+      setLanguage(LANGUAGE_OPTIONS[selectedIndex].value);
+    });
+  };
 
   const finishOnboarding = () => {
     useOnboardingStore.getState().setHasSeenOnboarding(true);
@@ -68,15 +134,28 @@ export default function OnboardingScreen() {
   return (
     <View className="flex-1 bg-background">
       <View className="flex-row items-center justify-between px-6" style={{ marginTop: insets.top + 12 }}>
-        <View className="flex-row items-center gap-2">
-          <View className="h-8 w-8 items-center justify-center rounded-full bg-primary">
-            <Ionicons name="hammer" size={16} color="#FFFFFF" />
+        <View className="flex-row items-center gap-2.5">
+          <View className="h-11 w-11 items-center justify-center rounded-2xl bg-primary">
+            <Ionicons name="hammer" size={22} color="#FFFFFF" />
           </View>
-          <Text className="text-lg font-bold text-foreground">Masters</Text>
+          <Text className="text-2xl font-bold text-foreground">Masters</Text>
         </View>
 
-        {!isLastSlide ? (
-          <Pressable onPress={finishOnboarding} hitSlop={8}>
+        <View className="flex-row items-center gap-2">
+          <Pressable onPress={toggleTheme} hitSlop={8}>
+            <BlurView
+              intensity={Platform.OS === "ios" ? 50 : 90}
+              tint={isDark ? "dark" : "light"}
+              style={[
+                styles.iconPill,
+                { borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.6)" },
+              ]}
+            >
+              <Ionicons name={isDark ? "moon" : "sunny"} size={16} color={colors.foreground} />
+            </BlurView>
+          </Pressable>
+
+          <Pressable onPress={openLanguagePicker} hitSlop={8}>
             <BlurView
               intensity={Platform.OS === "ios" ? 50 : 90}
               tint={isDark ? "dark" : "light"}
@@ -85,10 +164,27 @@ export default function OnboardingScreen() {
                 { borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.6)" },
               ]}
             >
-              <Text className="text-sm font-medium text-foreground">{t("skip")}</Text>
+              <Text className="text-sm font-medium text-foreground">
+                {LANGUAGE_OPTIONS.find((o) => o.value === language)?.short ?? "UZ"}
+              </Text>
             </BlurView>
           </Pressable>
-        ) : null}
+
+          {!isLastSlide ? (
+            <Pressable onPress={finishOnboarding} hitSlop={8}>
+              <BlurView
+                intensity={Platform.OS === "ios" ? 50 : 90}
+                tint={isDark ? "dark" : "light"}
+                style={[
+                  styles.skipPill,
+                  { borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.6)" },
+                ]}
+              >
+                <Text className="text-sm font-medium text-foreground">{t("skip")}</Text>
+              </BlurView>
+            </Pressable>
+          ) : null}
+        </View>
       </View>
 
       <FlatList
@@ -100,15 +196,13 @@ export default function OnboardingScreen() {
         showsHorizontalScrollIndicator={false}
         bounces={false}
         onMomentumScrollEnd={onMomentumScrollEnd}
-        renderItem={({ item }) => (
-          <View style={{ width: SCREEN_WIDTH }} className="flex-1 items-center justify-center px-8">
-            <View className="mb-8 h-60 w-60 items-center justify-center">
-              <item.Illustration width="100%" height="100%" />
-            </View>
-
-            <Text className="text-center text-2xl font-bold text-foreground">{t(`${item.key}_title`)}</Text>
-            <Text className="mt-3 text-center text-sm leading-5 text-muted">{t(`${item.key}_subtitle`)}</Text>
-          </View>
+        renderItem={({ item, index }) => (
+          <OnboardingSlide
+            Illustration={item.Illustration}
+            title={t(`${item.key}_title`)}
+            subtitle={t(`${item.key}_subtitle`)}
+            isActive={index === activeIndex}
+          />
         )}
       />
 
@@ -146,6 +240,15 @@ const styles = {
   skipPill: {
     height: 36,
     paddingHorizontal: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    overflow: "hidden" as const,
+  },
+  iconPill: {
+    height: 36,
+    width: 36,
     borderRadius: 18,
     borderWidth: 1,
     alignItems: "center" as const,

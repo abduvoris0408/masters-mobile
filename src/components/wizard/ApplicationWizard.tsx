@@ -1,7 +1,7 @@
-import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -22,6 +22,7 @@ try {
 
 import { MapLocationPicker } from "@/components/MapLocationPicker";
 import { Button } from "@/components/ui/Button";
+import { PickerField } from "@/components/ui/PickerField";
 import { TextField } from "@/components/ui/TextField";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -107,6 +108,7 @@ interface ApplicationWizardProps {
 // Yandex's JS SDK is web-only, + the same Yandex Geocoder REST calls the web
 // app uses for search/reverse-geocode) — see src/components/MapLocationPicker.tsx.
 export function ApplicationWizard({ onFinish, submitting = false }: ApplicationWizardProps) {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const insets = useSafeAreaInsets();
@@ -142,20 +144,20 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
   const validateStep = (): boolean => {
     const nextErrors: Partial<Record<keyof WizardState, string>> = {};
     if (stepKey === "category") {
-      if (!values.title.trim()) nextErrors.title = "Sarlavha kiritish shart";
+      if (!values.title.trim()) nextErrors.title = t("wizard_error_title_required");
       if (!matchedCategory) {
-        if (!values.base_category) nextErrors.base_category = "Yo'nalish tanlash shart";
-        if (!values.category) nextErrors.category = "Kategoriya tanlash shart";
+        if (!values.base_category) nextErrors.base_category = t("wizard_error_base_category_required");
+        if (!values.category) nextErrors.category = t("wizard_error_category_required");
       }
     } else if (stepKey === "description") {
-      if (!values.description.trim()) nextErrors.description = "Tavsif kiritish shart";
+      if (!values.description.trim()) nextErrors.description = t("wizard_error_description_required");
     } else if (stepKey === "location") {
-      if (!values.address.trim()) nextErrors.address = "Manzil kiritish shart";
+      if (!values.address.trim()) nextErrors.address = t("wizard_error_address_required");
     } else if (stepKey === "budget") {
-      if (!values.budget_from) nextErrors.budget_from = "Byudjet (dan) kiritish shart";
-      if (!values.budget_to) nextErrors.budget_to = "Byudjet (gacha) kiritish shart";
+      if (!values.budget_from) nextErrors.budget_from = t("wizard_error_budget_from_required");
+      if (!values.budget_to) nextErrors.budget_to = t("wizard_error_budget_to_required");
       else if (Number(values.budget_to) < Number(values.budget_from || 0)) {
-        nextErrors.budget_to = "Byudjet (gacha) kamida (dan) ga teng bo'lishi kerak";
+        nextErrors.budget_to = t("wizard_error_budget_to_min");
       }
     }
     setErrors(nextErrors);
@@ -199,16 +201,16 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
 
   const stepMeta: Record<TStepKey, { title: string; subtitle: string; icon: keyof typeof Ionicons.glyphMap }> = useMemo(
     () => ({
-      category: { title: "Sarlavha va kategoriya", subtitle: "Ish nomini yozing va kategoriyasini tanlang", icon: "text-outline" },
-      description: { title: "Tavsif", subtitle: "Ishni batafsil tasvirlab bering", icon: "document-text-outline" },
-      additional_works: { title: "Qo'shimcha ishlar", subtitle: "Kerak bo'lsa qo'shimcha ishlarni belgilang (ixtiyoriy)", icon: "list-outline" },
-      location: { title: "Manzil", subtitle: "Ish qayerda bajarilishi kerak", icon: "location-outline" },
-      timing: { title: "Muddat", subtitle: "Ishni qachon bajarish kerak", icon: "calendar-outline" },
-      budget: { title: "Byudjet", subtitle: "Ish uchun byudjet va to'lov turini belgilang", icon: "wallet-outline" },
-      images: { title: "Rasmlar", subtitle: "Ish haqida rasm qo'shing (ixtiyoriy)", icon: "image-outline" },
-      review: { title: "Ko'rib chiqish", subtitle: "Ma'lumotlarni tekshirib, e'lonni yuboring", icon: "checkmark-circle-outline" },
+      category: { title: t("wizard_step_category_title"), subtitle: t("wizard_step_category_subtitle"), icon: "text-outline" },
+      description: { title: t("wizard_step_description_title"), subtitle: t("wizard_step_description_subtitle"), icon: "document-text-outline" },
+      additional_works: { title: t("wizard_step_additional_works_title"), subtitle: t("wizard_step_additional_works_subtitle"), icon: "list-outline" },
+      location: { title: t("wizard_step_location_title"), subtitle: t("wizard_step_location_subtitle"), icon: "location-outline" },
+      timing: { title: t("wizard_step_timing_title"), subtitle: t("wizard_step_timing_subtitle"), icon: "calendar-outline" },
+      budget: { title: t("wizard_step_budget_title"), subtitle: t("wizard_step_budget_subtitle"), icon: "wallet-outline" },
+      images: { title: t("wizard_step_images_title"), subtitle: t("wizard_step_images_subtitle"), icon: "image-outline" },
+      review: { title: t("wizard_step_review_title"), subtitle: t("wizard_step_review_subtitle"), icon: "checkmark-circle-outline" },
     }),
-    [],
+    [t],
   );
   const meta = stepMeta[stepKey];
 
@@ -237,8 +239,8 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
         {stepKey === "category" && (
           <View className="gap-3">
             <TextField
-              label="Ish nomi"
-              placeholder="Masalan: Boshlang'ich daraja ingliz tili"
+              label={t("wizard_job_title_label")}
+              placeholder={t("wizard_job_title_placeholder")}
               value={values.title}
               onChangeText={(v) => {
                 set("title", v);
@@ -275,7 +277,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
             {matchedCategory ? (
               <View className="flex-row items-center justify-between gap-2 rounded-2xl bg-emerald-50 px-3.5 py-3 dark:bg-accent/15">
                 <Text className="flex-1 text-sm text-foreground">
-                  Kategoriya: <Text style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>{matchedCategory.name}</Text>
+                  {t("wizard_matched_category_label")} <Text style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>{matchedCategory.name}</Text>
                 </Text>
                 <Pressable
                   onPress={() => {
@@ -284,16 +286,16 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
                   }}
                 >
                   <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                    O'zgartirish
+                    {t("wizard_change_button")}
                   </Text>
                 </Pressable>
               </View>
             ) : (
               <View className="gap-3">
-                <Text className="text-xs text-muted">Mos sarlavha topilmadi — kategoriyani qo'lda tanlang</Text>
+                <Text className="text-xs text-muted">{t("wizard_no_title_match")}</Text>
                 <PickerField
-                  label="Yo'nalish"
-                  placeholder="Yo'nalishni tanlang"
+                  label={t("wizard_direction_label")}
+                  placeholder={t("wizard_direction_placeholder")}
                   loading={baseCategoriesLoading}
                   value={selectedBaseCategory?.name ?? null}
                   options={(baseCategories ?? []).map((bc) => ({ value: bc.guid, label: bc.name }))}
@@ -305,8 +307,8 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
                 />
                 {values.base_category ? (
                   <PickerField
-                    label="Kategoriya"
-                    placeholder="Kategoriyani tanlang"
+                    label={t("wizard_category_label")}
+                    placeholder={t("wizard_category_placeholder")}
                     loading={categoriesLoading}
                     value={selectedCategory?.name ?? null}
                     options={(categories ?? []).map((c) => ({ value: String(c.id), label: c.name }))}
@@ -321,7 +323,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
 
         {visitedSteps.has(1) && stepKey === "description" && (
           <TextField
-            placeholder="Ish haqida batafsil yozing..."
+            placeholder={t("wizard_description_placeholder")}
             value={values.description}
             onChangeText={(v) => set("description", v)}
             multiline
@@ -344,7 +346,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
                   : [...values.additional_works, id],
               )
             }
-            emptyText="Bu kategoriya uchun qo'shimcha ishlar yo'q"
+            emptyText={t("wizard_additional_works_empty")}
           />
         )}
 
@@ -369,8 +371,8 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
             <View className="flex-row gap-3">
               <View className="flex-1">
                 <PickerField
-                  label="Viloyat"
-                  placeholder="Tanlang"
+                  label={t("wizard_region_label")}
+                  placeholder={t("wizard_select_placeholder")}
                   loading={regionsLoading}
                   value={selectedRegion?.name ?? null}
                   options={(regions ?? []).map((r) => ({ value: r.guid, label: r.name }))}
@@ -382,8 +384,8 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
               </View>
               <View className="flex-1">
                 <PickerField
-                  label="Tuman"
-                  placeholder="Tanlang"
+                  label={t("wizard_district_label")}
+                  placeholder={t("wizard_select_placeholder")}
                   loading={districtsLoading}
                   disabled={!values.region}
                   value={selectedDistrict?.name ?? null}
@@ -393,8 +395,8 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
               </View>
             </View>
             <TextField
-              label="Manzil"
-              placeholder="Ko'cha, uy raqami..."
+              label={t("field_address")}
+              placeholder={t("wizard_address_placeholder")}
               value={values.address}
               onChangeText={(v) => set("address", v)}
               error={errors.address}
@@ -408,8 +410,8 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
               <ChoiceCard
                 active={values.is_urgent === true}
                 icon={<Ionicons name="flash" size={18} color={colors.accent} />}
-                title="Shoshilinch"
-                description="Ishni imkon qadar tezroq boshlash kerak"
+                title={t("field_urgent")}
+                description={t("wizard_urgent_description")}
                 onPress={() => {
                   set("is_urgent", true);
                   set("date_from", null);
@@ -419,8 +421,8 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
               <ChoiceCard
                 active={values.is_urgent === false}
                 icon={<Ionicons name="calendar-outline" size={18} color={colors.accent} />}
-                title="Kelishilgan muddat"
-                description="Ma'lum bir kun/oraliqda bajarilishi kerak"
+                title={t("wizard_scheduled_title")}
+                description={t("wizard_scheduled_description")}
                 onPress={() => set("is_urgent", false)}
               />
             </View>
@@ -437,7 +439,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
                     className="rounded-full bg-surface px-3.5 py-2"
                   >
                     <Text className="text-xs text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                      Bugun
+                      {t("wizard_date_today")}
                     </Text>
                   </Pressable>
                   <Pressable
@@ -449,7 +451,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
                     className="rounded-full bg-surface px-3.5 py-2"
                   >
                     <Text className="text-xs text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                      Ertaga
+                      {t("wizard_date_tomorrow")}
                     </Text>
                   </Pressable>
                   <Pressable
@@ -460,19 +462,19 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
                     className="rounded-full bg-surface px-3.5 py-2"
                   >
                     <Text className="text-xs text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                      Shu hafta ichida
+                      {t("wizard_date_this_week")}
                     </Text>
                   </Pressable>
                 </View>
 
                 <DatePickerField
-                  label="Boshlanish sanasi"
+                  label={t("wizard_date_from_label")}
                   value={values.date_from}
                   minimumDate={new Date()}
                   onChange={(date) => set("date_from", date)}
                 />
                 <DatePickerField
-                  label="Tugash sanasi"
+                  label={t("wizard_date_to_label")}
                   value={values.date_to}
                   minimumDate={values.date_from ? dayjs(values.date_from).toDate() : new Date()}
                   onChange={(date) => set("date_to", date)}
@@ -487,7 +489,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
             <View className="flex-row gap-3">
               <TextField
                 className="flex-1"
-                label="Byudjet (dan)"
+                label={t("field_budget_from")}
                 placeholder="100 000"
                 keyboardType="number-pad"
                 value={values.budget_from}
@@ -496,7 +498,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
               />
               <TextField
                 className="flex-1"
-                label="Byudjet (gacha)"
+                label={t("field_budget_to")}
                 placeholder="200 000"
                 keyboardType="number-pad"
                 value={values.budget_to}
@@ -522,19 +524,19 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
 
             <View className="gap-2.5">
               <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                To'lov turi
+                {t("field_payment_type")}
               </Text>
               <PaymentTypeOption
                 active={values.payment_type === "escrow"}
-                title="Xavfsiz to'lov (Escrow)"
-                badge="Tavsiya etiladi"
-                description="Pul platformada saqlanadi, ish tugagach masterga o'tkaziladi"
+                title={t("payment_escrow_title")}
+                badge={t("payment_recommended_badge")}
+                description={t("wizard_payment_escrow_description")}
                 onPress={() => set("payment_type", "escrow")}
               />
               <PaymentTypeOption
                 active={values.payment_type === "direct"}
-                title="To'g'ridan-to'g'ri"
-                description="To'lov tomonlar o'rtasida, platformadan tashqarida amalga oshiriladi"
+                title={t("payment_direct_title")}
+                description={t("wizard_payment_direct_description")}
                 onPress={() => set("payment_type", "direct")}
               />
             </View>
@@ -547,51 +549,51 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
 
         {stepKey === "review" && (
           <View className="overflow-hidden rounded-2xl border border-border">
-            <ReviewRow icon="text-outline" label="Sarlavha" value={values.title || "—"} onEdit={() => goToStep(0)} />
+            <ReviewRow icon="text-outline" label={t("field_title")} value={values.title || "—"} onEdit={() => goToStep(0)} />
             <ReviewRow
               icon="pricetags-outline"
-              label="Kategoriya"
+              label={t("wizard_category_label")}
               value={
                 matchedCategory?.name ??
                 ([selectedBaseCategory?.name, selectedCategory?.name].filter(Boolean).join(" — ") || "—")
               }
               onEdit={() => goToStep(0)}
             />
-            <ReviewRow icon="document-text-outline" label="Tavsif" value={values.description || "—"} onEdit={() => goToStep(1)} />
+            <ReviewRow icon="document-text-outline" label={t("field_description")} value={values.description || "—"} onEdit={() => goToStep(1)} />
             <ReviewRow
               icon="location-outline"
-              label="Manzil"
+              label={t("field_address")}
               value={[selectedRegion?.name, selectedDistrict?.name, values.address].filter(Boolean).join(", ") || "—"}
               onEdit={() => goToStep(3)}
             />
             <ReviewRow
               icon="calendar-outline"
-              label="Muddat"
+              label={t("wizard_step_timing_title")}
               value={
                 values.is_urgent
-                  ? "Shoshilinch"
+                  ? t("field_urgent")
                   : values.date_from && values.date_to
                     ? `${values.date_from} — ${values.date_to}`
-                    : "Muddat kelishiladi"
+                    : t("deadline_negotiable")
               }
               onEdit={() => goToStep(4)}
             />
             <ReviewRow
               icon="wallet-outline"
-              label="Byudjet"
+              label={t("field_budget")}
               value={values.budget_from && values.budget_to ? `${formatPrice(Number(values.budget_from))} — ${formatPrice(Number(values.budget_to))}` : "—"}
               onEdit={() => goToStep(5)}
             />
             <ReviewRow
               icon="shield-checkmark-outline"
-              label="To'lov turi"
-              value={values.payment_type === "direct" ? "To'g'ridan-to'g'ri" : "Xavfsiz to'lov (Escrow)"}
+              label={t("field_payment_type")}
+              value={values.payment_type === "direct" ? t("payment_direct_title") : t("payment_escrow_title")}
               onEdit={() => goToStep(5)}
             />
             <ReviewRow
               icon="image-outline"
-              label="Rasmlar"
-              value={pendingImages.length > 0 ? `${pendingImages.length} ta rasm` : "Rasm yo'q"}
+              label={t("wizard_step_images_title")}
+              value={pendingImages.length > 0 ? t("wizard_images_count", { count: pendingImages.length }) : t("wizard_no_images")}
               onEdit={() => goToStep(6)}
               last
             />
@@ -607,7 +609,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
             >
               <Ionicons name="arrow-back" size={16} color={colors.foreground} />
               <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                Orqaga
+                {t("common_back")}
               </Text>
             </Pressable>
           ) : null}
@@ -622,7 +624,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
             ) : (
               <>
                 <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                  {stepKey === "review" ? "Elonni joylash" : "Davom etish"}
+                  {stepKey === "review" ? t("wizard_submit_button") : t("common_continue")}
                 </Text>
                 <Ionicons name={stepKey === "review" ? "paper-plane-outline" : "arrow-forward"} size={16} color="#FFFFFF" />
               </>
@@ -647,6 +649,7 @@ function ReviewRow({
   onEdit: () => void;
   last?: boolean;
 }) {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   return (
     <View className={`flex-row items-start gap-3 bg-surface p-3.5 ${last ? "" : "border-b border-border"}`}>
@@ -659,66 +662,9 @@ function ReviewRow({
       </View>
       <Pressable onPress={onEdit}>
         <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-          Tahrirlash
+          {t("common_edit")}
         </Text>
       </Pressable>
-    </View>
-  );
-}
-
-// Native action sheet instead of a hand-rolled dropdown: iOS gets a real
-// UIAlertController (.actionSheet style, Swift/UIKit), Android a Material
-// bottom sheet — both via @expo/react-native-action-sheet's useActionSheet,
-// which picks the right native primitive per platform instead of this app
-// drawing its own absolutely-positioned option list.
-function PickerField({
-  label,
-  placeholder,
-  value,
-  options,
-  onSelect,
-  loading,
-  disabled,
-  error,
-}: {
-  label: string;
-  placeholder: string;
-  value: string | null;
-  options: { value: string; label: string }[];
-  onSelect: (value: string) => void;
-  loading?: boolean;
-  disabled?: boolean;
-  error?: string;
-}) {
-  const colors = useThemeColors();
-  const { showActionSheetWithOptions } = useActionSheet();
-
-  const open = () => {
-    if (disabled || loading || options.length === 0) return;
-    const labels = [...options.map((o) => o.label), "Bekor qilish"];
-    const cancelButtonIndex = labels.length - 1;
-    showActionSheetWithOptions({ options: labels, cancelButtonIndex, title: label }, (selectedIndex) => {
-      if (selectedIndex == null || selectedIndex === cancelButtonIndex) return;
-      onSelect(options[selectedIndex].value);
-    });
-  };
-
-  return (
-    <View className="gap-1.5">
-      <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-        {label}
-      </Text>
-      <Pressable
-        onPress={open}
-        className={`h-13 flex-row items-center justify-between rounded-2xl bg-surface px-4 ${disabled ? "opacity-50" : ""}`}
-        style={{ height: 52 }}
-      >
-        <Text className={value ? "text-base text-foreground" : "text-base text-muted"} numberOfLines={1}>
-          {loading ? "Yuklanmoqda..." : value || placeholder}
-        </Text>
-        <Ionicons name="chevron-down" size={16} color={colors.muted} />
-      </Pressable>
-      {error ? <Text className="text-xs text-red-500">{error}</Text> : null}
     </View>
   );
 }
@@ -737,6 +683,7 @@ function DatePickerField({
   minimumDate?: Date;
   onChange: (date: string) => void;
 }) {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const [iosPickerOpen, setIosPickerOpen] = useState(false);
   const dateValue = value ? dayjs(value).toDate() : new Date();
@@ -783,7 +730,7 @@ function DatePickerField({
         style={{ height: 52 }}
       >
         <Text className={value ? "text-base text-foreground" : "text-base text-muted"}>
-          {value ? formatDate(value) : "Sanani tanlang"}
+          {value ? formatDate(value) : t("wizard_select_date")}
         </Text>
         <Ionicons name="calendar-outline" size={18} color={colors.muted} />
       </Pressable>

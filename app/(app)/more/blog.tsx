@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, Image, Pressable, RefreshControl, Text, View } from "react-native";
 import { router } from "expo-router";
 
@@ -43,6 +44,7 @@ function BlogRow({ item }: { item: IBlogListItem }) {
 }
 
 export default function BlogScreen() {
+  const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
   const [pageSize, setPageSize] = useState(PAGE_SIZE_STEP);
@@ -57,10 +59,10 @@ export default function BlogScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title="Blog" onBackPress={() => router.back()} />
+      <Header title={t("blog_header")} onBackPress={() => router.back()} />
 
       <View className="px-4 pb-2" style={{ paddingTop: headerHeight }}>
-        <SearchBar placeholder="Qidiruv..." value={search} onChangeText={setSearch} />
+        <SearchBar placeholder={t("common_search_placeholder")} value={search} onChangeText={setSearch} />
       </View>
 
       {isLoading ? (
@@ -68,7 +70,7 @@ export default function BlogScreen() {
       ) : filtered.length === 0 ? (
         <EmptyState
           icon="newspaper-outline"
-          title={search ? "Hech narsa topilmadi" : "Hozircha maqolalar yo'q"}
+          title={search ? t("common_nothing_found") : t("blog_no_articles")}
         />
       ) : (
         <FlatList

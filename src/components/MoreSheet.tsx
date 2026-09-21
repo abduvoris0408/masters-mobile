@@ -2,21 +2,27 @@ import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetBackdrop, type BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import { router } from "expo-router";
 import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
+import { useProfilePerspective } from "@/hooks/useProfilePerspective";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { getChatUnreadTotal, useChatUnreadSummaryQuery } from "@/services/chat";
-import { useAuthStore } from "@/stores";
-import { EUserType } from "@/types";
+
+// "worker" = any masterProfile holder (individual master or org owner),
+// "client" = no masterProfile at all yet. Distinct from the finer-grained
+// isOrganization/isIndividualMaster split below, which only "client"-tagged
+// rows (the two onboarding links) need to further exclude org accounts from.
+type TMoreSheetAudience = "worker" | "client";
 
 interface MoreSheetItem {
   key: string;
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
   href?: string;
-  /** Only shown for this user type — omit to show for everyone. */
-  onlyFor?: EUserType;
+  /** Only shown for this audience — omit to show for everyone. */
+  onlyFor?: TMoreSheetAudience;
   disabled?: boolean;
 }
 
@@ -27,9 +33,7 @@ export interface MoreSheetHandle {
 
 // "Ko'proq" tab's destination per mobile-design.md's MobileTabBar spec — a
 // bottom sheet listing every secondary destination (not a route itself), one
-// row per link from the web project's MobileMoreSheet.tsx. Master/organization
-// onboarding have no RN screen yet — they render disabled/"Tez orada" instead
-// of being left out, so the full menu structure is visible up front.
+// row per link from the web project's MobileMoreSheet.tsx.
 //
 // Built on @gorhom/bottom-sheet (react-native-reanimated + gesture-handler)
 // instead of a plain RN <Modal> — gives the platform's native-feel spring
@@ -39,8 +43,9 @@ export interface MoreSheetHandle {
 export const MoreSheet = forwardRef<MoreSheetHandle>(function MoreSheet(_props, ref) {
   const sheetRef = useRef<BottomSheetModal>(null);
   const colors = useThemeColors();
-  const user = useAuthStore((s) => s.user);
-  const isWorker = user?.user_type === EUserType.WORKER;
+  const { t } = useTranslation("common");
+  const { isWorker } = useProfilePerspective();
+  const audience: TMoreSheetAudience = isWorker ? "worker" : "client";
   const { data: unreadSummary } = useChatUnreadSummaryQuery(true);
   const unreadChatCount = getChatUnreadTotal(unreadSummary);
 
@@ -50,26 +55,26 @@ export const MoreSheet = forwardRef<MoreSheetHandle>(function MoreSheet(_props, 
   }));
 
   const allItems: MoreSheetItem[] = [
-    { key: "my-applications", label: "Mening elonlarim", icon: "document-text-outline", href: "/more/my-applications" },
-    { key: "services", label: "Katalog", icon: "pricetags-outline", href: "/more/services" },
-    { key: "masters-catalog", label: "Ustalar katalogi", icon: "construct-outline", href: "/more/masters-catalog" },
-    { key: "organizations-catalog", label: "Tashkilotlar katalogi", icon: "business-outline", href: "/more/organizations-catalog" },
-    { key: "dashboard", label: "Dashboard", icon: "speedometer-outline", onlyFor: EUserType.WORKER, href: "/more/dashboard" },
-    { key: "courses", label: "Kurslarim", icon: "school-outline", onlyFor: EUserType.WORKER, href: "/more/courses" },
-    { key: "master-onboarding", label: "Ustaga o'tish", icon: "briefcase-outline", onlyFor: EUserType.CLIENT, disabled: true },
+    { key: "my-applications", label: t("more_sheet_my_applications"), icon: "document-text-outline", href: "/more/my-applications" },
+    { key: "services", label: t("more_sheet_catalog"), icon: "pricetags-outline", href: "/more/services" },
+    { key: "masters-catalog", label: t("more_sheet_masters_catalog"), icon: "construct-outline", href: "/more/masters-catalog" },
+    { key: "organizations-catalog", label: t("more_sheet_organizations_catalog"), icon: "business-outline", href: "/more/organizations-catalog" },
+    { key: "dashboard", label: t("dashboard"), icon: "speedometer-outline", onlyFor: "worker", href: "/more/dashboard" },
+    { key: "courses", label: t("more_sheet_my_courses"), icon: "school-outline", onlyFor: "worker", href: "/more/courses" },
+    { key: "master-onboarding", label: t("more_sheet_switch_to_master"), icon: "briefcase-outline", onlyFor: "client", href: "/master-onboarding" },
     {
       key: "organization-onboarding",
-      label: "Tashkilotga o'tish",
+      label: t("more_sheet_switch_to_organization"),
       icon: "business-outline",
-      onlyFor: EUserType.CLIENT,
-      disabled: true,
+      onlyFor: "client",
+      href: "/organization-onboarding",
     },
-    { key: "chat", label: "Xabarlar", icon: "chatbubble-outline", href: "/more/chat" },
-    { key: "legal-help", label: "Huquqiy yordam", icon: "shield-checkmark-outline", href: "/more/legal-help" },
-    { key: "applications-create", label: "E'lon berish", icon: "add-circle-outline", href: "/applications/create" },
-    { key: "blog", label: "Blog", icon: "newspaper-outline", href: "/more/blog" },
+    { key: "chat", label: t("chat"), icon: "chatbubble-outline", href: "/more/chat" },
+    { key: "legal-help", label: t("more_sheet_legal_help"), icon: "shield-checkmark-outline", href: "/more/legal-help" },
+    { key: "applications-create", label: t("more_sheet_post_listing"), icon: "add-circle-outline", href: "/applications/create" },
+    { key: "blog", label: t("more_sheet_blog"), icon: "newspaper-outline", href: "/more/blog" },
   ];
-  const items = allItems.filter((item) => !item.onlyFor || (item.onlyFor === EUserType.WORKER ? isWorker : !isWorker));
+  const items = allItems.filter((item) => !item.onlyFor || item.onlyFor === audience);
 
   const go = (href?: string) => {
     if (!href) return;
@@ -95,7 +100,7 @@ export const MoreSheet = forwardRef<MoreSheetHandle>(function MoreSheet(_props, 
     >
       <View className="flex-row items-center justify-between px-5 pb-3">
         <Text className="text-xl text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-          Ko'proq
+          {t("more_sheet_title")}
         </Text>
         <Pressable
           onPress={() => sheetRef.current?.dismiss()}
@@ -132,7 +137,7 @@ export const MoreSheet = forwardRef<MoreSheetHandle>(function MoreSheet(_props, 
             ) : null}
             {item.disabled ? (
               <Text className="text-xs text-muted" numberOfLines={1}>
-                Tez orada
+                {t("more_sheet_coming_soon")}
               </Text>
             ) : (
               <Ionicons name="chevron-forward" size={17} color={colors.muted} />

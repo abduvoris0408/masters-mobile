@@ -62,6 +62,7 @@ export interface IMasterProfileCreateRequest {
   type: EProfileType;
   description?: string;
   categories: number[];
+  main_category?: number | string | null;
   experience_level?: number | string | null;
   country?: number | string | null;
   region?: number | string | null;

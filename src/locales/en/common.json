@@ -184,5 +184,23 @@
       "name": "Tutoring and education",
       "description": "Private lessons and educational courses"
     }
-  }
+  },
+  "filter": "Filter",
+  "map_pick_location": "Pick a location on the map",
+  "map_search_address_placeholder": "Search for an address...",
+  "map_tap_or_drag_hint": "Tap the map or drag the marker to set the address",
+  "map_interactive_unavailable": "Interactive map isn't available in this app version — search for the address instead",
+  "tab_home": "Home",
+  "more_sheet_title": "More",
+  "more_sheet_coming_soon": "Coming soon",
+  "more_sheet_my_applications": "My listings",
+  "more_sheet_catalog": "Catalog",
+  "more_sheet_masters_catalog": "Workers catalog",
+  "more_sheet_organizations_catalog": "Organizations catalog",
+  "more_sheet_my_courses": "My courses",
+  "more_sheet_switch_to_master": "Switch to worker",
+  "more_sheet_switch_to_organization": "Switch to organization",
+  "more_sheet_legal_help": "Legal help",
+  "more_sheet_post_listing": "Post a listing",
+  "more_sheet_blog": "Blog"
 }

@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 import { Avatar } from "@/components/ui/Avatar";
@@ -38,18 +39,18 @@ interface ListingCardProps {
   variant?: "list" | "grid";
 }
 
-const PAYMENT_LABEL: Record<TPaymentType, string> = {
-  direct: "To'g'ridan-to'g'ri",
-  escrow: "Xavfsiz to'lov",
-};
-
 // One card = one listing row from the "Elonlar" feed screenshot: category
 // tag + urgent badge up top, title/description, location + deadline rows,
 // a budget row with the payment-type badge, then an offers footer and a
 // full-width CTA. Urgent listings get a red left accent border, matching the
 // reference screens' red-outlined card treatment.
 export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer", variant = "list" }: ListingCardProps) {
+  const { t } = useTranslation("catalog");
   const colors = useThemeColors();
+  const PAYMENT_LABEL: Record<TPaymentType, string> = {
+    direct: t("listing_payment_direct"),
+    escrow: t("listing_payment_escrow"),
+  };
 
   if (variant === "grid") {
     return (
@@ -84,7 +85,7 @@ export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer",
 
         <View className="flex-row items-center justify-between gap-1 border-t border-border pt-2">
           <Text className="text-[11px] text-muted" numberOfLines={1}>
-            {item.offersCount > 0 ? `${item.offersCount} ta taklif` : "Takliflar yo'q"}
+            {item.offersCount > 0 ? t("listing_offers_count", { count: item.offersCount }) : t("listing_no_offers")}
           </Text>
           <Ionicons name="chevron-forward" size={13} color={colors.muted} />
         </View>
@@ -112,7 +113,7 @@ export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer",
           <View className="flex-row items-center gap-1 self-start rounded-lg bg-red-50 px-2.5 py-1 dark:bg-danger/15">
             <Ionicons name="flash" size={12} color={colors.danger} />
             <Text className="text-xs text-danger" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-              Shoshilinch
+              {t("listing_urgent")}
             </Text>
           </View>
         ) : null}
@@ -138,7 +139,7 @@ export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer",
 
       <View className="flex-row items-center gap-1.5">
         <Ionicons name="alert-circle-outline" size={14} color={colors.muted} />
-        <Text className="text-sm text-muted">Bajarish muddati: </Text>
+        <Text className="text-sm text-muted">{t("listing_deadline_label")} </Text>
         <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
           {item.deadlineLabel}
         </Text>
@@ -148,7 +149,7 @@ export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer",
         <View className="flex-row items-center justify-between gap-2">
           <View className="flex-row items-center gap-1">
             <Ionicons name="wallet-outline" size={13} color={colors.muted} />
-            <Text className="text-xs text-muted">Byudjet</Text>
+            <Text className="text-xs text-muted">{t("listing_budget_label")}</Text>
           </View>
           {item.paymentType ? (
             <View className="flex-row items-center gap-1 self-start rounded-lg bg-surface px-2.5 py-1.5">
@@ -176,7 +177,7 @@ export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer",
         <View className="flex-row items-center gap-1.5">
           <Avatar uri={item.offerAvatarUri} size={20} />
           <Text className="text-xs text-muted">
-            {item.offersCount > 0 ? `${item.offersCount} ta taklif keldi` : "Takliflar yo'q"}
+            {item.offersCount > 0 ? t("listing_offers_received", { count: item.offersCount }) : t("listing_no_offers")}
           </Text>
         </View>
       </View>
@@ -187,7 +188,7 @@ export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer",
       >
         <Ionicons name={ctaVariant === "manage" ? "people-outline" : "paper-plane-outline"} size={16} color="#FFFFFF" />
         <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-          {ctaVariant === "manage" ? "Takliflarni ko'rish" : "Taklif yuborish"}
+          {ctaVariant === "manage" ? t("listing_view_offers") : t("listing_send_offer")}
         </Text>
       </Pressable>
     </PressableCard>
