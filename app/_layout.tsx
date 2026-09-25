@@ -16,7 +16,11 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Toast } from "@/components/Toast";
 import { applyGolosAsDefaultFont } from "@/lib/theme/fonts";
 import { ChatSocketProvider } from "@/providers/ChatSocketProvider";
-import { PushNotificationsProvider } from "@/providers/PushNotificationsProvider";
+// Temporarily disabled — @react-native-firebase is a native module and
+// Expo Go can't load it (Metro can't resolve its native-module imports
+// outside a custom dev-client/EAS build). Re-enable once testing moves to
+// a dev-client/build instead of Expo Go.
+// import { PushNotificationsProvider } from "@/providers/PushNotificationsProvider";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { Stack } from "expo-router";
@@ -58,14 +62,12 @@ export default function RootLayout() {
             <ActionSheetProvider>
               <BottomSheetModalProvider>
                 <ChatSocketProvider>
-                  <PushNotificationsProvider>
-                    <Stack screenOptions={{ headerShown: false }}>
-                      <Stack.Screen name="(onboarding)" />
-                      <Stack.Screen name="(auth)" />
-                      <Stack.Screen name="(app)" />
-                    </Stack>
-                    <Toast />
-                  </PushNotificationsProvider>
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="(onboarding)" />
+                    <Stack.Screen name="(auth)" />
+                    <Stack.Screen name="(app)" />
+                  </Stack>
+                  <Toast />
                 </ChatSocketProvider>
               </BottomSheetModalProvider>
             </ActionSheetProvider>

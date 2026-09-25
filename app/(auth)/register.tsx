@@ -296,6 +296,7 @@ export default function RegisterScreen() {
 
         <Button
           className="mt-6"
+          color="primary"
           loading={step === "details" && registerSimpleMutation.isPending}
           disabled={step === "role" ? !userType : !canSubmit}
           onPress={onContinue}

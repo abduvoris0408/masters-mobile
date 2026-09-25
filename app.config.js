@@ -41,8 +41,13 @@ module.exports = {
       "expo-secure-store",
       "expo-localization",
       "expo-font",
-      "@react-native-firebase/app",
-      "@react-native-firebase/messaging",
+      // Temporarily disabled — see app/_layout.tsx's matching note. Expo Go
+      // can't load @react-native-firebase's native modules, so these are
+      // commented out to keep `expo start` (Expo Go) usable; re-enable
+      // alongside PushNotificationsProvider once testing moves to a
+      // dev-client/EAS build.
+      // "@react-native-firebase/app",
+      // "@react-native-firebase/messaging",
       [
         "expo-image-picker",
         {
@@ -86,11 +91,10 @@ module.exports = {
           android: {
             buildArchs: ["arm64-v8a"],
           },
-          // @react-native-firebase v22+ requires static frameworks on iOS —
-          // its Swift pods don't build against the default dynamic linking.
-          ios: {
-            useFrameworks: "static",
-          },
+          // ios.useFrameworks: "static" was here for @react-native-firebase
+          // (v22+ needs it — its Swift pods don't build against the default
+          // dynamic linking). Re-add alongside the Firebase plugins above
+          // once Firebase is re-enabled.
         },
       ],
     ],

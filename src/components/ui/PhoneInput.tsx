@@ -16,9 +16,11 @@ interface PhoneInputProps {
   value?: string;
   onChange: (value: string) => void;
   label?: string;
+  /** See TextField's onSurface — same "field on a white card" case. */
+  onSurface?: boolean;
 }
 
-export function PhoneInput({ value = "", onChange, label }: PhoneInputProps) {
+export function PhoneInput({ value = "", onChange, label, onSurface }: PhoneInputProps) {
   const colors = useThemeColors();
   const localDigits = value.replace(/^\+998/, "").replace(/\D/g, "");
   const displayValue = maskDigits(localDigits);
@@ -31,7 +33,7 @@ export function PhoneInput({ value = "", onChange, label }: PhoneInputProps) {
   return (
     <View className="gap-1.5">
       {label ? <Text className="text-sm font-medium text-foreground">{label}</Text> : null}
-      <View className="flex-row items-center rounded-2xl bg-surface px-4">
+      <View className={`flex-row items-center rounded-2xl px-4 ${onSurface ? "bg-background" : "bg-surface"}`}>
         <Text className="mr-2 text-muted" style={{ fontSize: 16 }}>
           +998
         </Text>
