@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { Link, router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 import { Button } from "@/components/ui/Button";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { TextField } from "@/components/ui/TextField";
-import { useLoginMutation } from "@/services/auth";
+import { useTelegramLoginFlow } from "@/hooks/useTelegramLoginFlow";
+import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
+import { buildSessionFromTokens, useLoginMutation } from "@/services/auth";
+import { useAuthStore } from "@/stores";
 import { showError } from "@/utils/toast";
+
+const TELEGRAM_BLUE = "#229ED9";
 
 export default function LoginScreen() {
   const { t } = useTranslation("auth");
@@ -26,6 +32,21 @@ export default function LoginScreen() {
       showError(t("login_error"));
     }
   };
+
+  // Same deep-link + poll flow as the web app's LoginForm: once
+  // telegram-login-status confirms, build the full session (fetch the
+  // profile, call setAuth) instead of just stashing a token.
+  const telegramLogin = useTelegramLoginFlow({
+    onConfirmed: async (tokens) => {
+      try {
+        const user = await buildSessionFromTokens(tokens);
+        useAuthStore.getState().setAuth(user, tokens);
+        router.replace("/");
+      } catch {
+        showError(t("login_error"));
+      }
+    },
+  });
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1 bg-background">
@@ -52,6 +73,32 @@ export default function LoginScreen() {
           <Button loading={loginMutation.isPending} disabled={!canSubmit} onPress={onSubmit}>
             {t("login_submit")}
           </Button>
+
+          <Pressable
+            disabled={telegramLogin.isWaiting}
+            onPress={() => telegramLogin.start()}
+            className="h-13 flex-row items-center justify-center gap-2 rounded-full border-2 px-5"
+            style={{ height: 52, borderColor: TELEGRAM_BLUE, opacity: telegramLogin.isWaiting ? 0.6 : 1 }}
+          >
+            {telegramLogin.isWaiting ? (
+              <ActivityIndicator color={TELEGRAM_BLUE} />
+            ) : (
+              <>
+                <Ionicons name="paper-plane" size={17} color={TELEGRAM_BLUE} />
+                <Text className="text-base" style={{ fontFamily: GOLOS_WEIGHTS.bold, color: TELEGRAM_BLUE }}>
+                  {t("telegram_login_btn")}
+                </Text>
+              </>
+            )}
+          </Pressable>
+
+          {telegramLogin.isWaiting ? (
+            <Text className="text-center text-xs text-muted">{t("telegram_login_pending_hint")}</Text>
+          ) : null}
+
+          {telegramLogin.isError ? (
+            <Text className="text-center text-xs text-danger">{t("telegram_login_error")}</Text>
+          ) : null}
         </View>
 
         <View className="mt-8 flex-row justify-center">

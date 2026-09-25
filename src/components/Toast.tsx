@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { useEffect } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -10,8 +10,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { CardTitle } from "@/components/ui/Typography";
 import { useThemeColors } from "@/lib/theme/colors";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import type { ToastKind } from "@/stores/toast.store";
 import { useToastStore } from "@/stores/toast.store";
 
@@ -72,9 +72,7 @@ export function Toast() {
         <View className="h-8 w-8 items-center justify-center rounded-full" style={{ backgroundColor: `${meta.tint}1F` }}>
           <Ionicons name={meta.icon} size={18} color={meta.tint} />
         </View>
-        <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-          {toast.message}
-        </Text>
+        <CardTitle className="flex-1">{toast.message}</CardTitle>
       </Pressable>
     </Animated.View>
   );

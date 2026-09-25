@@ -7,8 +7,8 @@ import { Avatar } from "@/components/ui/Avatar";
 import { PressableCard } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { ListLabel } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useThemeColors } from "@/lib/theme/colors";
 import { useOrganizationsCatalogQuery } from "@/services/organization";
 import type { IOrganizationCatalogSummary } from "@/types";
@@ -63,9 +63,7 @@ export default function OrganizationsCatalogScreen() {
             <PressableCard className="flex-row items-center gap-3" onPress={() => router.push(`/organization/${item.guid}`)}>
               <Avatar uri={item.logo} name={item.name} size={48} fallbackIcon="business" />
               <View className="flex-1 gap-0.5">
-                <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                  {item.name}
-                </Text>
+                <ListLabel>{item.name}</ListLabel>
                 <Text className="text-sm text-muted">
                   {item.categories.map((c) => c.name).join(", ") || t("orgs_catalog_category_not_specified")}
                 </Text>

@@ -7,9 +7,9 @@ import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { Caption } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useProfilePerspective } from "@/hooks/useProfilePerspective";
 import {
   useCreateIntroVideoMutation,
@@ -46,9 +46,7 @@ function VideoRow({
         <View className="h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-accent/15">
           <Ionicons name="play" size={18} color={colors.accent} />
         </View>
-        <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-          {t("intro_video_watch")}
-        </Text>
+        <Caption className="flex-1 text-sm text-foreground">{t("intro_video_watch")}</Caption>
         <Ionicons name="open-outline" size={16} color={colors.muted} />
       </Pressable>
 
@@ -63,9 +61,7 @@ function VideoRow({
           ) : (
             <Ionicons name="refresh" size={14} color={colors.foreground} />
           )}
-          <Text className="text-xs text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-            {t("replace")}
-          </Text>
+          <Caption className="text-foreground">{t("replace")}</Caption>
         </Pressable>
         <Pressable
           onPress={onDelete}
@@ -77,9 +73,7 @@ function VideoRow({
           ) : (
             <Ionicons name="trash-outline" size={14} color={colors.danger} />
           )}
-          <Text className="text-xs text-danger" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-            {t("delete")}
-          </Text>
+          <Caption className="text-danger">{t("delete")}</Caption>
         </Pressable>
       </View>
     </View>
@@ -211,9 +205,7 @@ export default function ProfileIntroVideoScreen() {
             ) : (
               <>
                 <Ionicons name="cloud-upload-outline" size={18} color={colors.muted} />
-                <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                  {t("intro_video_add")}
-                </Text>
+                <Caption className="text-sm">{t("intro_video_add")}</Caption>
               </>
             )}
           </Pressable>

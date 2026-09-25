@@ -9,6 +9,7 @@ import { Chip, type ChipTone } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
 import { LocationMap } from "@/components/ui/LocationMap";
+import { Body, CardTitle, ScreenTitle, SectionTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -46,9 +47,7 @@ function OfferRow({
       <View className="flex-row items-center gap-3">
         <Avatar uri={offer.master.photo} name={offer.master.name} size={44} />
         <View className="flex-1 gap-0.5">
-          <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-            {offer.master.name}
-          </Text>
+          <CardTitle>{offer.master.name}</CardTitle>
           <Text className="text-xs text-muted">{formatPhoneNumber(offer.master.phone)}</Text>
         </View>
         <Chip label={statusMeta.label} tone={statusMeta.tone} />
@@ -157,9 +156,7 @@ export default function ApplicationManageScreen() {
               {data.is_urgent ? <Chip label={t("field_urgent")} tone="danger" icon="alarm-outline" /> : null}
               {statusMeta ? <Chip label={statusMeta.label} tone={statusMeta.tone} /> : null}
             </View>
-            <Text className="text-xl text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
-              {data.title}
-            </Text>
+            <ScreenTitle className="text-xl">{data.title}</ScreenTitle>
             <Text className="text-sm leading-6 text-muted">{data.description}</Text>
           </View>
 
@@ -170,9 +167,7 @@ export default function ApplicationManageScreen() {
           <Card className="gap-3">
             <View className="flex-row items-center justify-between">
               <Text className="text-xs text-muted">{t("field_address")}</Text>
-              <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                {formatAddress(data.address) || t("not_specified")}
-              </Text>
+              <Body style={{ fontFamily: GOLOS_WEIGHTS.medium }}>{formatAddress(data.address) || t("not_specified")}</Body>
             </View>
             <View className="flex-row items-center justify-between border-t border-border pt-3">
               <Text className="text-xs text-muted">{t("field_budget")}</Text>
@@ -184,9 +179,7 @@ export default function ApplicationManageScreen() {
             </View>
             <View className="flex-row items-center justify-between border-t border-border pt-3">
               <Text className="text-xs text-muted">{t("field_date")}</Text>
-              <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                {formatDate(data.created_at)}
-              </Text>
+              <Body style={{ fontFamily: GOLOS_WEIGHTS.medium }}>{formatDate(data.created_at)}</Body>
             </View>
           </Card>
 
@@ -215,9 +208,7 @@ export default function ApplicationManageScreen() {
           ) : null}
 
           <View className="gap-2">
-            <Text className="px-1 text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-              {t("offers_section_title")}
-            </Text>
+            <SectionTitle className="px-1">{t("offers_section_title")}</SectionTitle>
             <Text className="px-1 text-xs text-muted">{t("offers_section_subtitle")}</Text>
 
             {!data.offers || data.offers.length === 0 ? (

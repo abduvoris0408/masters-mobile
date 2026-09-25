@@ -84,6 +84,22 @@ export interface IResetPasswordRequest {
   new_password2: string;
 }
 
+// `token` is opaque — it's only ever echoed back to TELEGRAM_LOGIN_STATUS,
+// never parsed. `deep_link` already has the token baked in as ?start=.
+export interface ITelegramLoginResponse {
+  token: string;
+  deep_link: string;
+}
+
+export type TTelegramLoginStatus = "pending" | "confirmed";
+
+// Polled with the token from ITelegramLoginResponse. Only "confirmed" carries
+// the token pair — while "pending", access/refresh/phone are absent.
+export interface ITelegramLoginStatusResponse extends Partial<ITokenPair> {
+  status: TTelegramLoginStatus;
+  phone?: string;
+}
+
 export interface IUserPhotoUpdateRequest {
   photo?: File | null;
   remove_photo?: boolean;

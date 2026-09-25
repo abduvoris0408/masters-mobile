@@ -10,6 +10,7 @@ import { Chip, type ChipTone } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterChips } from "@/components/ui/FilterChips";
 import { Header } from "@/components/ui/Header";
+import { CardTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useProfilePerspective } from "@/hooks/useProfilePerspective";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -144,9 +145,7 @@ function JoinRequestCard({ item, isOrganization }: { item: IJoinRequest; isOrgan
           <>
             <Avatar uri={profilePhoto(item.profile)} name={profileName(item.profile)} size={40} />
             <View className="flex-1">
-              <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={1}>
-                {profileName(item.profile)}
-              </Text>
+              <CardTitle numberOfLines={1}>{profileName(item.profile)}</CardTitle>
               <Text className="text-xs text-muted">{formatDateTime(item.created_at)}</Text>
             </View>
           </>
@@ -154,9 +153,7 @@ function JoinRequestCard({ item, isOrganization }: { item: IJoinRequest; isOrgan
           <>
             <Avatar uri={organizationLogo(item.organization)} name={organizationName(item.organization)} size={40} />
             <View className="flex-1">
-              <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={1}>
-                {organizationName(item.organization)}
-              </Text>
+              <CardTitle numberOfLines={1}>{organizationName(item.organization)}</CardTitle>
               <Text className="text-xs text-muted">{formatDateTime(item.created_at)}</Text>
             </View>
           </>

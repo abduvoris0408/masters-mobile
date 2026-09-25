@@ -7,8 +7,8 @@ import { router } from "expo-router";
 import { PressableCard } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { ListLabel } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useThemeColors } from "@/lib/theme/colors";
 import { useMandatoryCoursesQuery } from "@/services/mandatory-courses";
 import type { IMandatoryCourseListItem } from "@/types";
@@ -69,9 +69,7 @@ export default function CoursesScreen() {
                 />
               </View>
               <View className="flex-1 gap-0.5">
-                <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                  {item.title}
-                </Text>
+                <ListLabel>{item.title}</ListLabel>
                 <Text className="text-sm text-muted">{t("courses_lessons_count", { count: item.lessons_count })}</Text>
               </View>
             </PressableCard>

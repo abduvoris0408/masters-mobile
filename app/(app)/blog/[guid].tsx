@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { ScreenTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -59,9 +60,7 @@ export default function BlogDetailScreen() {
 
           <View className="gap-2">
             <Text className="text-xs text-muted">{formatDate(data.created_at)}</Text>
-            <Text className="text-xl text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
-              {data.title}
-            </Text>
+            <ScreenTitle className="text-xl">{data.title}</ScreenTitle>
             <Text className="text-base leading-6 text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
               {data.description}
             </Text>

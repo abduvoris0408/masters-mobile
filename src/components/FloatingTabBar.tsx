@@ -197,51 +197,63 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
     moreSheetRef.current?.present();
   };
 
+  const tabRow = (
+    <View style={styles.pillRow}>
+      {renderTab(findRoute("index"), 0)}
+      {renderTab(findRoute("orders"), 1)}
+
+      <View style={styles.addSlot} onLayout={registerSlotLayout(2)}>
+        <Pressable
+          onPress={slotActions.current[2]}
+          className="items-center justify-center rounded-full bg-accent"
+          style={styles.addButton}
+        >
+          <Ionicons name="add" size={26} color="#FFFFFF" />
+        </Pressable>
+      </View>
+
+      <Pressable
+        onPress={slotActions.current[3]}
+        onLayout={registerSlotLayout(3)}
+        className="flex-1 items-center justify-center"
+      >
+        <View className="items-center justify-center">
+          <Animated.View
+            pointerEvents="none"
+            className="absolute rounded-full bg-emerald-50"
+            style={[styles.activePill, moreHoverStyle, isDark && { backgroundColor: "rgba(52,211,153,0.16)" }]}
+          />
+          <View className="items-center justify-center gap-1.5 px-2.5 py-1.5">
+            <Ionicons name="grid-outline" size={22} color={colors.muted} />
+            <Text style={{ fontFamily: GOLOS_WEIGHTS.regular, fontSize: 10, color: colors.muted }}>{t("more_sheet_title")}</Text>
+          </View>
+        </View>
+      </Pressable>
+
+      {renderTab(findRoute("profile"), 4)}
+    </View>
+  );
+
   return (
     <>
       <View pointerEvents="box-none" style={[styles.wrapper, { bottom: Math.max(insets.bottom - 4, 4) }]}>
-        <BlurView
-          intensity={Platform.OS === "ios" ? 55 : 100}
-          tint={isDark ? "dark" : "light"}
-          style={[styles.pill, { backgroundColor: isDark ? "rgba(20,20,24,0.38)" : "rgba(255,255,255,0.4)" }]}
-        >
-          <GestureDetector gesture={panGesture}>
-            <View style={styles.pillRow}>
-              {renderTab(findRoute("index"), 0)}
-              {renderTab(findRoute("orders"), 1)}
-
-              <View style={styles.addSlot} onLayout={registerSlotLayout(2)}>
-                <Pressable
-                  onPress={slotActions.current[2]}
-                  className="items-center justify-center rounded-full bg-accent"
-                  style={styles.addButton}
-                >
-                  <Ionicons name="add" size={26} color="#FFFFFF" />
-                </Pressable>
-              </View>
-
-              <Pressable
-                onPress={slotActions.current[3]}
-                onLayout={registerSlotLayout(3)}
-                className="flex-1 items-center justify-center"
-              >
-                <View className="items-center justify-center">
-                  <Animated.View
-                    pointerEvents="none"
-                    className="absolute rounded-full bg-emerald-50"
-                    style={[styles.activePill, moreHoverStyle, isDark && { backgroundColor: "rgba(52,211,153,0.16)" }]}
-                  />
-                  <View className="items-center justify-center gap-1.5 px-2.5 py-1.5">
-                    <Ionicons name="grid-outline" size={22} color={colors.muted} />
-                    <Text style={{ fontFamily: GOLOS_WEIGHTS.regular, fontSize: 10, color: colors.muted }}>{t("more_sheet_title")}</Text>
-                  </View>
-                </View>
-              </Pressable>
-
-              {renderTab(findRoute("profile"), 4)}
-            </View>
-          </GestureDetector>
-        </BlurView>
+        {/* Android: expo-blur's blur only works when the blurred content is
+            wrapped in a <BlurTargetView>, which isn't wired up here — without
+            it BlurView just renders as a plain translucent layer, i.e. a
+            washed-out bar. A solid tinted pill sidesteps that. */}
+        {Platform.OS === "android" ? (
+          <View style={[styles.pill, { backgroundColor: isDark ? "rgba(20,20,24,0.96)" : "rgba(255,255,255,0.96)" }]}>
+            <GestureDetector gesture={panGesture}>{tabRow}</GestureDetector>
+          </View>
+        ) : (
+          <BlurView
+            intensity={55}
+            tint={isDark ? "dark" : "light"}
+            style={[styles.pill, { backgroundColor: isDark ? "rgba(20,20,24,0.38)" : "rgba(255,255,255,0.4)" }]}
+          >
+            <GestureDetector gesture={panGesture}>{tabRow}</GestureDetector>
+          </BlurView>
+        )}
       </View>
 
       <MoreSheet ref={moreSheetRef} />

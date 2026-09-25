@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { EmptyState } from "@/components/ui/EmptyState";
+import { CardTitle } from "@/components/ui/Typography";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useThemeColors } from "@/lib/theme/colors";
 import { DEFAULT_MAP_CENTER } from "@/lib/yandexGeocoder";
@@ -86,9 +87,7 @@ export function ApplicationsMapView({ items, onSelect }: ApplicationsMapViewProp
           style={{ bottom: 16, shadowColor: "#0F172A", shadowOpacity: 0.15, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 6 }}
         >
           <View className="flex-1 gap-1">
-            <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }} numberOfLines={1}>
-              {selected.title}
-            </Text>
+            <CardTitle numberOfLines={1}>{selected.title}</CardTitle>
             <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
               {selected.budget_from === selected.budget_to
                 ? formatPrice(Number(selected.budget_from))

@@ -8,8 +8,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
+import { SectionTitle } from "@/components/ui/Typography";
 import { useThemeColors } from "@/lib/theme/colors";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useBlogListQuery } from "@/services/blog";
 import type { IBlogListItem } from "@/types";
 import { appendUniquePage } from "@/utils/pagination";
@@ -32,9 +32,7 @@ function BlogRow({ item }: { item: IBlogListItem }) {
       )}
       <View className="gap-1 px-1">
         <Text className="text-xs text-muted">{formatDate(item.created_at)}</Text>
-        <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }} numberOfLines={2}>
-          {item.title}
-        </Text>
+        <SectionTitle numberOfLines={2}>{item.title}</SectionTitle>
         <Text className="text-sm text-muted" numberOfLines={2}>
           {item.description}
         </Text>

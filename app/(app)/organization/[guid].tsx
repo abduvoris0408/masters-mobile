@@ -9,10 +9,10 @@ import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { BadgeLabel, CardTitle, Caption, ScreenTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useProfilePerspective } from "@/hooks/useProfilePerspective";
 import { useThemeColors } from "@/lib/theme/colors";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useOrganizationCatalogDetailQuery } from "@/services/organization";
 import { useCreateJoinRequestMutation } from "@/services/organization-join-request";
 import { formatDate, formatPhoneNumber } from "@/utils/format";
@@ -76,21 +76,19 @@ export default function OrganizationDetailScreen() {
         >
           <Card className="items-center gap-2">
             <Avatar uri={data.logo} name={data.name} size={72} />
-            <Text className="text-xl text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }} numberOfLines={2}>
+            <ScreenTitle className="text-xl" numberOfLines={2}>
               {data.name}
-            </Text>
+            </ScreenTitle>
             <View className="flex-row items-center gap-2">
               <View className="rounded-full bg-background px-3 py-1">
-                <Text className="text-xs text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+                <Caption>
                   {LEGAL_FORM_KEY[data.legal_form] ? t(`org_detail_legal_form_${LEGAL_FORM_KEY[data.legal_form]}`) : data.legal_form}
-                </Text>
+                </Caption>
               </View>
               {data.is_verified ? (
                 <View className="flex-row items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 dark:bg-accent/15">
                   <Ionicons name="shield-checkmark" size={12} color={colors.accent} />
-                  <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                    {t("org_detail_verified")}
-                  </Text>
+                  <BadgeLabel className="text-accent">{t("org_detail_verified")}</BadgeLabel>
                 </View>
               ) : null}
             </View>
@@ -98,18 +96,14 @@ export default function OrganizationDetailScreen() {
 
           {data.description ? (
             <Card className="gap-2">
-              <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                {t("org_detail_about_label")}
-              </Text>
+              <Caption className="text-sm">{t("org_detail_about_label")}</Caption>
               <Text className="text-base leading-6 text-foreground">{data.description}</Text>
             </Card>
           ) : null}
 
           {data.categories.length > 0 ? (
             <Card className="gap-3">
-              <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                {t("org_detail_categories_label")}
-              </Text>
+              <Caption className="text-sm">{t("org_detail_categories_label")}</Caption>
               <View className="flex-row flex-wrap gap-2">
                 {data.categories.map((category) => (
                   <Chip key={category.guid} label={category.name} />
@@ -119,9 +113,7 @@ export default function OrganizationDetailScreen() {
           ) : null}
 
           <Card className="gap-3">
-            <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-              {t("org_detail_info_label")}
-            </Text>
+            <Caption className="text-sm">{t("org_detail_info_label")}</Caption>
             <View className="gap-2.5">
               {(data.operates_regions && data.regions) || (data.operates_districts && data.districts) ? (
                 <View className="flex-row items-center gap-2">
@@ -142,9 +134,7 @@ export default function OrganizationDetailScreen() {
                   className="flex-row items-center gap-2"
                 >
                   <Ionicons name="call-outline" size={16} color={colors.accent} />
-                  <Text className="flex-1 text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                    {formatPhoneNumber(data.director_phone)}
-                  </Text>
+                  <CardTitle className="flex-1 text-accent">{formatPhoneNumber(data.director_phone)}</CardTitle>
                 </Pressable>
               ) : null}
               <View className="flex-row items-center gap-2">
@@ -158,9 +148,7 @@ export default function OrganizationDetailScreen() {
 
           {data.intro_videos.length > 0 ? (
             <Card className="gap-3">
-              <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                {t("org_detail_intro_videos_label")}
-              </Text>
+              <Caption className="text-sm">{t("org_detail_intro_videos_label")}</Caption>
               {data.intro_videos.map((url) => (
                 <Pressable
                   key={url}
@@ -168,9 +156,7 @@ export default function OrganizationDetailScreen() {
                   className="flex-row items-center gap-2 rounded-2xl bg-background px-3.5 py-3"
                 >
                   <Ionicons name="play-circle-outline" size={18} color={colors.accent} />
-                  <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                    {t("org_detail_watch_video")}
-                  </Text>
+                  <Caption className="flex-1 text-sm text-foreground">{t("org_detail_watch_video")}</Caption>
                   <Ionicons name="open-outline" size={16} color={colors.muted} />
                 </Pressable>
               ))}

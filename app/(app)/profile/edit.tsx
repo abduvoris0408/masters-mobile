@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/Button";
 import { Header } from "@/components/ui/Header";
 import { PickerField } from "@/components/ui/PickerField";
 import { TextField } from "@/components/ui/TextField";
+import { CardTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useProfilePerspective } from "@/hooks/useProfilePerspective";
 import { useThemeColors } from "@/lib/theme/colors";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import {
   useCountriesQuery,
   useDistrictsQuery,
@@ -102,9 +102,7 @@ function ClientEditView() {
 
       <View className="flex-row items-center justify-between rounded-2xl bg-surface px-4 py-3.5">
         <Text className="text-sm text-muted">{t("phone_number")}</Text>
-        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-          {formatPhoneNumber(user?.phone)}
-        </Text>
+        <CardTitle>{formatPhoneNumber(user?.phone)}</CardTitle>
       </View>
 
       <Button className="mt-2" loading={updateMutation.isPending} disabled={!canSubmit} onPress={handleSubmit}>

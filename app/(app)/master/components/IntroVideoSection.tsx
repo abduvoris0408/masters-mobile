@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { useVideoPlayer, VideoView } from "expo-video";
 
 import { Card } from "@/components/ui/Card";
+import { CardTitle } from "@/components/ui/Typography";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 
@@ -28,9 +29,7 @@ export function IntroVideoSection({ videos }: { videos: string[] }) {
     <Card className="gap-3">
       <View className="flex-row items-center gap-2">
         <Ionicons name="videocam-outline" size={16} color={colors.accent} />
-        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-          {t("intro_video_title")}
-        </Text>
+        <CardTitle>{t("intro_video_title")}</CardTitle>
       </View>
 
       <View style={{ aspectRatio: 16 / 9, borderRadius: 16, overflow: "hidden", backgroundColor: "#000" }}>

@@ -7,6 +7,7 @@ import { router } from "expo-router";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { CardTitle, Caption, SectionTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -94,9 +95,7 @@ export default function DashboardScreen() {
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-muted">{t("dashboard_master_level")}</Text>
-                  <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                    {masterProfile.level.current.name}
-                  </Text>
+                  <SectionTitle>{masterProfile.level.current.name}</SectionTitle>
                 </View>
               </View>
               {masterProfile.level.next ? (
@@ -156,9 +155,7 @@ export default function DashboardScreen() {
           </View>
 
           <View className="gap-2">
-            <Text className="px-1 text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-              {t("dashboard_recent_orders")}
-            </Text>
+            <Caption className="px-1 text-sm">{t("dashboard_recent_orders")}</Caption>
             {ordersLoading ? (
               <ActivityIndicator color={colors.accent} />
             ) : !orders?.results.length ? (
@@ -169,9 +166,9 @@ export default function DashboardScreen() {
               orders.results.map((order) => (
                 <Card key={order.guid} className="gap-1.5">
                   <View className="flex-row items-center justify-between gap-2">
-                    <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={1}>
+                    <CardTitle className="flex-1" numberOfLines={1}>
                       #{order.order_number}
-                    </Text>
+                    </CardTitle>
                     <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
                       {formatPrice(Number(order.price))}
                     </Text>

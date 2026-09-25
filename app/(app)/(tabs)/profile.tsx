@@ -3,8 +3,9 @@ import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { PressableCard } from "@/components/ui/Card";
+import { Card, PressableCard } from "@/components/ui/Card";
 import { Header } from "@/components/ui/Header";
+import { Body, Caption, ListLabel, ScreenTitle, SectionTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useProfilePerspective } from "@/hooks/useProfilePerspective";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -29,10 +30,8 @@ function InfoRow({
     <View className={`flex-row items-center gap-3 py-3 ${isLast ? "" : "border-b border-border"}`}>
       <Ionicons name={icon} size={18} color={colors.muted} />
       <View className="flex-1">
-        <Text className="text-xs text-muted">{label}</Text>
-        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-          {value}
-        </Text>
+        <Caption>{label}</Caption>
+        <Body style={{ fontFamily: GOLOS_WEIGHTS.medium }}>{value}</Body>
       </View>
     </View>
   );
@@ -42,22 +41,27 @@ function NavRow({
   icon,
   label,
   onPress,
+  color = "#34C759",
+  isLast,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   onPress: () => void;
+  color?: string;
+  isLast?: boolean;
 }) {
   const colors = useThemeColors();
   return (
-    <PressableCard className="flex-row items-center gap-3" onPress={onPress}>
-      <View className="h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 dark:bg-accent/15">
-        <Ionicons name={icon} size={17} color={colors.accent} />
+    <Pressable
+      className={`flex-row items-center gap-3 py-3 ${isLast ? "" : "border-b border-border"}`}
+      onPress={onPress}
+    >
+      <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: color }}>
+        <Ionicons name={icon} size={19} color="#FFFFFF" />
       </View>
-      <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-        {label}
-      </Text>
+      <ListLabel className="flex-1">{label}</ListLabel>
       <Ionicons name="chevron-forward" size={16} color={colors.muted} />
-    </PressableCard>
+    </Pressable>
   );
 }
 
@@ -116,9 +120,7 @@ export default function ProfileScreen() {
               <Ionicons name="pencil" size={17} color={colors.foreground} />
             </Pressable>
           </View>
-          <Text className="text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-            {displayName}
-          </Text>
+          <ScreenTitle>{displayName}</ScreenTitle>
           {isOrganization ? (
             <View className="flex-row items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 dark:bg-accent/15">
               <Ionicons name="business" size={13} color={colors.accent} />
@@ -184,9 +186,7 @@ export default function ProfileScreen() {
         {/* Personal info */}
         <View className="rounded-3xl bg-surface p-5">
           <View className="mb-1 flex-row items-center justify-between">
-            <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-              {t("personal_info_title")}
-            </Text>
+            <SectionTitle>{t("personal_info_title")}</SectionTitle>
             <Pressable
               onPress={() => router.push("/profile/edit")}
               hitSlop={8}
@@ -209,44 +209,81 @@ export default function ProfileScreen() {
 
         {/* Worker / organization management shortcuts */}
         {masterProfile ? (
-          <View className="gap-2.5">
+          <Card>
             {isOrganization ? (
-              <NavRow icon="people-outline" label={t("nav_specialists")} onPress={() => router.push("/profile/specialists")} />
+              <NavRow
+                icon="people-outline"
+                label={t("nav_specialists")}
+                onPress={() => router.push("/profile/specialists")}
+                color="#5AC8FA"
+              />
             ) : null}
-            <NavRow icon="images-outline" label={t("nav_portfolio")} onPress={() => router.push("/profile/portfolio")} />
-            <NavRow icon="construct-outline" label={t("nav_services")} onPress={() => router.push("/profile/services")} />
+            <NavRow
+              icon="images-outline"
+              label={t("nav_portfolio")}
+              onPress={() => router.push("/profile/portfolio")}
+              color="#FF9500"
+            />
+            <NavRow
+              icon="construct-outline"
+              label={t("nav_services")}
+              onPress={() => router.push("/profile/services")}
+              color="#34C759"
+            />
             <NavRow
               icon="document-attach-outline"
               label={t("nav_documents")}
               onPress={() => router.push("/profile/documents")}
+              color="#5856D6"
             />
             <NavRow
               icon="videocam-outline"
               label={t("nav_intro_video")}
               onPress={() => router.push("/profile/intro-video")}
+              color="#FF2D55"
             />
-            <NavRow icon="wallet-outline" label={t("nav_balance")} onPress={() => router.push("/more/balance")} />
+            <NavRow
+              icon="wallet-outline"
+              label={t("nav_balance")}
+              onPress={() => router.push("/more/balance")}
+              color="#30B0C7"
+            />
             <NavRow
               icon="paper-plane-outline"
               label={isOrganization ? t("nav_join_requests_org") : t("nav_join_requests_master")}
               onPress={() => router.push("/profile/join-requests")}
+              color="#AF52DE"
+              isLast
             />
-          </View>
+          </Card>
         ) : (
-          <View className="gap-2.5">
-            <NavRow icon="wallet-outline" label={t("nav_balance")} onPress={() => router.push("/more/balance")} />
-          </View>
+          <Card>
+            <NavRow
+              icon="wallet-outline"
+              label={t("nav_balance")}
+              onPress={() => router.push("/more/balance")}
+              color="#30B0C7"
+              isLast
+            />
+          </Card>
         )}
 
         {!isWorker ? (
-          <View className="gap-2.5">
-            <NavRow icon="construct-outline" label={t("nav_switch_to_master")} onPress={() => router.push("/master-onboarding")} />
+          <Card>
+            <NavRow
+              icon="construct-outline"
+              label={t("nav_switch_to_master")}
+              onPress={() => router.push("/master-onboarding")}
+              color="#34C759"
+            />
             <NavRow
               icon="business-outline"
               label={t("nav_switch_to_organization")}
               onPress={() => router.push("/organization-onboarding")}
+              color="#5AC8FA"
+              isLast
             />
-          </View>
+          </Card>
         ) : null}
 
         <PressableCard className="flex-row items-center gap-3" onPress={confirmLogout} disabled={logoutMutation.isPending}>

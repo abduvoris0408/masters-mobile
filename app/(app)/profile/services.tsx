@@ -7,9 +7,9 @@ import { useTranslation } from "react-i18next";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
 import { TextField } from "@/components/ui/TextField";
+import { CardTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useMasterProfileQuery, useUpdateUserServiceMutation, useUserServicesQuery } from "@/services/master";
 import type { IUserService, IUserServiceCategoryRef } from "@/types";
 import { showError, showSuccess } from "@/utils/toast";
@@ -46,11 +46,7 @@ function ServiceRow({ service, profileGuid }: { service: IUserService; profileGu
 
   return (
     <View className="gap-3 rounded-3xl bg-surface p-4">
-      {service.service_name ? (
-        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-          {service.service_name}
-        </Text>
-      ) : null}
+      {service.service_name ? <CardTitle>{service.service_name}</CardTitle> : null}
 
       <View className="flex-row items-center justify-between gap-2">
         <Text className="text-sm text-muted">{t("services_show_in_catalog")}</Text>
@@ -88,9 +84,7 @@ function ServiceRow({ service, profileGuid }: { service: IUserService; profileGu
           {updateMutation.isPending ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-              {t("save")}
-            </Text>
+            <CardTitle className="text-white">{t("save")}</CardTitle>
           )}
         </Pressable>
       ) : null}
@@ -109,9 +103,7 @@ function CategoryGroup({
 }) {
   return (
     <View className="gap-2.5">
-      <Text className="px-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-        {category.name}
-      </Text>
+      <CardTitle className="px-1">{category.name}</CardTitle>
       {services.map((service) => (
         <ServiceRow key={service.guid} service={service} profileGuid={profileGuid} />
       ))}

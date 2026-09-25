@@ -15,6 +15,8 @@ import type {
   IResendOtpRequest,
   IResetPasswordRequest,
   IRoleUpdateRequest,
+  ITelegramLoginResponse,
+  ITelegramLoginStatusResponse,
   ITokenPair,
   ITokens,
 } from "@/types";
@@ -39,7 +41,7 @@ function buildAuthUser(profile: IMeProfileResponse): IAuthUser {
   };
 }
 
-async function buildSessionFromTokens(tokens: ITokens): Promise<IAuthUser> {
+export async function buildSessionFromTokens(tokens: ITokens): Promise<IAuthUser> {
   useAuthStore.getState().setToken(tokens);
   const profile = await axiosInstance
     .get<IMeProfileResponse>(ENDPOINTS.MASTER_PROFILE.ME)
@@ -161,6 +163,28 @@ export const useResetPasswordMutation = () =>
     mutationFn: (data: IResetPasswordRequest) =>
       axiosInstance.post(ENDPOINTS.AUTH.RESET_PASSWORD, data).then((r) => r.data),
   });
+
+// Starts a Telegram-bot login — no phone yet, the visitor sends it inside the
+// bot once they open the deep link. Returns a one-time token and that deep
+// link; the caller polls fetchTelegramLoginStatus with the token until the
+// visitor confirms inside the bot.
+export const useTelegramLoginMutation = () =>
+  useMutation({
+    mutationFn: (): Promise<ITelegramLoginResponse> =>
+      axiosInstance.post(ENDPOINTS.AUTH.TELEGRAM_LOGIN, {}, { silentError: true }).then((r) => r.data),
+  });
+
+// One poll tick against telegram-login-status/?token=... — kept as a plain
+// function (not a query hook) since callers need to drive the interval
+// themselves and stop as soon as status flips to "confirmed".
+export async function fetchTelegramLoginStatus(token: string): Promise<ITelegramLoginStatusResponse> {
+  return axiosInstance
+    .get<ITelegramLoginStatusResponse>(ENDPOINTS.AUTH.TELEGRAM_LOGIN_STATUS, {
+      params: { token },
+      silentError: true,
+    })
+    .then((r) => r.data);
+}
 
 // Profile screen's "Mutaxassis profiliga o'tish" / "Mijoz profiliga
 // qaytish" switch — re-derives the session from the fresh /me-profile/

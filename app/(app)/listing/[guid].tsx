@@ -14,6 +14,7 @@ import { Header } from "@/components/ui/Header";
 import { LocationMap } from "@/components/ui/LocationMap";
 import { Rating } from "@/components/ui/Rating";
 import { TextField } from "@/components/ui/TextField";
+import { Caption, ScreenTitle, SectionTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -57,9 +58,7 @@ function DetailRow({
             <Ionicons name={icon} size={15} color={colors.accent} />
           </View>
         ) : null}
-        <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-          {label}
-        </Text>
+        <Caption className="text-sm">{label}</Caption>
       </View>
       {typeof value === "string" ? (
         <Text className="text-base leading-6 text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
@@ -151,9 +150,7 @@ export default function ListingDetailScreen() {
           >
             {/* Title + meta */}
             <View className="gap-2.5">
-              <Text className="text-xl text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                {data.title}
-              </Text>
+              <ScreenTitle className="text-xl">{data.title}</ScreenTitle>
 
               <View className="self-start rounded-full bg-amber-100 px-3 py-1.5 dark:bg-amber-500/20">
                 <Text className="text-sm text-amber-700 dark:text-amber-400" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
@@ -270,9 +267,7 @@ export default function ListingDetailScreen() {
               onPress={() => router.push("/applications/create")}
               className="gap-1.5 rounded-3xl bg-surface p-5"
             >
-              <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                {t("listing_post_own_banner_title")}
-              </Text>
+              <SectionTitle>{t("listing_post_own_banner_title")}</SectionTitle>
               <Text className="text-sm text-muted">
                 {t("listing_post_own_banner_description")}
               </Text>
@@ -289,9 +284,9 @@ export default function ListingDetailScreen() {
               <Avatar name={data.customer.name} size={48} />
               <View className="flex-1 gap-1">
                 <Text className="text-xs text-muted">{t("listing_customer_label")}</Text>
-                <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                <SectionTitle className="text-accent">
                   {data.customer.name} {data.customer.surname}
-                </Text>
+                </SectionTitle>
                 <View className="flex-row items-center gap-1.5">
                   <Rating value={data.customer.rating} />
                   <Text className="text-xs text-muted">{t("listing_reviews_count", { count: data.customer.reviews_count })}</Text>
@@ -342,9 +337,7 @@ export default function ListingDetailScreen() {
           >
             <BottomSheetView style={{ gap: 16, padding: 20 }}>
               <View className="flex-row items-center justify-between">
-                <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                  {t("send_offer_header")}
-                </Text>
+                <SectionTitle>{t("send_offer_header")}</SectionTitle>
                 <Pressable onPress={() => offerSheetRef.current?.dismiss()} hitSlop={8}>
                   <Ionicons name="close" size={22} color={colors.muted} />
                 </Pressable>

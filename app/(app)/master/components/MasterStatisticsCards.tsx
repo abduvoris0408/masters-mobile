@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
+import { BadgeLabel } from "@/components/ui/Typography";
 import { useThemeColors } from "@/lib/theme/colors";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useProfileStatisticsQuery } from "@/services/master";
 
 interface StatItem {
@@ -52,9 +52,9 @@ export function MasterStatisticsCards({ guid, completedOrders }: { guid: string;
           <View className="h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: `${item.color}1F` }}>
             <Ionicons name={item.icon} size={17} color={item.color} />
           </View>
-          <Text className="text-xs text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+          <BadgeLabel className="text-foreground">
             {item.value !== undefined ? `${item.label}: ${item.value}` : item.label}
-          </Text>
+          </BadgeLabel>
         </View>
       ))}
     </View>

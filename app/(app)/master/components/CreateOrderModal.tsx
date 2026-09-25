@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import { Button } from "@/components/ui/Button";
+import { BadgeLabel, CardTitle, ScreenTitle } from "@/components/ui/Typography";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useCreateOrderMutation } from "@/services/application";
@@ -126,9 +127,7 @@ export const CreateOrderModal = forwardRef<CreateOrderModalHandle, Props>(functi
     >
       <View className="px-5">
         <View className="mb-4 flex-row items-center justify-between">
-          <Text className="text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-            {step === "contract" ? t("create_order_contract_title") : t("create_order_title")}
-          </Text>
+          <ScreenTitle>{step === "contract" ? t("create_order_contract_title") : t("create_order_title")}</ScreenTitle>
           <Pressable onPress={onClose} hitSlop={8}>
             <Ionicons name="close" size={22} color={colors.muted} />
           </Pressable>
@@ -148,9 +147,7 @@ export const CreateOrderModal = forwardRef<CreateOrderModalHandle, Props>(functi
             {service.service_name ?? t("create_order_service_fallback")}
           </Text>
           <View className="mb-4 self-start rounded-full bg-emerald-50 px-3 py-1 dark:bg-accent/15">
-            <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-              {formatPrice(Number(service.price))}
-            </Text>
+            <BadgeLabel className="text-accent">{formatPrice(Number(service.price))}</BadgeLabel>
           </View>
 
           <Text className="mb-1.5 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
@@ -190,9 +187,7 @@ export const CreateOrderModal = forwardRef<CreateOrderModalHandle, Props>(functi
             <>
               <View className="mb-3 flex-row items-center gap-2">
                 <Ionicons name="document-text-outline" size={18} color={colors.foreground} />
-                <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                  {preview.contract_title}
-                </Text>
+                <CardTitle className="flex-1">{preview.contract_title}</CardTitle>
               </View>
 
               <View className="mb-3 gap-2 rounded-2xl bg-surface p-3.5">

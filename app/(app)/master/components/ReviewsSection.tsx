@@ -6,8 +6,8 @@ import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { Avatar } from "@/components/ui/Avatar";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Rating } from "@/components/ui/Rating";
+import { CardTitle, SectionTitle } from "@/components/ui/Typography";
 import { useThemeColors } from "@/lib/theme/colors";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useProfileReviewsQuery } from "@/services/review";
 import { formatDateTime } from "@/utils/format";
 
@@ -39,9 +39,7 @@ export function ReviewsSection({ profileGuid, fallbackRating, page, onPageChange
   return (
     <View className="gap-3 rounded-3xl bg-surface p-4">
       <View className="flex-row items-center justify-between gap-2">
-        <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-          {t("reviews_title")}
-        </Text>
+        <SectionTitle>{t("reviews_title")}</SectionTitle>
         {!isLoading && count > 0 ? (
           <View className="flex-row items-center gap-2">
             <Rating value={averageRating ?? 0} />
@@ -61,9 +59,7 @@ export function ReviewsSection({ profileGuid, fallbackRating, page, onPageChange
               <View className="flex-row items-center justify-between gap-2">
                 <View className="flex-row items-center gap-2">
                   <Avatar name={review.customer?.name} size={24} />
-                  <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                    {review.customer?.name}
-                  </Text>
+                  <CardTitle>{review.customer?.name}</CardTitle>
                 </View>
                 <Text className="text-xs text-muted">{formatDateTime(review.created_at)}</Text>
               </View>

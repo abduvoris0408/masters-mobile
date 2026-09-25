@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { CardTitle, ScreenTitle } from "@/components/ui/Typography";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import {
@@ -184,9 +185,7 @@ export default function CourseDetailScreen() {
 
       <ScrollView contentContainerClassName="gap-1 pb-10">
         <View className="gap-2 border-b border-border px-4 py-4">
-          <Text className="text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-            {activeLesson?.title ?? data.title}
-          </Text>
+          <ScreenTitle>{activeLesson?.title ?? data.title}</ScreenTitle>
           {activeLesson?.description ? (
             <Text className="text-sm leading-6 text-muted">{activeLesson.description}</Text>
           ) : (
@@ -199,9 +198,7 @@ export default function CourseDetailScreen() {
               className="mt-1 flex-row items-center gap-2 self-start rounded-full bg-emerald-50 px-4 py-2 dark:bg-accent/15"
             >
               <Ionicons name="document-attach-outline" size={16} color={colors.accent} />
-              <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                {t("course_open_material")}
-              </Text>
+              <CardTitle className="text-accent">{t("course_open_material")}</CardTitle>
             </Pressable>
           ) : null}
 
@@ -218,9 +215,9 @@ export default function CourseDetailScreen() {
         </View>
 
         <View className="gap-1 px-2 py-2">
-          <Text className="px-2 py-1 text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+          <CardTitle className="px-2 py-1 text-muted">
             {t("course_lessons_count", { read: lessons.filter((l) => l.is_read).length, total: lessons.length })}
-          </Text>
+          </CardTitle>
           {lessons.map((lesson, index) => (
             <LessonListRow
               key={lesson.guid}

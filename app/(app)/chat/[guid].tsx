@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Avatar } from "@/components/ui/Avatar";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { CardTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -87,9 +88,7 @@ function InviteBubble({ message }: { message: IChatMessage }) {
         <View className="h-8 w-8 items-center justify-center rounded-full bg-emerald-50 dark:bg-accent/15">
           <Ionicons name={icon} size={15} color={colors.accent} />
         </View>
-        <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-          {message.text || label}
-        </Text>
+        <CardTitle className="flex-1">{message.text || label}</CardTitle>
       </View>
 
       {message.order ? (

@@ -53,6 +53,20 @@ module.exports = {
           locationWhenInUsePermission: "Joriy joylashuvingizni xaritada ko'rsatish uchun ruxsat kerak.",
         },
       ],
+      [
+        "expo-build-properties",
+        {
+          // Preview/internal-test APKs only need to run on real, modern
+          // phones — dropping armeabi-v7a/x86/x86_64 native libs (emulator +
+          // legacy-device architectures) cuts the universal APK from ~110MB
+          // down to roughly a quarter of that. Play Store release builds use
+          // an .aab instead, which already splits per-ABI automatically, so
+          // this filter only matters for the directly-installable APK.
+          android: {
+            abiFilters: ["arm64-v8a"],
+          },
+        },
+      ],
     ],
     extra: {
       eas: {

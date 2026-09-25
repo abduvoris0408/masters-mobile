@@ -16,9 +16,9 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
 import { TextField } from "@/components/ui/TextField";
+import { BadgeLabel, CardTitle, Caption, ScreenTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import {
   useCreateDocumentMutation,
   useDeleteDocumentMutation,
@@ -139,9 +139,7 @@ const DocumentFormModal = forwardRef<
       handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
     >
       <View className="px-5">
-        <Text className="mb-4 text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-          {isEdit ? t("documents_edit_title") : t("documents_add_title")}
-        </Text>
+        <ScreenTitle className="mb-4">{isEdit ? t("documents_edit_title") : t("documents_add_title")}</ScreenTitle>
       </View>
 
       <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20 }}>
@@ -152,9 +150,7 @@ const DocumentFormModal = forwardRef<
         <TextField label={t("documents_issued_at")} value={issuedAt} onChangeText={setIssuedAt} placeholder="2025-01-31" />
         <View style={{ height: 16 }} />
 
-        <Text className="mb-2 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-          {t("documents_file")}
-        </Text>
+        <Caption className="mb-2 text-sm text-foreground">{t("documents_file")}</Caption>
         {file ? (
           <View className="flex-row items-center gap-2.5 rounded-2xl bg-surface px-3.5 py-3">
             <Ionicons name="document-text-outline" size={18} color={colors.accent} />
@@ -172,9 +168,7 @@ const DocumentFormModal = forwardRef<
               {t("documents_current_file_kept")}
             </Text>
             <Pressable onPress={handlePick}>
-              <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                {t("replace")}
-              </Text>
+              <BadgeLabel className="text-accent">{t("replace")}</BadgeLabel>
             </Pressable>
           </View>
         ) : (
@@ -183,9 +177,7 @@ const DocumentFormModal = forwardRef<
             className="flex-row items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-4"
           >
             <Ionicons name="cloud-upload-outline" size={18} color={colors.muted} />
-            <Text className="text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-              {t("documents_pick_file")}
-            </Text>
+            <Caption className="text-sm">{t("documents_pick_file")}</Caption>
           </Pressable>
         )}
 
@@ -280,9 +272,7 @@ export default function ProfileDocumentsScreen() {
                 />
               </Pressable>
               <Pressable className="flex-1 gap-0.5" onPress={() => Linking.openURL(item.file)}>
-                <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={1}>
-                  {item.title}
-                </Text>
+                <CardTitle numberOfLines={1}>{item.title}</CardTitle>
                 <Text className="text-xs text-muted" numberOfLines={1}>
                   {item.issued_by} · {formatDate(item.issued_at)}
                 </Text>

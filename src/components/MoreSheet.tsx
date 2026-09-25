@@ -5,6 +5,7 @@ import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
+import { ListLabel } from "@/components/ui/Typography";
 import { useProfilePerspective } from "@/hooks/useProfilePerspective";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -121,13 +122,9 @@ export const MoreSheet = forwardRef<MoreSheetHandle>(function MoreSheet(_props, 
             <View className="h-10 w-10 items-center justify-center rounded-xl bg-surface">
               <Ionicons name={item.icon} size={19} color={colors.foreground} />
             </View>
-            <Text
-              className="flex-1 text-base text-foreground"
-              style={{ fontFamily: GOLOS_WEIGHTS.medium }}
-              numberOfLines={1}
-            >
+            <ListLabel className="flex-1" numberOfLines={1}>
               {item.label}
-            </Text>
+            </ListLabel>
             {item.key === "chat" && unreadChatCount > 0 ? (
               <View className="mr-1 h-6 min-w-6 items-center justify-center rounded-full bg-danger px-1.5">
                 <Text className="text-xs text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>

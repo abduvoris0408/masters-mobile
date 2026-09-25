@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, ScrollView, Switch, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, Switch, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
 import { TextField } from "@/components/ui/TextField";
+import { CardTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { PaymentTypeOption } from "@/components/wizard/PaymentTypeOption";
 import { useThemeColors } from "@/lib/theme/colors";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useApplicationDetailQuery, useUpdateApplicationMutation } from "@/services/application";
 import type { TPaymentType } from "@/types";
 import { showError, showSuccess } from "@/utils/toast";
@@ -108,16 +108,12 @@ export default function EditApplicationScreen() {
           </View>
 
           <View className="flex-row items-center justify-between rounded-2xl bg-surface px-4 py-3.5">
-            <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-              {t("field_urgent")}
-            </Text>
+            <CardTitle>{t("field_urgent")}</CardTitle>
             <Switch value={isUrgent} onValueChange={setIsUrgent} trackColor={{ true: colors.accent }} />
           </View>
 
           <View className="gap-2">
-            <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-              {t("field_payment_type")}
-            </Text>
+            <CardTitle>{t("field_payment_type")}</CardTitle>
             <PaymentTypeOption
               active={paymentType === "direct"}
               title={t("payment_direct_title")}

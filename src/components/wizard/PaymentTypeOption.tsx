@@ -1,6 +1,7 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { Chip } from "@/components/ui/Chip";
+import { CardTitle, Caption } from "@/components/ui/Typography";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 
 interface PaymentTypeOptionProps {
@@ -26,12 +27,10 @@ export function PaymentTypeOption({ active, title, badge, description, onPress }
       />
       <View className="flex-1 gap-1">
         <View className="flex-row flex-wrap items-center gap-2">
-          <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-            {title}
-          </Text>
+          <CardTitle style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>{title}</CardTitle>
           {badge ? <Chip label={badge} tone="success" /> : null}
         </View>
-        <Text className="text-xs leading-5 text-muted">{description}</Text>
+        <Caption className="leading-5">{description}</Caption>
       </View>
     </Pressable>
   );

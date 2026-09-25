@@ -18,6 +18,7 @@ import { Header } from "@/components/ui/Header";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { PickerField } from "@/components/ui/PickerField";
 import { TextField } from "@/components/ui/TextField";
+import { CardTitle, ScreenTitle, SectionTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useProfilePerspective } from "@/hooks/useProfilePerspective";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -132,9 +133,7 @@ const AddSpecialistSheet = forwardRef<AddSpecialistSheetHandle, { organizationId
         handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
       >
         <View className="px-5">
-          <Text className="mb-4 text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-            {t("specialists_add_title")}
-          </Text>
+          <ScreenTitle className="mb-4">{t("specialists_add_title")}</ScreenTitle>
         </View>
 
         <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24, gap: 12 }} keyboardShouldPersistTaps="handled">
@@ -213,11 +212,7 @@ function ServiceEditRow({
 
   return (
     <View className="gap-2.5 rounded-2xl bg-background p-3.5">
-      {service.service_name ? (
-        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-          {service.service_name}
-        </Text>
-      ) : null}
+      {service.service_name ? <CardTitle>{service.service_name}</CardTitle> : null}
       <Pressable onPress={() => setIsPublished((v) => !v)} className="flex-row items-center gap-2">
         <Ionicons name={isPublished ? "checkbox" : "square-outline"} size={18} color={isPublished ? colors.accent : colors.muted} />
         <Text className="text-xs text-muted">{t("specialists_show")}</Text>
@@ -326,9 +321,7 @@ const MemberDetailSheet = forwardRef<MemberDetailSheetHandle>(function MemberDet
           <View className="flex-row items-center gap-3">
             <Avatar uri={member.photo} name={fullName} size={56} />
             <View className="flex-1">
-              <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                {fullName}
-              </Text>
+              <SectionTitle>{fullName}</SectionTitle>
               <Text className="text-xs text-muted">{formatPhoneNumber(member.phone)}</Text>
               {address ? <Text className="text-xs text-muted">{address}</Text> : null}
             </View>
@@ -351,9 +344,7 @@ const MemberDetailSheet = forwardRef<MemberDetailSheetHandle>(function MemberDet
             </Text>
           </Pressable>
 
-          <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-            {t("specialists_services_and_prices")}
-          </Text>
+          <CardTitle>{t("specialists_services_and_prices")}</CardTitle>
 
           {member.services.length === 0 ? (
             <Text className="text-xs text-muted">{t("specialists_no_services")}</Text>
@@ -384,9 +375,7 @@ function MemberCard({ member, onPress }: { member: IOrganizationMemberSummary; o
     <PressableCard onPress={onPress} className="flex-row items-center gap-3">
       <Avatar uri={member.photo} name={fullName} size={48} />
       <View className="flex-1 gap-0.5">
-        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={1}>
-          {fullName}
-        </Text>
+        <CardTitle numberOfLines={1}>{fullName}</CardTitle>
         <Text className="text-xs text-muted">{formatPhoneNumber(member.phone)}</Text>
         <Text className="text-xs text-muted">{t("specialists_service_count", { count: member.services.length })}</Text>
       </View>

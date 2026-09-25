@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 import { Header } from "@/components/ui/Header";
+import { Caption } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -38,9 +39,7 @@ export default function SettingsScreen() {
 
       <View className="gap-6 px-4 py-4" style={{ paddingTop: headerHeight + 16 }}>
         <View className="gap-2">
-          <Text className="px-1 text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-            {t("settings_appearance")}
-          </Text>
+          <Caption className="px-1 text-sm">{t("settings_appearance")}</Caption>
           <View className="overflow-hidden rounded-2xl bg-surface">
             {THEME_OPTIONS.map((opt, i) => {
               const active = preference === opt.value;
@@ -65,9 +64,7 @@ export default function SettingsScreen() {
         </View>
 
         <View className="gap-2">
-          <Text className="px-1 text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-            {t("settings_language")}
-          </Text>
+          <Caption className="px-1 text-sm">{t("settings_language")}</Caption>
           <View className="overflow-hidden rounded-2xl bg-surface">
             {LANGUAGE_OPTIONS.map((opt, i) => {
               const active = language === opt.value;

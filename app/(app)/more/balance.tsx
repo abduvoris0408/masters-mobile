@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { GradientCard } from "@/components/ui/GradientCard";
 import { Header } from "@/components/ui/Header";
 import { TextField } from "@/components/ui/TextField";
+import { CardTitle, Caption, ScreenTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -44,9 +45,7 @@ function TransactionRow({ item }: { item: IBalanceTransaction }) {
         <Ionicons name={meta.icon} size={18} color={isCredit ? colors.accent : "#D97706"} />
       </View>
       <View className="flex-1 gap-0.5">
-        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-          {meta.label}
-        </Text>
+        <CardTitle>{meta.label}</CardTitle>
         <Text className="text-xs text-muted">{formatDateTime(item.created_at)}</Text>
       </View>
       <View className="items-end gap-0.5">
@@ -114,9 +113,7 @@ const DepositModal = forwardRef<DepositModalHandle>(function DepositModal(_props
       handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
     >
       <BottomSheetView style={{ padding: 20 }}>
-        <Text className="mb-4 text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-          {t("balance_topup_title")}
-        </Text>
+        <ScreenTitle className="mb-4">{t("balance_topup_title")}</ScreenTitle>
 
         {succeeded ? (
           <View className="items-center gap-3 py-6">
@@ -222,9 +219,7 @@ export default function BalanceScreen() {
               </Pressable>
             </View>
 
-            <Text className="px-1 text-sm text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-              {t("balance_transaction_history_title")}
-            </Text>
+            <Caption className="px-1 text-sm">{t("balance_transaction_history_title")}</Caption>
           </View>
         }
         renderItem={({ item }) => <TransactionRow item={item} />}

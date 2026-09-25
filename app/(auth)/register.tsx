@@ -9,6 +9,7 @@ import { isAxiosError } from "axios";
 import { Button } from "@/components/ui/Button";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { TextField } from "@/components/ui/TextField";
+import { BadgeLabel, ScreenTitle, SectionTitle } from "@/components/ui/Typography";
 import { USER_ROLE_ID } from "@/constants";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -48,11 +49,7 @@ const STRENGTH_FILL: Record<PasswordStrength, number> = {
 };
 
 function SectionHeading({ children }: { children: string }) {
-  return (
-    <Text className="text-xs uppercase tracking-wide text-muted" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-      {children}
-    </Text>
-  );
+  return <BadgeLabel className="uppercase tracking-wide text-muted">{children}</BadgeLabel>;
 }
 
 export default function RegisterScreen() {
@@ -168,13 +165,9 @@ export default function RegisterScreen() {
           >
             <Ionicons name="chevron-back" size={20} color={colors.foreground} />
           </Pressable>
-          <Text
-            pointerEvents="none"
-            className="absolute left-0 right-0 text-center text-xl font-bold text-foreground"
-            style={{ fontFamily: GOLOS_WEIGHTS.bold }}
-          >
+          <ScreenTitle pointerEvents="none" className="absolute left-0 right-0 text-center text-xl">
             {t("register_title")}
-          </Text>
+          </ScreenTitle>
         </View>
 
         <View className="flex-row items-center gap-2.5">
@@ -215,13 +208,12 @@ export default function RegisterScreen() {
                     <Ionicons name={item.icon} size={22} color={active ? "#FFFFFF" : colors.muted} />
                   </View>
                   <View className="flex-1 gap-0.5 pr-1">
-                    <Text
-                      className={`text-base ${active ? "text-accent" : "text-foreground"}`}
-                      style={{ fontFamily: GOLOS_WEIGHTS.bold }}
+                    <SectionTitle
+                      className={active ? "text-accent" : "text-foreground"}
                       numberOfLines={1}
                     >
                       {item.label}
-                    </Text>
+                    </SectionTitle>
                     <Text className="text-sm text-muted" numberOfLines={2}>
                       {item.desc}
                     </Text>

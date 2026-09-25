@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/Card";
 import { Chip, type ChipTone } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { CardTitle, Caption, SectionTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -53,13 +54,9 @@ function CategoryCard({
       style={{ width: "48%" }}
     >
       <Ionicons name={fallbackIcon} size={20} color={selected ? colors.danger : colors.muted} />
-      <Text
-        className={`text-sm ${selected ? "text-danger" : "text-foreground"}`}
-        style={{ fontFamily: GOLOS_WEIGHTS.semibold }}
-        numberOfLines={2}
-      >
+      <CardTitle className={selected ? "text-danger" : ""} numberOfLines={2}>
         {category.name}
-      </Text>
+      </CardTitle>
       {category.description ? (
         <Text className="text-xs leading-4 text-muted" numberOfLines={2}>
           {category.description}
@@ -87,9 +84,9 @@ function RequestHistoryRow({ item }: { item: ILegalSupportRequestListItem }) {
           <Text className="text-xs text-muted">{formatDateTime(item.created_at)}</Text>
           {item.is_priority ? <Chip label={t("legal_priority_badge")} tone="warning" /> : null}
         </View>
-        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={2}>
+        <CardTitle numberOfLines={2}>
           {t("legal_request_row_title", { category: item.category.name, orderNumber: item.order.order_number })}
-        </Text>
+        </CardTitle>
       </View>
       <Chip label={status.label} tone={status.tone} />
     </View>
@@ -169,9 +166,7 @@ export default function LegalHelpScreen() {
               <View className="h-12 w-12 items-center justify-center rounded-2xl bg-red-50 dark:bg-danger/15">
                 <Ionicons name="shield-checkmark-outline" size={22} color={colors.danger} />
               </View>
-              <Text className="text-center text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                {t("legal_help_header")}
-              </Text>
+              <SectionTitle className="text-center">{t("legal_help_header")}</SectionTitle>
               <Text className="text-center text-sm leading-5 text-muted">
                 {t("legal_help_intro")}
               </Text>
@@ -186,9 +181,7 @@ export default function LegalHelpScreen() {
             </View>
 
             <View className="gap-2.5">
-              <Text className="px-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                {t("legal_problem_type_title")}
-              </Text>
+              <CardTitle className="px-1">{t("legal_problem_type_title")}</CardTitle>
               {categoriesLoading ? (
                 <ActivityIndicator color={colors.accent} style={{ marginVertical: 16 }} />
               ) : categories.length === 0 ? (
@@ -209,18 +202,14 @@ export default function LegalHelpScreen() {
 
             <Card className="gap-3">
               <View className="gap-1">
-                <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                  {t("legal_form_title")}
-                </Text>
+                <SectionTitle>{t("legal_form_title")}</SectionTitle>
                 <Text className="text-xs text-muted">
                   {t("legal_form_subtitle")}
                 </Text>
               </View>
 
               <View className="gap-1.5">
-                <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                  {t("legal_order_number_label")}
-                </Text>
+                <Caption className="text-sm text-foreground">{t("legal_order_number_label")}</Caption>
                 <View className="flex-row items-center gap-2 rounded-2xl bg-background px-4">
                   <Ionicons name="pricetag-outline" size={15} color={colors.muted} />
                   <TextInput
@@ -235,9 +224,7 @@ export default function LegalHelpScreen() {
               </View>
 
               <View className="gap-1.5">
-                <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                  {t("legal_against_person_label")}
-                </Text>
+                <Caption className="text-sm text-foreground">{t("legal_against_person_label")}</Caption>
                 <View className="flex-row items-center gap-2 rounded-2xl bg-background px-4">
                   <Ionicons name="person-outline" size={15} color={colors.muted} />
                   <TextInput
@@ -252,9 +239,7 @@ export default function LegalHelpScreen() {
               </View>
 
               <View className="gap-1.5">
-                <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-                  {t("legal_description_label")}
-                </Text>
+                <Caption className="text-sm text-foreground">{t("legal_description_label")}</Caption>
                 <TextInput
                   value={description}
                   onChangeText={setDescription}
@@ -283,9 +268,7 @@ export default function LegalHelpScreen() {
                 <View className="h-8 w-8 items-center justify-center rounded-full bg-emerald-50 dark:bg-accent/15">
                   <Ionicons name="call-outline" size={16} color={colors.accent} />
                 </View>
-                <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                  {t("legal_direct_contact_title")}
-                </Text>
+                <CardTitle className="flex-1">{t("legal_direct_contact_title")}</CardTitle>
               </View>
               <Text className="text-xs leading-5 text-muted">
                 {t("legal_direct_contact_description")}
@@ -317,9 +300,7 @@ export default function LegalHelpScreen() {
               </Button>
             </Card>
 
-            <Text className="px-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-              {t("legal_your_requests_title")}
-            </Text>
+            <CardTitle className="px-1">{t("legal_your_requests_title")}</CardTitle>
           </View>
         }
         renderItem={({ item }) => <RequestHistoryRow item={item} />}

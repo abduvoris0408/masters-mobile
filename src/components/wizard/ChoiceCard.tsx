@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
+import { CardTitle } from "@/components/ui/Typography";
 
 interface ChoiceCardProps {
   active: boolean;
@@ -24,9 +24,7 @@ export function ChoiceCard({ active, icon, title, description, onPress, style }:
       style={style}
     >
       <View>{icon}</View>
-      <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-        {title}
-      </Text>
+      <CardTitle>{title}</CardTitle>
       <Text className="text-xs leading-5 text-muted">{description}</Text>
     </Pressable>
   );

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Image, Linking, Pressable, ScrollView, Text, View } from "react-native";
 
 import { EmptyState } from "@/components/ui/EmptyState";
+import { BadgeLabel, CardTitle } from "@/components/ui/Typography";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useDocumentListQuery } from "@/services/document";
@@ -68,9 +69,7 @@ function ServicesTab({ groups, onOrder }: { groups: ServiceGroup[]; onOrder?: (s
     <View className="gap-4">
       {groups.map(({ category, services }) => (
         <View key={category.guid} className="gap-2.5">
-          <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-            {category.name}
-          </Text>
+          <CardTitle>{category.name}</CardTitle>
           <View className="gap-2">
             {services.map((service) => (
               <View key={service.guid} className="gap-2 rounded-2xl bg-background p-3.5">
@@ -89,9 +88,7 @@ function ServicesTab({ groups, onOrder }: { groups: ServiceGroup[]; onOrder?: (s
                 </View>
                 {onOrder ? (
                   <Pressable onPress={() => onOrder(service)} className="self-start rounded-full bg-accent px-3.5 py-1.5">
-                    <Text className="text-xs text-white" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                      {t("master_tabs_order_service")}
-                    </Text>
+                    <BadgeLabel className="text-white">{t("master_tabs_order_service")}</BadgeLabel>
                   </Pressable>
                 ) : null}
               </View>
@@ -136,9 +133,7 @@ function DocumentsTab({ profileGuid }: { profileGuid: string }) {
               />
             </View>
             <View className="flex-1 gap-0.5">
-              <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={1}>
-                {doc.title}
-              </Text>
+              <CardTitle numberOfLines={1}>{doc.title}</CardTitle>
               <Text className="text-xs text-muted">
                 {doc.issued_by} · {formatDate(doc.issued_at)}
               </Text>

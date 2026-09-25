@@ -6,6 +6,7 @@ import { router } from "expo-router";
 
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { CardTitle, SectionTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -133,9 +134,7 @@ export default function NotificationsScreen() {
                       {label ? <Text className="text-xs text-muted">{label}</Text> : <View />}
                       <Text className="text-xs text-muted">{fromNow(notif.created_at)}</Text>
                     </View>
-                    <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={2}>
-                      {notif.title}
-                    </Text>
+                    <CardTitle numberOfLines={2}>{notif.title}</CardTitle>
                   </View>
                 </View>
 
@@ -174,9 +173,7 @@ function NotificationDetailModal({ guid, onClose }: { guid: string | null; onClo
             <ActivityIndicator color={colors.accent} />
           ) : data ? (
             <>
-              <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-                {data.title}
-              </Text>
+              <SectionTitle>{data.title}</SectionTitle>
               <Text className="text-sm leading-6 text-muted">{data.body}</Text>
             </>
           ) : null}

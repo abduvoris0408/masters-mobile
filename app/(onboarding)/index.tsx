@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
@@ -21,7 +21,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-na
 import { BrowseIllustration } from "@/components/onboarding/BrowseIllustration";
 import { FastOrderIllustration } from "@/components/onboarding/FastOrderIllustration";
 import { TrustIllustration } from "@/components/onboarding/TrustIllustration";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
+import { SectionTitle } from "@/components/ui/Typography";
 import { useThemeColors } from "@/lib/theme/colors";
 import { useOnboardingStore } from "@/stores";
 import { useLanguageStore, type AppLanguage } from "@/stores/language.store";
@@ -87,6 +87,38 @@ function OnboardingSlide({
   );
 }
 
+// Android: expo-blur only actually blurs when the content behind it is
+// wrapped in a <BlurTargetView>, which these small floating pills don't do
+// (they sit over an arbitrary scrolling illustration, not one fixed sibling)
+// — without that wiring BlurView just renders as a flat translucent layer,
+// i.e. a washed-out, barely-legible pill. A solid tinted pill sidesteps that.
+function BlurPill({
+  isDark,
+  style,
+  children,
+}: {
+  isDark: boolean;
+  style: object;
+  children: ReactNode;
+}) {
+  if (Platform.OS === "android") {
+    return (
+      <View style={[style, { backgroundColor: isDark ? "rgba(24,27,36,0.96)" : "rgba(255,255,255,0.96)" }]}>
+        {children}
+      </View>
+    );
+  }
+  return (
+    <BlurView
+      intensity={50}
+      tint={isDark ? "dark" : "light"}
+      style={[style, { borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.6)" }]}
+    >
+      {children}
+    </BlurView>
+  );
+}
+
 export default function OnboardingScreen() {
   const { t } = useTranslation("onboarding");
   const colors = useThemeColors();
@@ -143,45 +175,24 @@ export default function OnboardingScreen() {
 
         <View className="flex-row items-center gap-2">
           <Pressable onPress={toggleTheme} hitSlop={8}>
-            <BlurView
-              intensity={Platform.OS === "ios" ? 50 : 90}
-              tint={isDark ? "dark" : "light"}
-              style={[
-                styles.iconPill,
-                { borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.6)" },
-              ]}
-            >
+            <BlurPill style={styles.iconPill} isDark={isDark}>
               <Ionicons name={isDark ? "moon" : "sunny"} size={16} color={colors.foreground} />
-            </BlurView>
+            </BlurPill>
           </Pressable>
 
           <Pressable onPress={openLanguagePicker} hitSlop={8}>
-            <BlurView
-              intensity={Platform.OS === "ios" ? 50 : 90}
-              tint={isDark ? "dark" : "light"}
-              style={[
-                styles.skipPill,
-                { borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.6)" },
-              ]}
-            >
+            <BlurPill style={styles.skipPill} isDark={isDark}>
               <Text className="text-sm font-medium text-foreground">
                 {LANGUAGE_OPTIONS.find((o) => o.value === language)?.short ?? "UZ"}
               </Text>
-            </BlurView>
+            </BlurPill>
           </Pressable>
 
           {!isLastSlide ? (
             <Pressable onPress={finishOnboarding} hitSlop={8}>
-              <BlurView
-                intensity={Platform.OS === "ios" ? 50 : 90}
-                tint={isDark ? "dark" : "light"}
-                style={[
-                  styles.skipPill,
-                  { borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.6)" },
-                ]}
-              >
+              <BlurPill style={styles.skipPill} isDark={isDark}>
                 <Text className="text-sm font-medium text-foreground">{t("skip")}</Text>
-              </BlurView>
+              </BlurPill>
             </Pressable>
           ) : null}
         </View>
@@ -221,15 +232,15 @@ export default function OnboardingScreen() {
         </View>
 
         <Pressable onPress={onNext}>
-          <BlurView
-            intensity={Platform.OS === "ios" ? 60 : 100}
-            tint={isDark ? "dark" : "light"}
-            style={[styles.cta, { backgroundColor: "rgba(22,163,74,0.78)" }]}
-          >
-            <Text className="text-base text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-              {isLastSlide ? t("get_started") : t("next")}
-            </Text>
-          </BlurView>
+          {Platform.OS === "android" ? (
+            <View style={[styles.cta, { backgroundColor: "rgba(22,163,74,0.96)" }]}>
+              <SectionTitle className="text-white">{isLastSlide ? t("get_started") : t("next")}</SectionTitle>
+            </View>
+          ) : (
+            <BlurView intensity={60} tint={isDark ? "dark" : "light"} style={[styles.cta, { backgroundColor: "rgba(22,163,74,0.78)" }]}>
+              <SectionTitle className="text-white">{isLastSlide ? t("get_started") : t("next")}</SectionTitle>
+            </BlurView>
+          )}
         </Pressable>
       </View>
     </View>

@@ -24,6 +24,7 @@ import { MapLocationPicker } from "@/components/MapLocationPicker";
 import { Button } from "@/components/ui/Button";
 import { PickerField } from "@/components/ui/PickerField";
 import { TextField } from "@/components/ui/TextField";
+import { BadgeLabel, Caption, ScreenTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -221,18 +222,14 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
           <View className="h-1.5 flex-1 overflow-hidden rounded-full bg-border">
             <View className="h-full rounded-full bg-accent" style={{ width: `${percent}%` }} />
           </View>
-          <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-            {percent}%
-          </Text>
+          <BadgeLabel className="text-accent">{percent}%</BadgeLabel>
         </View>
       </View>
 
       <ScrollView contentContainerClassName="gap-4 px-4 py-4" keyboardShouldPersistTaps="handled">
         <View className="flex-row items-center gap-2">
           <Ionicons name={meta.icon} size={18} color={colors.accent} />
-          <Text className="text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-            {meta.title}
-          </Text>
+          <ScreenTitle>{meta.title}</ScreenTitle>
         </View>
         <Text className="-mt-2 text-sm text-muted">{meta.subtitle}</Text>
 

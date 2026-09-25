@@ -15,6 +15,11 @@ export const ENDPOINTS = {
     OTP_RESEND: "/auth/resend-otp/",
     FORGOT_PASSWORD: "/auth/forgot-password/",
     RESET_PASSWORD: "/auth/reset-password/",
+    // Starts a Telegram-bot login: returns a one-time token plus the bot deep
+    // link (t.me/<bot>?start=<token>) to open, then TELEGRAM_LOGIN_STATUS is
+    // polled with that same token until the visitor confirms inside the bot.
+    TELEGRAM_LOGIN: "/auth/telegram-login/",
+    TELEGRAM_LOGIN_STATUS: "/auth/telegram-login-status/",
   },
   APPLICATION: {
     LIST: "/application/list/",

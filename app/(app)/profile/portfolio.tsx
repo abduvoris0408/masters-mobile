@@ -16,9 +16,9 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { Caption, ScreenTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import {
   useCreatePortfolioMutation,
   useDeletePortfolioMutation,
@@ -180,15 +180,11 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
       handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
     >
       <View className="px-5">
-        <Text className="mb-4 text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
-          {isEdit ? t("portfolio_edit_title") : t("portfolio_add_title")}
-        </Text>
+        <ScreenTitle className="mb-4">{isEdit ? t("portfolio_edit_title") : t("portfolio_add_title")}</ScreenTitle>
       </View>
 
       <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20 }}>
-        <Text className="mb-1.5 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
-          {t("description")}
-        </Text>
+        <Caption className="mb-1.5 text-sm text-foreground">{t("description")}</Caption>
         <BottomSheetTextInput
           value={description}
           onChangeText={setDescription}
@@ -199,9 +195,9 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
           style={{ minHeight: 90, textAlignVertical: "top", color: colors.foreground }}
         />
 
-        <Text className="mb-2 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+        <Caption className="mb-2 text-sm text-foreground">
           {t("portfolio_images_label")} {totalImages > 0 ? `(${totalImages})` : ""}
-        </Text>
+        </Caption>
         <View className="mb-4 flex-row flex-wrap gap-2.5">
           {keptImages.map((img) => (
             <View key={img.id} style={{ width: 88, height: 88 }}>

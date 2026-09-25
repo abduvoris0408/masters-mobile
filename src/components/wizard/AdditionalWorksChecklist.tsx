@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
+import { CardTitle, Caption } from "@/components/ui/Typography";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import type { IJobsCategoryAdditionalWork } from "@/types";
@@ -45,10 +46,8 @@ export function AdditionalWorksChecklist({ works, loading, selected, onToggle, e
               {active ? <Ionicons name="checkmark" size={14} color="#FFFFFF" /> : null}
             </View>
             <View className="flex-1 gap-0.5">
-              <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                {work.name}
-              </Text>
-              {work.description ? <Text className="text-xs leading-5 text-muted">{work.description}</Text> : null}
+              <CardTitle style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>{work.name}</CardTitle>
+              {work.description ? <Caption className="leading-5">{work.description}</Caption> : null}
             </View>
           </Pressable>
         );

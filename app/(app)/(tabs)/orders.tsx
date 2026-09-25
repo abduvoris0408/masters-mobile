@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterChips } from "@/components/ui/FilterChips";
 import { Header } from "@/components/ui/Header";
+import { BadgeLabel, CardTitle, Caption } from "@/components/ui/Typography";
 import { UnderlineTabs } from "@/components/ui/UnderlineTabs";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -57,9 +58,7 @@ function StatusBadge({ status }: { status: TOrderStatus }) {
   const style = STATUS_BADGE_STYLE[status] ?? STATUS_BADGE_STYLE.new;
   return (
     <View className={`rounded-full px-2.5 py-1 ${style.bg}`}>
-      <Text className={`text-xs ${style.text}`} style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-        {ORDER_STATUS_LABEL[status] ?? status}
-      </Text>
+      <BadgeLabel className={style.text}>{ORDER_STATUS_LABEL[status] ?? status}</BadgeLabel>
     </View>
   );
 }
@@ -85,24 +84,24 @@ function OrderCard({ order, perspective, onMessage, onFinish, finishing, onCompl
   return (
     <Card className="gap-3">
       <View className="flex-row items-center justify-between gap-2">
-        <Text className="flex-1 text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={1}>
+        <CardTitle className="flex-1" numberOfLines={1}>
           #{order.order_number}
-        </Text>
+        </CardTitle>
         <StatusBadge status={order.status} />
       </View>
 
       {order.application?.title ? (
-        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }} numberOfLines={2}>
+        <Caption className="text-sm text-foreground" numberOfLines={2}>
           {order.application.title}
-        </Text>
+        </Caption>
       ) : null}
 
       <View className="flex-row items-center gap-2">
         <Avatar uri={counterpart?.photo} name={counterpart?.name} size={36} />
         <View className="flex-1">
-          <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }} numberOfLines={1}>
+          <Caption className="text-sm text-foreground" numberOfLines={1}>
             {counterpart?.name || (perspective === "client" ? t("orders_role_worker") : t("orders_role_client"))}
-          </Text>
+          </Caption>
           {counterpart?.phone ? <Text className="text-xs text-muted">{formatPhoneNumber(counterpart.phone)}</Text> : null}
         </View>
         <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>

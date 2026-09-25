@@ -4,6 +4,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { Avatar } from "@/components/ui/Avatar";
 import { PressableCard } from "@/components/ui/Card";
+import { BadgeLabel, CardTitle, Caption, SectionTitle } from "@/components/ui/Typography";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useThemeColors } from "@/lib/theme/colors";
 import type { TPaymentType } from "@/types";
@@ -61,16 +62,14 @@ export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer",
       >
         <View className="flex-row items-start justify-between gap-1.5">
           <View className="flex-1 self-start rounded-lg bg-emerald-50 px-2 py-1 dark:bg-accent/15">
-            <Text className="text-[11px] text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={1}>
+            <BadgeLabel className="text-[11px] text-accent" numberOfLines={1}>
               {item.categoryLabel}
-            </Text>
+            </BadgeLabel>
           </View>
           {item.isUrgent ? <Ionicons name="flash" size={14} color={colors.danger} /> : null}
         </View>
 
-        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }} numberOfLines={2}>
-          {item.title}
-        </Text>
+        <CardTitle numberOfLines={2}>{item.title}</CardTitle>
 
         <View className="flex-row items-center gap-1">
           <Ionicons name="location-outline" size={12} color={colors.muted} />
@@ -105,24 +104,18 @@ export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer",
     >
       <View className="flex-row items-start justify-between gap-2">
         <View className="self-start rounded-lg bg-emerald-50 px-2.5 py-1 dark:bg-accent/15">
-          <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-            {item.categoryLabel}
-          </Text>
+          <BadgeLabel className="text-accent">{item.categoryLabel}</BadgeLabel>
         </View>
         {item.isUrgent ? (
           <View className="flex-row items-center gap-1 self-start rounded-lg bg-red-50 px-2.5 py-1 dark:bg-danger/15">
             <Ionicons name="flash" size={12} color={colors.danger} />
-            <Text className="text-xs text-danger" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-              {t("listing_urgent")}
-            </Text>
+            <BadgeLabel className="text-danger">{t("listing_urgent")}</BadgeLabel>
           </View>
         ) : null}
       </View>
 
       <View className="gap-1">
-        <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }} numberOfLines={2}>
-          {item.title}
-        </Text>
+        <SectionTitle numberOfLines={2}>{item.title}</SectionTitle>
         {item.description ? (
           <Text className="text-sm text-muted" numberOfLines={1}>
             {item.description}
@@ -158,9 +151,7 @@ export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer",
                 size={12}
                 color={colors.muted}
               />
-              <Text className="text-xs text-muted" style={{ fontFamily: GOLOS_WEIGHTS.medium }} numberOfLines={1}>
-                {PAYMENT_LABEL[item.paymentType]}
-              </Text>
+              <Caption numberOfLines={1}>{PAYMENT_LABEL[item.paymentType]}</Caption>
             </View>
           ) : null}
         </View>
