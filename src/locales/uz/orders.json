@@ -80,6 +80,7 @@
   "offer_sent_success": "Taklif muvaffaqiyatli yuborildi",
   "offer_send_error": "Taklif yuborishda xatolik yuz berdi",
   "offer_send_button": "Taklif yuborish",
+  "listing_offer_cta_text": "Hozir taklif qoldirsangiz,\nsizning taklifingiz birinchi o'rinda bo'ladi.",
   "offer_your_price_label": "Sizning narxingiz",
   "offer_price_placeholder": "masalan, 150 000",
   "offer_comment_placeholder": "Taklifingiz va muddatlarni tasvirlab bering",

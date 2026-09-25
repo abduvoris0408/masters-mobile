@@ -20,6 +20,8 @@ function useListingCardMapper() {
     const sameBudget = item.budget_from === item.budget_to;
     return {
       id: item.guid,
+      categoryGuid: item.category.guid,
+      categoryIcon: item.category.icon,
       categoryLabel: item.category.name,
       title: item.title,
       description: item.description,

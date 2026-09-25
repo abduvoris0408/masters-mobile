@@ -1,11 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { Card, PressableCard } from "@/components/ui/Card";
 import { Header } from "@/components/ui/Header";
-import { Body, Caption, ListLabel, ScreenTitle, SectionTitle } from "@/components/ui/Typography";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { ScreenTitle, SectionTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useProfilePerspective } from "@/hooks/useProfilePerspective";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -13,57 +14,8 @@ import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useLogoutMutation } from "@/services/auth";
 import { useAuthStore } from "@/stores";
 import { formatPhoneNumber } from "@/utils/format";
-
-function InfoRow({
-  icon,
-  label,
-  value,
-  isLast,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  value: string;
-  isLast?: boolean;
-}) {
-  const colors = useThemeColors();
-  return (
-    <View className={`flex-row items-center gap-3 py-3 ${isLast ? "" : "border-b border-border"}`}>
-      <Ionicons name={icon} size={18} color={colors.muted} />
-      <View className="flex-1">
-        <Caption>{label}</Caption>
-        <Body style={{ fontFamily: GOLOS_WEIGHTS.medium }}>{value}</Body>
-      </View>
-    </View>
-  );
-}
-
-function NavRow({
-  icon,
-  label,
-  onPress,
-  color = "#34C759",
-  isLast,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  onPress: () => void;
-  color?: string;
-  isLast?: boolean;
-}) {
-  const colors = useThemeColors();
-  return (
-    <Pressable
-      className={`flex-row items-center gap-3 py-3 ${isLast ? "" : "border-b border-border"}`}
-      onPress={onPress}
-    >
-      <View className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: color }}>
-        <Ionicons name={icon} size={19} color="#FFFFFF" />
-      </View>
-      <ListLabel className="flex-1">{label}</ListLabel>
-      <Ionicons name="chevron-forward" size={16} color={colors.muted} />
-    </Pressable>
-  );
-}
+import { ProfileAvatar } from "./_profile/ProfileAvatar";
+import { InfoRow, NavRow } from "./_profile/ProfileRows";
 
 export default function ProfileScreen() {
   const { t } = useTranslation("profile");
@@ -71,7 +23,7 @@ export default function ProfileScreen() {
   const headerHeight = useHeaderHeight();
   const user = useAuthStore((s) => s.user);
   const logoutMutation = useLogoutMutation();
-  const { masterProfile, isWorker, isOrganization, organization } = useProfilePerspective();
+  const { masterProfile, isWorker, isOrganization, isIndividualMaster, organization, isLoading } = useProfilePerspective();
 
   const addressLabel = masterProfile
     ? [masterProfile.region?.name, masterProfile.district?.name].filter(Boolean).join(", ")
@@ -94,32 +46,21 @@ export default function ProfileScreen() {
         contentContainerClassName="gap-4 px-4"
         contentContainerStyle={{ paddingTop: headerHeight + 12, paddingBottom: 140 }}
       >
+        {isLoading ? (
+          <>
+            <View className="items-center gap-3">
+              <Skeleton width={140} height={140} radius={70} />
+              <Skeleton width={160} height={22} />
+            </View>
+            <Skeleton height={90} radius={24} />
+            <Skeleton height={140} radius={24} />
+            <Skeleton height={260} radius={24} />
+          </>
+        ) : (
+          <>
         {/* Avatar */}
         <View className="items-center gap-3">
-          <View>
-            {isOrganization && organization?.logo ? (
-              <Image source={{ uri: organization.logo }} style={{ width: 140, height: 140, borderRadius: 70 }} />
-            ) : user?.avatar ? (
-              <Image source={{ uri: user.avatar }} style={{ width: 140, height: 140, borderRadius: 70 }} />
-            ) : (
-              <View
-                className="items-center justify-center rounded-full bg-emerald-100"
-                style={{ width: 140, height: 140 }}
-              >
-                <Text className="text-5xl font-bold text-primary">
-                  {(displayName.trim()?.[0] ?? "?").toUpperCase()}
-                </Text>
-              </View>
-            )}
-            <Pressable
-              onPress={() => router.push("/profile/edit")}
-              hitSlop={8}
-              className="absolute -bottom-1 -right-1 h-10 w-10 items-center justify-center rounded-full border-2 border-background bg-surface"
-              style={{ shadowColor: "#0F172A", shadowOpacity: 0.15, shadowRadius: 6, elevation: 4 }}
-            >
-              <Ionicons name="pencil" size={17} color={colors.foreground} />
-            </Pressable>
-          </View>
+          <ProfileAvatar displayName={displayName} isOrganization={isOrganization} organizationLogo={organization?.logo} />
           <ScreenTitle>{displayName}</ScreenTitle>
           {isOrganization ? (
             <View className="flex-row items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 dark:bg-accent/15">
@@ -128,7 +69,21 @@ export default function ProfileScreen() {
                 {t("organization_badge")}
               </Text>
             </View>
-          ) : null}
+          ) : isIndividualMaster ? (
+            <View className="flex-row items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 dark:bg-accent/15">
+              <Ionicons name="construct" size={13} color={colors.accent} />
+              <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+                {t("master_badge")}
+              </Text>
+            </View>
+          ) : (
+            <View className="flex-row items-center gap-1.5 rounded-full bg-surface px-3 py-1">
+              <Ionicons name="person" size={13} color={colors.muted} />
+              <Text className="text-xs text-muted" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+                {t("client_badge")}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Level card */}
@@ -294,6 +249,8 @@ export default function ProfileScreen() {
             {logoutMutation.isPending ? t("logging_out") : t("logout")}
           </Text>
         </PressableCard>
+          </>
+        )}
       </ScrollView>
     </View>
   );

@@ -161,18 +161,24 @@ export default function CourseDetailScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      {/* Video player pinned to the very top, under the status bar — the
+      {/* Video player pinned to the top, below the status bar — the
           YouTube-watch-page layout the user asked for, instead of routing
-          out to an external browser to view the lesson. */}
-      <View style={{ height: PLAYER_HEIGHT, backgroundColor: "#000" }}>
-        {videoSource ? (
-          <VideoView player={player} style={{ width: "100%", height: "100%" }} nativeControls contentFit="contain" />
-        ) : (
-          <View className="flex-1 items-center justify-center">
-            <Ionicons name="document-text-outline" size={36} color="#FFFFFF" />
-            <Text className="mt-2 text-sm text-white/70">{t("course_material_not_video")}</Text>
-          </View>
-        )}
+          out to an external browser to view the lesson. PLAYER_HEIGHT is a
+          fixed 16:9 height computed from screen width; without the status
+          bar's own height added on top, that fixed box got pushed partly
+          behind the status bar instead of sitting right under it, reading
+          as the player being squeezed small up against the top edge. */}
+      <View style={{ height: insets.top + PLAYER_HEIGHT, backgroundColor: "#000" }}>
+        <View style={{ marginTop: insets.top, height: PLAYER_HEIGHT }}>
+          {videoSource ? (
+            <VideoView player={player} style={{ width: "100%", height: "100%" }} nativeControls contentFit="contain" />
+          ) : (
+            <View className="flex-1 items-center justify-center">
+              <Ionicons name="document-text-outline" size={36} color="#FFFFFF" />
+              <Text className="mt-2 text-sm text-white/70">{t("course_material_not_video")}</Text>
+            </View>
+          )}
+        </View>
         <Pressable
           onPress={() => router.back()}
           hitSlop={8}

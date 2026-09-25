@@ -80,6 +80,7 @@
   "offer_sent_success": "Предложение успешно отправлено",
   "offer_send_error": "Ошибка при отправке предложения",
   "offer_send_button": "Отправить предложение",
+  "listing_offer_cta_text": "Ваш отклик окажется на 1 месте,\nесли вы оставите его прямо сейчас.",
   "offer_your_price_label": "Ваша цена",
   "offer_price_placeholder": "например, 150 000",
   "offer_comment_placeholder": "Опишите ваше предложение и сроки",

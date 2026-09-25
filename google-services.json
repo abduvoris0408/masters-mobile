@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "261926709816",
+    "project_id": "ustalar-super-app",
+    "storage_bucket": "ustalar-super-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:261926709816:android:f73b83b1a4b29e0f5d14cd",
+        "android_client_info": {
+          "package_name": "uz.masters.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxCXcplka9v0kpI8pIBKEgKCloZAbxHlE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -14,9 +14,11 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "uz.masters.mobile",
+      googleServicesFile: "./GoogleService-Info.plist",
     },
     android: {
       package: "uz.masters.mobile",
+      googleServicesFile: "./google-services.json",
       adaptiveIcon: {
         backgroundColor: "#E6F4FE",
         foregroundImage: "./assets/android-icon-foreground.png",
@@ -39,6 +41,8 @@ module.exports = {
       "expo-secure-store",
       "expo-localization",
       "expo-font",
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging",
       [
         "expo-image-picker",
         {
@@ -47,6 +51,19 @@ module.exports = {
       ],
       "expo-video",
       "@react-native-community/datetimepicker",
+      [
+        "expo-splash-screen",
+        {
+          image: "./assets/splash-icon.png",
+          imageWidth: 160,
+          resizeMode: "contain",
+          backgroundColor: "#F5F5F5",
+          dark: {
+            image: "./assets/splash-icon.png",
+            backgroundColor: "#181B24",
+          },
+        },
+      ],
       [
         "expo-location",
         {
@@ -68,6 +85,11 @@ module.exports = {
           // this block being present.
           android: {
             buildArchs: ["arm64-v8a"],
+          },
+          // @react-native-firebase v22+ requires static frameworks on iOS —
+          // its Swift pods don't build against the default dynamic linking.
+          ios: {
+            useFrameworks: "static",
           },
         },
       ],

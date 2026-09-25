@@ -80,6 +80,7 @@
   "offer_sent_success": "Offer sent successfully",
   "offer_send_error": "An error occurred while sending the offer",
   "offer_send_button": "Send offer",
+  "listing_offer_cta_text": "Your offer will rank first\nif you send it right now.",
   "offer_your_price_label": "Your price",
   "offer_price_placeholder": "e.g. 150,000",
   "offer_comment_placeholder": "Describe your offer and timeline",

@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import Checkbox from "expo-checkbox";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import { CardTitle, Caption } from "@/components/ui/Typography";
@@ -40,11 +40,12 @@ export function AdditionalWorksChecklist({ works, loading, selected, onToggle, e
             onPress={() => onToggle(work.id)}
             className={`flex-row items-start gap-3 rounded-2xl border p-4 ${active ? "border-accent bg-emerald-50 dark:bg-accent/15" : "border-border bg-surface"}`}
           >
-            <View
-              className={`mt-0.5 h-5 w-5 items-center justify-center rounded-md ${active ? "bg-accent" : "border border-border"}`}
-            >
-              {active ? <Ionicons name="checkmark" size={14} color="#FFFFFF" /> : null}
-            </View>
+            <Checkbox
+              value={active}
+              onValueChange={() => onToggle(work.id)}
+              color={active ? colors.accent : undefined}
+              style={{ marginTop: 2 }}
+            />
             <View className="flex-1 gap-0.5">
               <CardTitle style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>{work.name}</CardTitle>
               {work.description ? <Caption className="leading-5">{work.description}</Caption> : null}

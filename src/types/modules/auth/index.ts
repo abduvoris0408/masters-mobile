@@ -100,8 +100,11 @@ export interface ITelegramLoginStatusResponse extends Partial<ITokenPair> {
   phone?: string;
 }
 
+// RN has no File/Blob-backed <input type=file> — a picked image comes back
+// from expo-image-picker as a local `{ uri, type, name }` triple instead
+// (see IPickedImageAsset in application.mutation.ts), unlike web's raw File.
 export interface IUserPhotoUpdateRequest {
-  photo?: File | null;
+  photo?: { uri: string; type?: string | null; name?: string | null } | null;
   remove_photo?: boolean;
 }
 

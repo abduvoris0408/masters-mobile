@@ -1,6 +1,8 @@
 {
   "screen_title": "Profil",
   "organization_badge": "Tashkilot",
+  "master_badge": "Mutaxassis",
+  "client_badge": "Buyurtmachi",
   "master_level_label": "Mutaxassis darajasi",
   "level_orders_count": "{{count}}/{{total}} buyurtma",
   "level_remaining_orders": "\"{{level}}\" darajasigacha yana {{count}} ta buyurtma",
@@ -218,5 +220,17 @@
 
   "org_onboarding_title": "Tashkilotga o'tish",
   "org_onboarding_hint": "Tashkilotingiz ma'lumotlarini to'ldiring — bu ma'lumotlar tekshiruvdan so'ng ommaviy profilingizda ko'rinadi",
-  "org_onboarding_success": "Tashkilotingiz yaratildi"
+  "org_onboarding_success": "Tashkilotingiz yaratildi",
+
+  "common_cancel": "Bekor qilish",
+  "permission_required_title": "Ruxsat kerak",
+  "permission_camera_message": "Kameradan foydalanish uchun ruxsat bering.",
+  "permission_gallery_message": "Rasm tanlash uchun galereyaga ruxsat bering.",
+  "avatar_camera_option": "Kamera",
+  "avatar_gallery_option": "Galereya",
+  "avatar_remove_option": "Rasmni o'chirish",
+  "avatar_remove_confirm_title": "Rasmni o'chirish",
+  "avatar_remove_confirm_message": "Profil rasmingizni o'chirishni tasdiqlaysizmi?",
+  "avatar_remove_confirm_action": "O'chirish",
+  "avatar_update_error": "Rasmni yangilashda xatolik yuz berdi"
 }

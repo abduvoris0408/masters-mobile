@@ -1,6 +1,8 @@
 {
   "screen_title": "Profile",
   "organization_badge": "Organization",
+  "master_badge": "Worker",
+  "client_badge": "Client",
   "master_level_label": "Worker level",
   "level_orders_count": "{{count}}/{{total}} orders",
   "level_remaining_orders": "{{count}} more orders until \"{{level}}\" level",
@@ -218,5 +220,17 @@
 
   "org_onboarding_title": "Switch to organization",
   "org_onboarding_hint": "Fill in your organization's details — after review, this will appear on your public profile",
-  "org_onboarding_success": "Your organization has been created"
+  "org_onboarding_success": "Your organization has been created",
+
+  "common_cancel": "Cancel",
+  "permission_required_title": "Permission required",
+  "permission_camera_message": "Please allow camera access.",
+  "permission_gallery_message": "Please allow gallery access to pick a photo.",
+  "avatar_camera_option": "Camera",
+  "avatar_gallery_option": "Gallery",
+  "avatar_remove_option": "Remove photo",
+  "avatar_remove_confirm_title": "Remove photo",
+  "avatar_remove_confirm_message": "Are you sure you want to remove your profile photo?",
+  "avatar_remove_confirm_action": "Remove",
+  "avatar_update_error": "Failed to update photo"
 }

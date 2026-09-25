@@ -6,6 +6,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useProfilePerspective } from "@/hooks/useProfilePerspective";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -90,7 +91,22 @@ export default function MasterDetailScreen() {
       <Header title={t("master_detail_title")} onBackPress={() => router.back()} />
 
       {isLoading ? (
-        <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
+        <View className="gap-4 px-4" style={{ paddingTop: headerHeight + 16 }}>
+          <View className="flex-row items-center gap-3">
+            <Skeleton width={64} height={64} radius={32} />
+            <View className="flex-1 gap-2">
+              <Skeleton width="60%" height={18} />
+              <Skeleton width="40%" height={13} />
+            </View>
+          </View>
+          <View className="flex-row gap-3">
+            <Skeleton height={70} radius={16} style={{ flex: 1 }} />
+            <Skeleton height={70} radius={16} style={{ flex: 1 }} />
+            <Skeleton height={70} radius={16} style={{ flex: 1 }} />
+          </View>
+          <Skeleton height={150} radius={20} />
+          <Skeleton height={150} radius={20} />
+        </View>
       ) : isError || !master ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
           <EmptyState icon="alert-circle-outline" title={t("master_detail_not_found")} />

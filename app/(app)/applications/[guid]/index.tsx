@@ -9,6 +9,7 @@ import { Chip, type ChipTone } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
 import { LocationMap } from "@/components/ui/LocationMap";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { Body, CardTitle, ScreenTitle, SectionTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -143,7 +144,16 @@ export default function ApplicationManageScreen() {
       <Header title={t("application_details_header")} onBackPress={() => router.back()} />
 
       {isLoading ? (
-        <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
+        <View className="gap-4 px-4" style={{ paddingTop: headerHeight + 12 }}>
+          <View className="flex-row gap-2">
+            <Skeleton width={80} height={26} radius={13} />
+            <Skeleton width={100} height={26} radius={13} />
+          </View>
+          <Skeleton width="85%" height={24} />
+          <Skeleton height={60} />
+          <Skeleton height={160} radius={20} />
+          <Skeleton height={140} radius={24} />
+        </View>
       ) : isError || !data ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
           <EmptyState icon="alert-circle-outline" title={t("application_not_found")} />

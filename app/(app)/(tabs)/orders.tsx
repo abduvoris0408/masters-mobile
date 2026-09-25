@@ -10,8 +10,9 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterChips } from "@/components/ui/FilterChips";
 import { Header } from "@/components/ui/Header";
+import { PillTabs } from "@/components/ui/PillTabs";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { BadgeLabel, CardTitle, Caption } from "@/components/ui/Typography";
-import { UnderlineTabs } from "@/components/ui/UnderlineTabs";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -53,6 +54,27 @@ const STATUS_BADGE_STYLE: Record<TOrderStatus, { bg: string; text: string }> = {
 };
 
 const PAGE_SIZE = 10;
+
+function OrderCardSkeleton() {
+  return (
+    <Card className="gap-3">
+      <View className="flex-row items-center justify-between gap-2">
+        <Skeleton width={80} height={16} />
+        <Skeleton width={70} height={22} radius={11} />
+      </View>
+      <Skeleton width="70%" height={14} />
+      <View className="flex-row items-center gap-2">
+        <Skeleton width={36} height={36} radius={18} />
+        <View className="flex-1 gap-1">
+          <Skeleton width="60%" height={13} />
+          <Skeleton width="40%" height={11} />
+        </View>
+        <Skeleton width={70} height={16} />
+      </View>
+      <Skeleton width="50%" height={12} />
+    </Card>
+  );
+}
 
 function StatusBadge({ status }: { status: TOrderStatus }) {
   const style = STATUS_BADGE_STYLE[status] ?? STATUS_BADGE_STYLE.new;
@@ -232,7 +254,11 @@ function OrdersList({ perspective }: { perspective: "client" | "worker" }) {
       </View>
 
       {isLoading ? (
-        <ActivityIndicator color={colors.accent} style={{ marginTop: 24 }} />
+        <View className="gap-3 px-4 py-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <OrderCardSkeleton key={i} />
+          ))}
+        </View>
       ) : isError ? (
         <View style={{ flex: 1, marginTop: -44 }}>
           <EmptyState
@@ -299,14 +325,16 @@ export default function OrdersScreen() {
     <View className="flex-1 bg-background">
       <Header title={t("orders_title")} onBackPress={() => router.push("/")} />
       <View style={{ flex: 1, paddingTop: headerHeight }}>
-        <UnderlineTabs
-          value={view}
-          onChange={setView}
-          options={[
-            { value: "worker", label: t("orders_tab_worker") },
-            { value: "client", label: t("orders_tab_client") },
-          ]}
-        />
+        <View className="px-4 pb-1 pt-2">
+          <PillTabs
+            value={view}
+            onChange={setView}
+            options={[
+              { value: "worker", label: t("orders_tab_worker") },
+              { value: "client", label: t("orders_tab_client") },
+            ]}
+          />
+        </View>
         <OrdersList perspective={view} />
       </View>
     </View>

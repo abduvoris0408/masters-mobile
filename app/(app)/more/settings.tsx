@@ -1,10 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import Svg, { Path } from "react-native-svg";
 
 import { Header } from "@/components/ui/Header";
-import { Caption } from "@/components/ui/Typography";
+import { Caption, ListLabel } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -17,6 +18,25 @@ const LANGUAGE_OPTIONS: { value: "uz" | "ru" | "en"; label: string }[] = [
   { value: "ru", label: "Русский" },
   { value: "en", label: "English" },
 ];
+
+// Drawn with react-native-svg rather than Ionicons — the icon-font glyph
+// intermittently failed to rasterize here (Expo Go font-cache flakiness),
+// leaving the row looking like the icon+label had merged with nothing
+// selected on the right. An SVG path has no font dependency to fail.
+function CheckBadge({ active, color, borderColor }: { active: boolean; color: string; borderColor: string }) {
+  return (
+    <View
+      className="h-6 w-6 items-center justify-center rounded-full"
+      style={active ? { backgroundColor: color } : { borderWidth: 2, borderColor }}
+    >
+      {active ? (
+        <Svg width={13} height={13} viewBox="0 0 24 24">
+          <Path d="M5 13L10 18L19 7" stroke="#FFFFFF" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        </Svg>
+      ) : null}
+    </View>
+  );
+}
 
 export default function SettingsScreen() {
   const { t } = useTranslation("orders");
@@ -37,8 +57,8 @@ export default function SettingsScreen() {
     <View className="flex-1 bg-background">
       <Header title={t("settings_header")} onBackPress={() => router.back()} hideSettings />
 
-      <View className="gap-6 px-4 py-4" style={{ paddingTop: headerHeight + 16 }}>
-        <View className="gap-2">
+      <View className="gap-7 px-4 py-4" style={{ paddingTop: headerHeight + 16 }}>
+        <View className="gap-2.5">
           <Caption className="px-1 text-sm">{t("settings_appearance")}</Caption>
           <View className="overflow-hidden rounded-2xl bg-surface">
             {THEME_OPTIONS.map((opt, i) => {
@@ -47,23 +67,22 @@ export default function SettingsScreen() {
                 <Pressable
                   key={opt.value}
                   onPress={() => setPreference(opt.value)}
-                  className={`flex-row items-center gap-3 px-4 py-3.5 ${i > 0 ? "border-t border-border" : ""}`}
+                  className={`flex-row items-center gap-4 px-4 py-4 ${i > 0 ? "border-t border-border" : ""}`}
                 >
-                  <Ionicons name={opt.icon} size={18} color={active ? colors.accent : colors.foreground} />
-                  <Text
-                    className="flex-1 text-sm text-foreground"
-                    style={{ fontFamily: active ? GOLOS_WEIGHTS.semibold : GOLOS_WEIGHTS.regular }}
-                  >
+                  <View style={{ width: 22, alignItems: "center" }}>
+                    <Ionicons name={opt.icon} size={20} color={active ? colors.accent : colors.foreground} />
+                  </View>
+                  <ListLabel className="flex-1" style={{ fontFamily: active ? GOLOS_WEIGHTS.semibold : GOLOS_WEIGHTS.medium }}>
                     {opt.label}
-                  </Text>
-                  {active ? <Ionicons name="checkmark" size={18} color={colors.accent} /> : null}
+                  </ListLabel>
+                  <CheckBadge active={active} color={colors.accent} borderColor={colors.border} />
                 </Pressable>
               );
             })}
           </View>
         </View>
 
-        <View className="gap-2">
+        <View className="gap-2.5">
           <Caption className="px-1 text-sm">{t("settings_language")}</Caption>
           <View className="overflow-hidden rounded-2xl bg-surface">
             {LANGUAGE_OPTIONS.map((opt, i) => {
@@ -72,15 +91,15 @@ export default function SettingsScreen() {
                 <Pressable
                   key={opt.value}
                   onPress={() => setLanguage(opt.value)}
-                  className={`flex-row items-center gap-3 px-4 py-3.5 ${i > 0 ? "border-t border-border" : ""}`}
+                  className={`flex-row items-center gap-4 px-4 py-4 ${i > 0 ? "border-t border-border" : ""}`}
                 >
-                  <Text
-                    className="flex-1 text-sm text-foreground"
-                    style={{ fontFamily: active ? GOLOS_WEIGHTS.semibold : GOLOS_WEIGHTS.regular }}
-                  >
+                  <View style={{ width: 22, alignItems: "center" }}>
+                    <Ionicons name="language-outline" size={20} color={active ? colors.accent : colors.foreground} />
+                  </View>
+                  <ListLabel className="flex-1" style={{ fontFamily: active ? GOLOS_WEIGHTS.semibold : GOLOS_WEIGHTS.medium }}>
                     {opt.label}
-                  </Text>
-                  {active ? <Ionicons name="checkmark" size={18} color={colors.accent} /> : null}
+                  </ListLabel>
+                  <CheckBadge active={active} color={colors.accent} borderColor={colors.border} />
                 </Pressable>
               );
             })}

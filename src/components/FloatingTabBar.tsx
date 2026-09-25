@@ -236,7 +236,17 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
 
   return (
     <>
-      <View pointerEvents="box-none" style={[styles.wrapper, { bottom: Math.max(insets.bottom - 4, 4) }]}>
+      <View
+        pointerEvents="box-none"
+        style={[
+          styles.wrapper,
+          // Android's gesture-nav inset is often tiny (or 0 on some OEM
+          // skins), which left the pill sitting almost flush with the
+          // screen edge — iOS's home-indicator inset doesn't have this
+          // problem, so only Android needs a larger floor here.
+          { bottom: Platform.OS === "android" ? Math.max(insets.bottom, 16) : Math.max(insets.bottom - 4, 4) },
+        ]}
+      >
         {/* Android: expo-blur's blur only works when the blurred content is
             wrapped in a <BlurTargetView>, which isn't wired up here — without
             it BlurView just renders as a plain translucent layer, i.e. a

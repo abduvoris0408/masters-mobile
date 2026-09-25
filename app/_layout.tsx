@@ -16,12 +16,21 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Toast } from "@/components/Toast";
 import { applyGolosAsDefaultFont } from "@/lib/theme/fonts";
 import { ChatSocketProvider } from "@/providers/ChatSocketProvider";
+import { PushNotificationsProvider } from "@/providers/PushNotificationsProvider";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { ActivityIndicator, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+
+// Keep the native splash (app.config.js's expo-splash-screen block) up
+// until fonts are ready, instead of hiding it on first frame and then
+// showing a bare spinner screen behind it — that swap (native splash →
+// spinner → real UI) reads as a stutter. Holding it through font load means
+// the native splash dissolves straight into the real UI.
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -33,13 +42,11 @@ export default function RootLayout() {
     GolosText_900Black,
   });
 
-  if (!fontsLoaded) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator />
-      </View>
-    );
-  }
+  useEffect(() => {
+    if (fontsLoaded) SplashScreen.hideAsync().catch(() => undefined);
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) return null;
 
   applyGolosAsDefaultFont();
 
@@ -51,12 +58,14 @@ export default function RootLayout() {
             <ActionSheetProvider>
               <BottomSheetModalProvider>
                 <ChatSocketProvider>
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="(onboarding)" />
-                    <Stack.Screen name="(auth)" />
-                    <Stack.Screen name="(app)" />
-                  </Stack>
-                  <Toast />
+                  <PushNotificationsProvider>
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="(onboarding)" />
+                      <Stack.Screen name="(auth)" />
+                      <Stack.Screen name="(app)" />
+                    </Stack>
+                    <Toast />
+                  </PushNotificationsProvider>
                 </ChatSocketProvider>
               </BottomSheetModalProvider>
             </ActionSheetProvider>

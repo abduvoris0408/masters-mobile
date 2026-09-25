@@ -6,6 +6,7 @@ import { router } from "expo-router";
 
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { CardTitle, SectionTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -33,6 +34,20 @@ const NOTIF_TYPE_STYLE: Record<string, { icon: keyof typeof Ionicons.glyphMap; c
 };
 
 const PAGE_SIZE = 20;
+
+function NotificationRowSkeleton() {
+  return (
+    <View className="rounded-2xl bg-surface px-3.5 py-3">
+      <View className="flex-row items-start gap-3">
+        <Skeleton width={40} height={40} radius={20} />
+        <View className="flex-1 gap-1.5">
+          <Skeleton width="30%" height={11} />
+          <Skeleton width="80%" height={14} />
+        </View>
+      </View>
+    </View>
+  );
+}
 
 export default function NotificationsScreen() {
   const { t } = useTranslation("orders");
@@ -94,7 +109,11 @@ export default function NotificationsScreen() {
       </View>
 
       {isLoading ? (
-        <ActivityIndicator className="mt-10" color={colors.accent} />
+        <View className="gap-2.5 px-4 py-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <NotificationRowSkeleton key={i} />
+          ))}
+        </View>
       ) : notifications.length === 0 ? (
         <EmptyState
           icon="notifications-outline"

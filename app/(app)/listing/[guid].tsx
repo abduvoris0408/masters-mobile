@@ -1,9 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
-import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop, type BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
+import {
+  BottomSheetModal,
+  BottomSheetScrollView,
+  BottomSheetBackdrop,
+  type BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { useColorScheme } from "nativewind";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
@@ -12,7 +19,10 @@ import { Chip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
 import { LocationMap } from "@/components/ui/LocationMap";
+import { ProgressiveBlurView } from "@/components/ui/ProgressiveBlurView";
 import { Rating } from "@/components/ui/Rating";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { SuccessCheckmark } from "@/components/ui/SuccessCheckmark";
 import { TextField } from "@/components/ui/TextField";
 import { Caption, ScreenTitle, SectionTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
@@ -75,10 +85,18 @@ export default function ListingDetailScreen() {
   const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
+  const insets = useSafeAreaInsets();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
   const { guid } = useLocalSearchParams<{ guid: string }>();
   const { data, isLoading, isError } = useApplicationPublicDetailQuery(guid ?? null);
   const user = useAuthStore((s) => s.user);
   const createOfferMutation = useCreateOfferMutation();
+  // Measured rather than guessed — the CTA's text wraps to a different
+  // number of lines per locale/font-scale, so a fixed padding either left a
+  // gap or (as reported) let the scroll content's last card peek out from
+  // under the floating CTA at the bottom of the list.
+  const [ctaHeight, setCtaHeight] = useState(0);
 
   const STATUS_LABEL: Record<string, string> = {
     open: t("status_open"),
@@ -137,7 +155,16 @@ export default function ListingDetailScreen() {
       <Header title={t("send_offer_header")} onBackPress={() => router.back()} />
 
       {isLoading ? (
-        <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
+        <View className="gap-4 px-4" style={{ paddingTop: headerHeight + 16 }}>
+          <View className="flex-row gap-2">
+            <Skeleton width={80} height={26} radius={13} />
+          </View>
+          <Skeleton width="85%" height={24} />
+          <Skeleton height={60} />
+          <Skeleton height={160} radius={20} />
+          <Skeleton height={100} radius={24} />
+          <Skeleton height={140} radius={24} />
+        </View>
       ) : isError || !data ? (
         <View style={{ flex: 1, paddingTop: headerHeight }}>
           <EmptyState icon="alert-circle-outline" title={t("application_not_found")} description={t("blog_article_not_found_description")} />
@@ -146,7 +173,7 @@ export default function ListingDetailScreen() {
         <>
           <ScrollView
             contentContainerClassName="gap-4 px-4 pb-6"
-            contentContainerStyle={{ paddingTop: headerHeight + 16, paddingBottom: canOffer ? 120 : 32 }}
+            contentContainerStyle={{ paddingTop: headerHeight + 16, paddingBottom: canOffer ? ctaHeight + 24 : 32 }}
           >
             {/* Title + meta */}
             <View className="gap-2.5">
@@ -309,33 +336,46 @@ export default function ListingDetailScreen() {
 
           {/* Floating CTA */}
           {canOffer ? (
-            <Pressable
-              onPress={() => offerSheetRef.current?.present()}
-              className="absolute inset-x-4 flex-row items-center gap-3 rounded-2xl bg-accent px-4 shadow-lg"
-              style={{ bottom: 24, height: 56 }}
+            <ProgressiveBlurView
+              fade="up"
+              intensity={70}
+              tint={isDark ? "dark" : "light"}
+              style={{ position: "absolute", left: 0, right: 0, bottom: 0, paddingTop: 28 }}
+              onLayout={(e) => setCtaHeight(e.nativeEvent.layout.height)}
             >
-              <View className="h-9 w-9 items-center justify-center rounded-xl bg-white/20">
-                <Ionicons name="cash-outline" size={18} color="#FFFFFF" />
+              <View className="gap-3 px-5" style={{ paddingBottom: insets.bottom + 16 }}>
+                <Text className="text-center text-sm leading-5 text-foreground">{t("listing_offer_cta_text")}</Text>
+                <Pressable
+                  onPress={() => offerSheetRef.current?.present()}
+                  className="items-center justify-center rounded-full bg-accent"
+                  style={{ height: 56 }}
+                >
+                  <Text className="text-base text-white" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
+                    {t("offer_send_button")}
+                  </Text>
+                </Pressable>
               </View>
-              <Text className="flex-1 text-base text-white" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                {t("offer_send_button")}
-              </Text>
-              <Ionicons name="chevron-forward" size={18} color="#FFFFFF" />
-            </Pressable>
+            </ProgressiveBlurView>
           ) : null}
 
           {/* Offer form sheet */}
           <BottomSheetModal
             ref={offerSheetRef}
-            snapPoints={["55%"]}
+            snapPoints={["55%", "90%"]}
             enableDynamicSizing={false}
             keyboardBehavior="interactive"
             keyboardBlurBehavior="restore"
+            android_keyboardInputMode="adjustResize"
             backdropComponent={renderOfferBackdrop}
             backgroundStyle={{ backgroundColor: colors.background, borderRadius: 24 }}
             handleIndicatorStyle={{ backgroundColor: colors.border, width: 40 }}
           >
-            <BottomSheetView style={{ gap: 16, padding: 20 }}>
+            {/* Scrollable — the price field, multiline comment, and submit
+                button together don't fit in the 55% snap point once the
+                keyboard is up, which left the comment field and button
+                hidden behind the keyboard. Scrolling (plus a second, taller
+                snap point) lets the sheet grow and the content reach them. */}
+            <BottomSheetScrollView contentContainerStyle={{ gap: 16, padding: 20, paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
               <View className="flex-row items-center justify-between">
                 <SectionTitle>{t("send_offer_header")}</SectionTitle>
                 <Pressable onPress={() => offerSheetRef.current?.dismiss()} hitSlop={8}>
@@ -344,8 +384,8 @@ export default function ListingDetailScreen() {
               </View>
 
               {succeeded ? (
-                <View className="items-center gap-2 py-6">
-                  <Ionicons name="checkmark-circle" size={48} color={colors.accent} />
+                <View className="items-center gap-3 py-8">
+                  <SuccessCheckmark />
                   <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                     {t("offer_sent_success")}
                   </Text>
@@ -374,7 +414,7 @@ export default function ListingDetailScreen() {
                   </Button>
                 </>
               )}
-            </BottomSheetView>
+            </BottomSheetScrollView>
           </BottomSheetModal>
         </>
       )}

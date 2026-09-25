@@ -3,6 +3,7 @@ export * from "./auth";
 export * from "./blog";
 export * from "./chat";
 export * from "./contract";
+export * from "./device-token";
 export * from "./document";
 export * from "./intro-video";
 export * from "./legal-support";

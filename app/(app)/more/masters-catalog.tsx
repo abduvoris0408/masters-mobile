@@ -8,7 +8,7 @@ import {
   type CategoryRegionFilterSheetHandle,
   type CategoryRegionFilterValue,
 } from "@/components/CategoryRegionFilterSheet";
-import { MasterCard, type MasterCardData } from "@/components/MasterCard";
+import { MasterCard, MasterCardSkeleton, type MasterCardData } from "@/components/MasterCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterFab } from "@/components/ui/FilterFab";
 import { Header } from "@/components/ui/Header";
@@ -77,7 +77,11 @@ export default function MastersCatalogScreen() {
       </View>
 
       {isLoading ? (
-        <ActivityIndicator className="mt-10" color={colors.accent} />
+        <View className="gap-3 px-4 py-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <MasterCardSkeleton key={i} />
+          ))}
+        </View>
       ) : isError ? (
         <EmptyState icon="alert-circle-outline" title={t("common_load_error_title")} description={t("common_retry_description")} actionLabel={t("common_retry_action")} onAction={() => refetch()} />
       ) : items.length === 0 ? (

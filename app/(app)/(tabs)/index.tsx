@@ -10,7 +10,7 @@ import {
   type CategoryRegionFilterSheetHandle,
   type CategoryRegionFilterValue,
 } from "@/components/CategoryRegionFilterSheet";
-import { ListingCard, type ListingCardData } from "@/components/ListingCard";
+import { ListingCard, ListingCardSkeleton, type ListingCardData } from "@/components/ListingCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterChips } from "@/components/ui/FilterChips";
 import { Header } from "@/components/ui/Header";
@@ -29,6 +29,8 @@ function toListingCard(item: IApplication, t: (key: string, options?: Record<str
   const sameBudget = item.budget_from === item.budget_to;
   return {
     id: item.guid,
+    categoryGuid: item.category.guid,
+    categoryIcon: item.category.icon,
     categoryLabel: item.category.name,
     title: item.title,
     description: item.description,
@@ -175,7 +177,11 @@ export default function HomeScreen() {
       </View>
 
       {isLoading ? (
-        <ActivityIndicator className="mt-10" color={colors.accent} />
+        <View className={viewMode === "list" ? "px-4" : "gap-3 px-4"}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <ListingCardSkeleton key={i} variant={viewMode === "list" ? "grid" : "list"} />
+          ))}
+        </View>
       ) : isError ? (
         <EmptyState icon="alert-circle-outline" title={t("common_load_error_title")} description={t("common_retry_description")} actionLabel={t("common_retry_action")} onAction={() => refetch()} />
       ) : items.length === 0 ? (
@@ -188,16 +194,15 @@ export default function HomeScreen() {
         <FlatList
           key={viewMode}
           data={items}
-          numColumns={viewMode === "grid" ? 2 : 1}
-          columnWrapperStyle={viewMode === "grid" ? { gap: 12 } : undefined}
           keyExtractor={(item) => item.guid}
-          contentContainerClassName="gap-3 px-4"
+          contentContainerClassName={viewMode === "list" ? "px-4" : "gap-3 px-4"}
           contentContainerStyle={{ paddingBottom: 140 }}
+          ItemSeparatorComponent={viewMode === "list" ? () => <View className="border-b border-border" /> : undefined}
           renderItem={({ item }) => (
-            <View style={viewMode === "grid" ? { flex: 1 } : undefined}>
+            <View>
               <ListingCard
                 item={toListingCard(item, t)}
-                variant={viewMode === "grid" ? "grid" : "list"}
+                variant={viewMode === "list" ? "grid" : "list"}
                 onPress={() => router.push(`/listing/${item.guid}`)}
                 onOfferPress={() => router.push(`/listing/${item.guid}`)}
               />

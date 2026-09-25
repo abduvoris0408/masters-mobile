@@ -3,6 +3,7 @@ import { Text, View } from "react-native";
 import { Avatar } from "@/components/ui/Avatar";
 import { PressableCard } from "@/components/ui/Card";
 import { Rating } from "@/components/ui/Rating";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { CardTitle, Caption } from "@/components/ui/Typography";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 
@@ -33,6 +34,19 @@ export function MasterCard({ item, onPress }: MasterCardProps) {
           {item.rating != null ? <Rating value={item.rating} /> : null}
           <Caption>{item.fromPrice}</Caption>
         </View>
+      </View>
+    </PressableCard>
+  );
+}
+
+export function MasterCardSkeleton() {
+  return (
+    <PressableCard className="flex-row items-center gap-3">
+      <Skeleton width={52} height={52} radius={26} />
+      <View className="flex-1 gap-1.5">
+        <Skeleton width="55%" height={15} />
+        <Skeleton width="40%" height={13} />
+        <Skeleton width="35%" height={12} />
       </View>
     </PressableCard>
   );

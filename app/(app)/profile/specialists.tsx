@@ -5,6 +5,7 @@ import {
   BottomSheetBackdrop,
   type BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
+import Checkbox from "expo-checkbox";
 import { router } from "expo-router";
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Pressable, Text, View } from "react-native";
@@ -214,7 +215,7 @@ function ServiceEditRow({
     <View className="gap-2.5 rounded-2xl bg-background p-3.5">
       {service.service_name ? <CardTitle>{service.service_name}</CardTitle> : null}
       <Pressable onPress={() => setIsPublished((v) => !v)} className="flex-row items-center gap-2">
-        <Ionicons name={isPublished ? "checkbox" : "square-outline"} size={18} color={isPublished ? colors.accent : colors.muted} />
+        <Checkbox value={isPublished} onValueChange={setIsPublished} color={isPublished ? colors.accent : undefined} />
         <Text className="text-xs text-muted">{t("specialists_show")}</Text>
       </Pressable>
       <View className="flex-row items-center gap-2">

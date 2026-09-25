@@ -1,6 +1,8 @@
 {
   "screen_title": "Профиль",
   "organization_badge": "Организация",
+  "master_badge": "Мастер",
+  "client_badge": "Заказчик",
   "master_level_label": "Уровень мастера",
   "level_orders_count": "{{count}}/{{total}} заказов",
   "level_remaining_orders": "До уровня «{{level}}» осталось ещё {{count}} заказов",
@@ -218,5 +220,17 @@
 
   "org_onboarding_title": "Стать организацией",
   "org_onboarding_hint": "Заполните данные вашей организации — после проверки они появятся в публичном профиле",
-  "org_onboarding_success": "Ваша организация создана"
+  "org_onboarding_success": "Ваша организация создана",
+
+  "common_cancel": "Отмена",
+  "permission_required_title": "Требуется разрешение",
+  "permission_camera_message": "Разрешите доступ к камере.",
+  "permission_gallery_message": "Разрешите доступ к галерее для выбора фото.",
+  "avatar_camera_option": "Камера",
+  "avatar_gallery_option": "Галерея",
+  "avatar_remove_option": "Удалить фото",
+  "avatar_remove_confirm_title": "Удалить фото",
+  "avatar_remove_confirm_message": "Удалить фото профиля?",
+  "avatar_remove_confirm_action": "Удалить",
+  "avatar_update_error": "Ошибка при обновлении фото"
 }

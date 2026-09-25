@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyALX1atgFbDf_VN8avNe0TYW_ev6qvnz6M</string>
+	<key>GCM_SENDER_ID</key>
+	<string>261926709816</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>uz.masters.mobile</string>
+	<key>PROJECT_ID</key>
+	<string>ustalar-super-app</string>
+	<key>STORAGE_BUCKET</key>
+	<string>ustalar-super-app.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:261926709816:ios:bf90c6b5601626885d14cd</string>
+</dict>
+</plist>
