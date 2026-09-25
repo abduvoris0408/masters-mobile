@@ -4,6 +4,8 @@ import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollVie
 import { Link, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
+import { isAxiosError } from "axios";
+
 import { Button } from "@/components/ui/Button";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { TextField } from "@/components/ui/TextField";
@@ -28,8 +30,13 @@ export default function LoginScreen() {
     try {
       await loginMutation.mutateAsync({ phone, password });
       router.replace("/");
-    } catch {
-      showError(t("login_error"));
+    } catch (error) {
+      // A missing response (network unreachable, wrong API URL, timeout)
+      // isn't the same problem as a wrong phone/password — telling the user
+      // "incorrect password" when the real issue is no server connection
+      // sends them down the wrong troubleshooting path.
+      const isNetworkError = isAxiosError(error) && !error.response;
+      showError(isNetworkError ? t("error", { ns: "common" }) : t("login_error"));
     }
   };
 
