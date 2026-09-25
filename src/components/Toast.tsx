@@ -3,9 +3,9 @@ import { useColorScheme } from "nativewind";
 import { useEffect } from "react";
 import { Pressable, View } from "react-native";
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -38,9 +38,9 @@ export function Toast() {
   useEffect(() => {
     if (!toast) return;
     progress.value = 0;
-    progress.value = withSpring(1, { damping: 16, stiffness: 180 });
+    progress.value = withTiming(1, { duration: 220, easing: Easing.out(Easing.cubic) });
     const timer = setTimeout(() => {
-      progress.value = withTiming(0, { duration: 180 });
+      progress.value = withTiming(0, { duration: 180, easing: Easing.in(Easing.cubic) });
       setTimeout(() => dismiss(toast.id), 180);
     }, 3200);
     return () => clearTimeout(timer);
@@ -48,7 +48,7 @@ export function Toast() {
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
-    transform: [{ translateY: (1 - progress.value) * -24 }, { scale: 0.96 + progress.value * 0.04 }],
+    transform: [{ translateY: (1 - progress.value) * -12 }],
   }));
 
   if (!toast) return null;
