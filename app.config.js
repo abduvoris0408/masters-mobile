@@ -62,8 +62,12 @@ module.exports = {
           // down to roughly a quarter of that. Play Store release builds use
           // an .aab instead, which already splits per-ABI automatically, so
           // this filter only matters for the directly-installable APK.
+          // NOTE: the expo-build-properties key is `buildArchs`, not
+          // `abiFilters` — the latter is silently ignored (no error, no
+          // effect), which is why earlier builds stayed at ~110MB despite
+          // this block being present.
           android: {
-            abiFilters: ["arm64-v8a"],
+            buildArchs: ["arm64-v8a"],
           },
         },
       ],
