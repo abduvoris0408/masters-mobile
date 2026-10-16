@@ -191,6 +191,8 @@
   "map_tap_or_drag_hint": "Tap the map or drag the marker to set the address",
   "map_interactive_unavailable": "Interactive map isn't available in this app version — search for the address instead",
   "tab_home": "Home",
+  "tab_orders": "Orders",
+  "tab_create": "Post",
   "more_sheet_title": "More",
   "more_sheet_coming_soon": "Coming soon",
   "more_sheet_my_applications": "My listings",
@@ -202,5 +204,7 @@
   "more_sheet_switch_to_organization": "Switch to organization",
   "more_sheet_legal_help": "Legal help",
   "more_sheet_post_listing": "Post a listing",
-  "more_sheet_blog": "Blog"
+  "more_sheet_blog": "Blog",
+
+  "favorites": "Favorites"
 }

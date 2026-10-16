@@ -1,22 +1,27 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useColorScheme } from "nativewind";
-import { router } from "expo-router";
+import { router, Stack, useNavigation } from "expo-router";
 import type { ReactNode } from "react";
-import { Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View } from "react-native";
 
 import { NotificationBell } from "@/components/NotificationBell";
 import { HeaderIconButton } from "@/components/ui/HeaderIconButton";
-import { ProgressiveBlurView } from "@/components/ui/ProgressiveBlurView";
 import { useThemeColors } from "@/lib/theme/colors";
-import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useAuthStore } from "@/stores";
 
 interface HeaderProps {
   title?: string;
-  onMenuPress?: () => void;
+  /** iOS large title that collapses into the bar on scroll. The screen's
+   *  ScrollView must then be its first child, with
+   *  contentInsetAdjustmentBehavior="automatic" instead of a manual
+   *  useHeaderHeight() padding. */
+  largeTitle?: boolean;
+  /** Custom left slot for tab roots, where there's no back button (e.g. the
+   *  app logo on Asosiy). Ignored when the native back button is shown. */
+  left?: ReactNode;
+  /** Only used when the screen is the first in its stack (e.g. opened from a
+   *  deep link) — otherwise the native back button is shown and does the
+   *  same thing a router.back() would. */
   onBackPress?: () => void;
-  onSearchPress?: () => void;
   right?: ReactNode;
   /** The notifications screen itself hides the bell — mirrors the web
    *  shell header's onNotificationsPage check (no point linking to the
@@ -27,79 +32,70 @@ interface HeaderProps {
   hideSettings?: boolean;
 }
 
-// Floating liquid-glass header — absolutely positioned over the screen's
-// content (screens add matching top padding, see useHeaderHeight) instead of
-// sitting in-flow, so content is visible scrolling underneath the frosted
-// glass, fading to fully transparent toward the bottom edge.
-// Left slot priority: onBackPress > onSearchPress > onMenuPress. The
-// top-level catalog tabs (Asosiy, Mutaxassislar) use onSearchPress instead of
-// a back/menu button — there's nowhere to go "back" to from a tab root, and
-// the reference screens show a search icon there instead.
-// Right slot defaults to the notification bell (signed-in users only) unless
-// a screen passes its own `right` or sets `hideRight` — matches the web
-// shell header, where the bell is the one consistent default action. Every
-// slot (back/search/menu/bell) renders through the same HeaderIconButton so
-// they share one visual size/weight instead of the bell looking bare next to
-// a bordered back button.
-export function Header({ title, onMenuPress, onBackPress, onSearchPress, right, hideRight, hideSettings }: HeaderProps) {
-  const insets = useSafeAreaInsets();
+// Configures the screen's native header (UINavigationBar on iOS — Liquid
+// Glass on iOS 26 — Material top app bar on Android) instead of drawing one
+// in JS; the look itself comes from useNativeHeaderOptions in the stack
+// layouts. Renders nothing of its own, so screens keep calling it the same
+// way they did when it was a floating JS header.
+// Left slot: native back button whenever there's somewhere to go back to;
+// otherwise `left`, or a back button for onBackPress.
+// Right slot defaults to settings + notification bell (signed-in users only)
+// unless a screen passes its own `right` or sets `hideRight`.
+export function Header({
+  title,
+  largeTitle,
+  left: customLeft,
+  onBackPress,
+  right,
+  hideRight,
+  hideSettings,
+}: HeaderProps) {
   const iconColor = useThemeColors().foreground;
   const isAuth = useAuthStore((s) => s.isAuth);
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const navigation = useNavigation();
+  // Same test the native back button uses: is there a screen below this one
+  // in its *own* stack? (navigation.canGoBack() also counts parent
+  // navigators, so it reads true on tab roots after switching tabs.)
+  const canGoBack = (navigation.getState()?.index ?? 0) > 0;
+
   const resolvedRight =
     right ??
     (!hideRight && isAuth ? (
-      <View className="flex-row items-center gap-1.5">
+      <View className="flex-row items-center gap-1">
         {hideSettings ? null : (
           <HeaderIconButton onPress={() => router.push("/more/settings")}>
-            <Ionicons name="settings-outline" size={20} color={iconColor} />
+            <Ionicons name="settings-outline" size={21} color={iconColor} />
           </HeaderIconButton>
         )}
         <NotificationBell />
       </View>
     ) : null);
 
+  const left = canGoBack ? null : customLeft ? (
+    customLeft
+  ) : onBackPress ? (
+    <HeaderIconButton onPress={onBackPress}>
+      <Ionicons name="chevron-back" size={24} color={iconColor} />
+    </HeaderIconButton>
+  ) : null;
+
+  // A custom left element (the brand on Asosiy) isn't a button, so on iOS 26
+  // it's opted out of the Liquid Glass capsule the bar wraps items in.
+  // unstable_headerLeftItems is iOS-only and overrides headerLeft there;
+  // Android keeps using headerLeft.
+  const plainLeft = !canGoBack && !!customLeft;
+
   return (
-    <ProgressiveBlurView
-      fade="down"
-      intensity={70}
-      tint={isDark ? "dark" : "light"}
-      style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 20 }}
-    >
-      <View className="flex-row items-center justify-between px-4 pb-3" style={{ paddingTop: insets.top + 10 }}>
-        <View style={{ minWidth: 84 }}>
-          {onBackPress ? (
-            <HeaderIconButton onPress={onBackPress}>
-              <Ionicons name="chevron-back" size={22} color={iconColor} />
-            </HeaderIconButton>
-          ) : onSearchPress ? (
-            <HeaderIconButton onPress={onSearchPress}>
-              <Ionicons name="search-outline" size={20} color={iconColor} />
-            </HeaderIconButton>
-          ) : onMenuPress ? (
-            <HeaderIconButton onPress={onMenuPress}>
-              <Ionicons name="menu-outline" size={24} color={iconColor} />
-            </HeaderIconButton>
-          ) : null}
-        </View>
-
-        {title ? (
-          <Text
-            className="flex-1 text-center text-lg text-foreground"
-            style={{ fontFamily: GOLOS_WEIGHTS.bold }}
-            numberOfLines={1}
-          >
-            {title}
-          </Text>
-        ) : (
-          <View className="flex-1" />
-        )}
-
-        <View className="items-end" style={{ minWidth: 84 }}>
-          {resolvedRight}
-        </View>
-      </View>
-    </ProgressiveBlurView>
+    <Stack.Screen
+      options={{
+        title: title ?? "",
+        headerLargeTitle: largeTitle,
+        headerLeft: left ? () => left : undefined,
+        unstable_headerLeftItems: plainLeft
+          ? () => [{ type: "custom", element: <>{customLeft}</>, hidesSharedBackground: true }]
+          : undefined,
+        headerRight: resolvedRight ? () => resolvedRight : undefined,
+      }}
+    />
   );
 }

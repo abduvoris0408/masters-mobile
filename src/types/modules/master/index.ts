@@ -253,6 +253,9 @@ export interface IUserServiceCatalogDetail {
   region: IMasterProfileAddressRef | null;
   district: IMasterProfileAddressRef | null;
   last_login: string | null;
+  // Last time the master did anything on the site — what "last seen" shows,
+  // unlike `last_login`, which only moves on a fresh sign-in.
+  last_activity_at: string | null;
   services: IUserServiceCatalogServiceDetail[];
   organization: IUserServiceCatalogOrganizationRef | null;
   // Embedded directly as raw served URLs here — unlike the owner-management

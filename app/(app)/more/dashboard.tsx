@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { router } from "expo-router";
 
+import { MasterStatisticsPanel } from "@/components/MasterStatisticsPanel";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
@@ -55,7 +56,7 @@ function StatTile({
         <Ionicons name={icon} size={16} color={isDimmed ? colors.muted : toneStyle.fg} />
       </View>
       {value ? (
-        <Text className="text-lg text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+        <Text className="text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold, fontSize: 20, lineHeight: 26 }}>
           {value}
         </Text>
       ) : null}
@@ -140,6 +141,9 @@ export default function DashboardScreen() {
             </View>
           ) : null}
 
+          <MasterStatisticsPanel />
+
+          <Caption className="px-1 text-sm">{t("stats_achievements")}</Caption>
           <View className="flex-row flex-wrap gap-3">
             <StatTile
               icon="briefcase-outline"

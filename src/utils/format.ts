@@ -47,6 +47,33 @@ export const formatDateRange = (from: string, to: string, locale = i18n.language
     ? formatDate(from, locale)
     : `${formatDate(from, locale)} – ${formatDate(to, locale)}`;
 
+// Chart axis labels: "625 ming" / "625 тыс." / "625K" — full so'm amounts
+// don't fit under a bar. Hand-rolled rather than Intl's `notation: "compact"`,
+// which Hermes doesn't implement on every Android build.
+const COMPACT_SUFFIXES: Record<string, [string, string, string]> = {
+  uz: ["ming", "mln", "mlrd"],
+  ru: ["тыс.", "млн", "млрд"],
+  en: ["K", "M", "B"],
+};
+
+export const formatCompactNumber = (value: number, locale = i18n.language) => {
+  const [k, m, b] = COMPACT_SUFFIXES[locale] ?? COMPACT_SUFFIXES.uz;
+  const sep = locale === "en" ? "" : " ";
+  const abs = Math.abs(value);
+  const fmt = (n: number, suffix: string) => `${+(value / n).toFixed(1)}${sep}${suffix}`;
+  if (abs >= 1e9) return fmt(1e9, b);
+  if (abs >= 1e6) return fmt(1e6, m);
+  if (abs >= 1e3) return fmt(1e3, k);
+  return String(value);
+};
+
+// "2026-08" -> "Avg" / "авг." / "Aug".
+export const formatMonthShort = (month: string, locale = i18n.language) =>
+  dayjs(`${month}-01`).locale(toDayjsLocale(locale)).format("MMM");
+
+export const formatMonthLong = (month: string, locale = i18n.language) =>
+  dayjs(`${month}-01`).locale(toDayjsLocale(locale)).format("MMMM YYYY");
+
 export const formatDateTime = (date: string, locale = i18n.language) =>
   dayjs(date).locale(toDayjsLocale(locale)).format("D/M/YYYY HH:mm");
 

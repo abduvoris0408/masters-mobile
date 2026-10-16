@@ -1,0 +1,18 @@
+{
+  "title": "Sevimlilar",
+  "tab_masters": "Ustalar",
+  "tab_organizations": "Tashkilotlar",
+  "add": "Sevimlilarga qo'shish",
+  "remove": "Sevimlilardan olib tashlash",
+  "save": "Saqlash",
+  "saved": "Saqlangan",
+  "added": "Sevimlilarga qo'shildi",
+  "removed": "Sevimlilardan olib tashlandi",
+  "no_description": "Tavsif qo'shilmagan",
+  "empty_masters_title": "Hali sevimli ustalar yo'q",
+  "empty_organizations_title": "Hali sevimli tashkilotlar yo'q",
+  "empty_desc": "Yoqqanlarini ♥ tugmasi orqali saqlang — ular shu yerda jamlanadi va keyin tezda topasiz.",
+  "browse_masters": "Ustalar katalogiga o'tish",
+  "browse_organizations": "Tashkilotlar katalogiga o'tish",
+  "unnamed_master": "Usta"
+}

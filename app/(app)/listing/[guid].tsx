@@ -41,7 +41,7 @@ const STATUS_COLOR: Record<string, string> = {
   in_progress: "#D97706",
   completed: "#2563EB",
   cancelled: "#DC2626",
-  closed: "#79748A",
+  closed: "#646A78",
 };
 
 // Tag-style spec row: a small icon chip + label on its own line, the value

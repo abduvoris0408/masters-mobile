@@ -323,7 +323,7 @@ export default function OrdersScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title={t("orders_title")} onBackPress={() => router.push("/")} />
+      <Header title={t("orders_title")} />
       <View style={{ flex: 1, paddingTop: headerHeight }}>
         <View className="px-4 pb-1 pt-2">
           <PillTabs

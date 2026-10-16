@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
@@ -91,6 +92,9 @@ export default function OrganizationDetailScreen() {
                   <BadgeLabel className="text-accent">{t("org_detail_verified")}</BadgeLabel>
                 </View>
               ) : null}
+            </View>
+            <View className="mt-2">
+              <FavoriteButton type="organization" targetGuid={data.guid} variant="button" />
             </View>
           </Card>
 

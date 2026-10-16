@@ -232,5 +232,10 @@
   "avatar_remove_confirm_title": "Remove photo",
   "avatar_remove_confirm_message": "Are you sure you want to remove your profile photo?",
   "avatar_remove_confirm_action": "Remove",
-  "avatar_update_error": "Failed to update photo"
+  "avatar_update_error": "Failed to update photo",
+  "full_name": "Full name",
+  "account_status": "Account status",
+  "account_verified": "Verified",
+  "account_not_verified": "Not verified",
+  "change_photo": "Change photo"
 }

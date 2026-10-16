@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Header } from "@/components/ui/Header";
 import { PickerField } from "@/components/ui/PickerField";
 import { TextField } from "@/components/ui/TextField";
+import { DatePickerField } from "@/components/wizard/steps/DatePickerField";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { useRoleUpdateMutation } from "@/services/auth";
@@ -73,7 +74,13 @@ export default function OrganizationOnboardingScreen() {
   const selectedRegion = regions?.find((r) => r.guid === regionGuid);
   const selectedDistrict = districts?.find((d) => d.guid === districtGuid);
 
+  // There's no country picker (only one option in practice) — like the web
+  // form, the first country from the API is used, so wait for it instead of
+  // letting "Finish" silently do nothing.
+  const countryId = countries?.[0]?.id ?? null;
+
   const canSubmit =
+    countryId !== null &&
     name.trim() !== "" &&
     legalForm !== null &&
     stir.trim() !== "" &&
@@ -86,7 +93,7 @@ export default function OrganizationOnboardingScreen() {
     districtGuid !== null;
 
   const handleSubmit = async () => {
-    if (!canSubmit || !countries?.length) return;
+    if (!canSubmit || countryId === null) return;
     const regionId = regions?.find((r) => r.guid === regionGuid)?.id;
     const districtId = districts?.find((d) => d.guid === districtGuid)?.id;
     if (!regionId || !districtId) return;
@@ -103,7 +110,7 @@ export default function OrganizationOnboardingScreen() {
           legal_address: legalAddress.trim(),
           director_full_name: directorFullName.trim(),
           director_phone: directorPhone.trim(),
-          country: countries[0].id,
+          country: countryId,
           operates_regions: false,
           regions: [regionId],
           operates_districts: false,
@@ -114,7 +121,8 @@ export default function OrganizationOnboardingScreen() {
       await createProfileMutation.mutateAsync({ type: EProfileType.ORGANIZATION, categories: [] });
       if (user) setUser({ ...user, user_type: EUserType.WORKER });
       showSuccess(t("org_onboarding_success"));
-      router.replace("/(app)/(tabs)/profile");
+      // Pops back to the tabs (already under this screen) and lands on Profil.
+      router.dismissTo("/profile");
     } catch {
       showError(t("onboarding_save_error"));
     }
@@ -148,12 +156,7 @@ export default function OrganizationOnboardingScreen() {
 
         <TextField label={t("stir")} placeholder="123456789" value={stir} onChangeText={setStir} keyboardType="number-pad" />
 
-        <TextField
-          label={t("registered_at")}
-          placeholder="2020-01-31"
-          value={registeredAt}
-          onChangeText={setRegisteredAt}
-        />
+        <DatePickerField label={t("registered_at")} value={registeredAt || null} onChange={setRegisteredAt} />
 
         <TextField label={t("legal_address")} placeholder={t("legal_address_placeholder")} value={legalAddress} onChangeText={setLegalAddress} />
 

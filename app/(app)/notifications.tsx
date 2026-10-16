@@ -7,7 +7,7 @@ import { router } from "expo-router";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { CardTitle, SectionTitle } from "@/components/ui/Typography";
+import { SectionTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
@@ -37,13 +37,11 @@ const PAGE_SIZE = 20;
 
 function NotificationRowSkeleton() {
   return (
-    <View className="rounded-2xl bg-surface px-3.5 py-3">
-      <View className="flex-row items-start gap-3">
-        <Skeleton width={40} height={40} radius={20} />
-        <View className="flex-1 gap-1.5">
-          <Skeleton width="30%" height={11} />
-          <Skeleton width="80%" height={14} />
-        </View>
+    <View className="flex-row items-center gap-3 rounded-2xl bg-surface px-3.5 py-3">
+      <Skeleton width={40} height={40} radius={20} />
+      <View className="flex-1 gap-1.5">
+        <Skeleton width="30%" height={11} />
+        <Skeleton width="80%" height={14} />
       </View>
     </View>
   );
@@ -99,7 +97,10 @@ export default function NotificationsScreen() {
                 onPress={() => setTypeFilter(f.key)}
                 className={`rounded-full px-4 py-2 ${active ? "bg-accent" : "bg-surface"}`}
               >
-                <Text className={`text-sm ${active ? "text-white" : "text-foreground"}`} style={{ fontWeight: active ? "700" : "500" }}>
+                <Text
+                  className={`text-[13px] ${active ? "text-white" : "text-foreground"}`}
+                  style={{ fontFamily: active ? GOLOS_WEIGHTS.semibold : GOLOS_WEIGHTS.medium }}
+                >
                   {f.label}
                 </Text>
               </Pressable>
@@ -134,38 +135,51 @@ export default function NotificationsScreen() {
               notif.category?.name ??
               (isAdmin ? (notif.type === ENotificationType.ADMIN_DIRECT ? t("notifications_direct_message_label") : t("notifications_announcement_label")) : null);
 
+            // One row: type icon | meta line + title | "mark read" button, all
+            // vertically centered so the icon lines up with the text block.
             return (
               <Pressable
                 onPress={() => canOpen && handleOpen(notif)}
-                className="relative rounded-2xl bg-surface px-3.5 py-3"
+                className="flex-row items-center gap-3 rounded-2xl bg-surface px-3.5 py-3"
               >
-                {!notif.is_read ? <View className="absolute left-2.5 top-2.5 h-2.5 w-2.5 rounded-full bg-amber-500" /> : null}
-                <View className="flex-row items-start gap-3">
-                  <View
-                    className="h-10 w-10 items-center justify-center rounded-full"
-                    style={{ backgroundColor: `${style.color}1F` }}
-                  >
-                    <Ionicons name={style.icon} size={18} color={style.color} />
-                  </View>
+                <View
+                  className="h-10 w-10 items-center justify-center rounded-full"
+                  style={{ backgroundColor: `${style.color}1F` }}
+                >
+                  <Ionicons name={style.icon} size={18} color={style.color} />
+                </View>
 
-                  <View className="flex-1 gap-0.5">
-                    <View className="flex-row items-center justify-between gap-2">
-                      {label ? <Text className="text-xs text-muted">{label}</Text> : <View />}
-                      <Text className="text-xs text-muted">{fromNow(notif.created_at)}</Text>
-                    </View>
-                    <CardTitle numberOfLines={2}>{notif.title}</CardTitle>
+                <View className="flex-1 gap-1">
+                  <View className="flex-row items-center gap-1.5">
+                    {label ? (
+                      <Text className="shrink text-[11px] text-muted" numberOfLines={1}>
+                        {label}
+                      </Text>
+                    ) : null}
+                    {label ? <Text className="text-[11px] text-muted">·</Text> : null}
+                    <Text className="text-[11px] text-muted" numberOfLines={1}>
+                      {fromNow(notif.created_at)}
+                    </Text>
+                    {!notif.is_read ? <View className="h-2 w-2 rounded-full bg-amber-500" /> : null}
                   </View>
+                  <Text
+                    className="text-sm leading-[19px] text-foreground"
+                    style={{ fontFamily: notif.is_read ? GOLOS_WEIGHTS.regular : GOLOS_WEIGHTS.medium }}
+                    numberOfLines={2}
+                  >
+                    {notif.title}
+                  </Text>
                 </View>
 
                 {!notif.is_read ? (
                   <Pressable
                     onPress={() => markReadMutation.mutate(notif.id)}
-                    className="mt-2 flex-row items-center gap-1 self-end rounded-lg bg-emerald-50 px-2.5 py-1.5 dark:bg-accent/15"
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={t("notifications_mark_as_read")}
+                    className="h-8 w-8 items-center justify-center rounded-full bg-emerald-50 dark:bg-accent/15"
                   >
-                    <Ionicons name="checkmark" size={12} color={colors.accent} />
-                    <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
-                      {t("notifications_mark_as_read")}
-                    </Text>
+                    <Ionicons name="checkmark-done" size={16} color={colors.accent} />
                   </Pressable>
                 ) : null}
               </Pressable>

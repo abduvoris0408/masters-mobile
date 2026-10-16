@@ -232,5 +232,10 @@
   "avatar_remove_confirm_title": "Удалить фото",
   "avatar_remove_confirm_message": "Удалить фото профиля?",
   "avatar_remove_confirm_action": "Удалить",
-  "avatar_update_error": "Ошибка при обновлении фото"
+  "avatar_update_error": "Ошибка при обновлении фото",
+  "full_name": "Ф.И.О.",
+  "account_status": "Статус аккаунта",
+  "account_verified": "Подтверждён",
+  "account_not_verified": "Не подтверждён",
+  "change_photo": "Изменить фото"
 }

@@ -232,5 +232,10 @@
   "avatar_remove_confirm_title": "Rasmni o'chirish",
   "avatar_remove_confirm_message": "Profil rasmingizni o'chirishni tasdiqlaysizmi?",
   "avatar_remove_confirm_action": "O'chirish",
-  "avatar_update_error": "Rasmni yangilashda xatolik yuz berdi"
+  "avatar_update_error": "Rasmni yangilashda xatolik yuz berdi",
+  "full_name": "F.I.Sh.",
+  "account_status": "Hisob holati",
+  "account_verified": "Tasdiqlangan",
+  "account_not_verified": "Tasdiqlanmagan",
+  "change_photo": "Rasmni o'zgartirish"
 }

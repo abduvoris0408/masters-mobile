@@ -1,13 +1,33 @@
 import { ENDPOINTS } from "@/constants";
 import { axiosInstance } from "@/lib/axios";
-import type { IBalance, IBalanceTransaction, IDjangoPaginated, IEscrowDetail } from "@/types";
+import type {
+  IBalance,
+  IBalanceTransaction,
+  IDjangoPaginated,
+  IEscrowDetail,
+  IMasterStatistics,
+  TStatisticsPeriod,
+} from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
 export const PAYMENTS_KEYS = {
   balance: ["payments", "balance"],
   transactions: (page: number, pageSize: number) => ["payments", "transactions", page, pageSize],
   escrowDetail: (orderGuid: string | null) => ["payments", "escrow-detail", orderGuid],
+  masterStatistics: (period: TStatisticsPeriod) => ["payments", "balance", "master-statistics", period],
 };
+
+export const useMasterStatisticsQuery = (period: TStatisticsPeriod) =>
+  useQuery({
+    queryKey: PAYMENTS_KEYS.masterStatistics(period),
+    queryFn: (): Promise<IMasterStatistics> =>
+      axiosInstance
+        .get<IMasterStatistics>(ENDPOINTS.PAYMENTS.MASTER_STATISTICS, { params: { period } })
+        .then((r) => r.data),
+    // Keep the previous period's numbers on screen while switching tabs so
+    // the panel doesn't collapse into a loader on every tap.
+    placeholderData: (prev) => prev,
+  });
 
 export const useBalanceQuery = () =>
   useQuery({

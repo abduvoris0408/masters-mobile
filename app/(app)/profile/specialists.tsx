@@ -5,10 +5,9 @@ import {
   BottomSheetBackdrop,
   type BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
-import Checkbox from "expo-checkbox";
 import { router } from "expo-router";
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Pressable, Switch, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "@/components/ui/Avatar";
@@ -214,10 +213,12 @@ function ServiceEditRow({
   return (
     <View className="gap-2.5 rounded-2xl bg-background p-3.5">
       {service.service_name ? <CardTitle>{service.service_name}</CardTitle> : null}
-      <Pressable onPress={() => setIsPublished((v) => !v)} className="flex-row items-center gap-2">
-        <Checkbox value={isPublished} onValueChange={setIsPublished} color={isPublished ? colors.accent : undefined} />
-        <Text className="text-xs text-muted">{t("specialists_show")}</Text>
-      </Pressable>
+      {/* Native UISwitch / Material switch — same control as the master's own
+          "show in catalog" toggle on the services screen. */}
+      <View className="flex-row items-center justify-between gap-2">
+        <Text className="flex-1 text-sm text-muted">{t("specialists_show")}</Text>
+        <Switch value={isPublished} onValueChange={setIsPublished} trackColor={{ true: colors.accent }} />
+      </View>
       <View className="flex-row items-center gap-2">
         <View className="flex-1 flex-row items-center rounded-xl bg-surface px-3">
           <TextField

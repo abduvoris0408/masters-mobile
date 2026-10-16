@@ -5,17 +5,19 @@
 :root {
   /* Neutral gray canvas so white cards read as elevated, matching the
      reference screens' light theme (mobile-design.md §3). */
-  --color-background: 245 245 245;
+  /* Cool, clean neutrals — the earlier warm gray + purple-tinted muted/
+     border read as washed out. Darker text/muted for crisper contrast. */
+  --color-background: 244 246 248;
   --color-surface: 255 255 255;
-  --color-foreground: 23 20 33;
-  --color-muted: 121 116 138;
-  --color-border: 232 230 240;
+  --color-foreground: 15 23 42;
+  --color-muted: 100 106 120;
+  --color-border: 228 231 236;
 }
 
 .dark:root {
   --color-background: 24 27 36;
   --color-surface: 35 39 51;
   --color-foreground: 240 239 245;
-  --color-muted: 156 150 175;
+  --color-muted: 156 163 175;
   --color-border: 42 46 58;
 }

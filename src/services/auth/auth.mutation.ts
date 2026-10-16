@@ -194,7 +194,8 @@ export const useRoleUpdateMutation = () => {
   const { setUser } = useAuthStore();
   return useMutation({
     mutationFn: async (data: IRoleUpdateRequest): Promise<IAuthUser> => {
-      await axiosInstance.post(ENDPOINTS.USER.ROLE_UPDATE, data);
+      // PATCH, same as web — the backend rejects POST here with 405.
+      await axiosInstance.patch(ENDPOINTS.USER.ROLE_UPDATE, data);
       const profile = await axiosInstance
         .get<IMeProfileResponse>(ENDPOINTS.MASTER_PROFILE.ME)
         .then((r) => r.data);

@@ -215,9 +215,6 @@
   "settings_header": "Sozlamalar",
   "settings_appearance": "Ko'rinish",
   "settings_language": "Til",
-  "settings_theme_system": "Tizim sozlamasi",
-  "settings_theme_light": "Yorug'",
-  "settings_theme_dark": "Tungi",
 
   "notifications_header": "Bildirishnomalar",
   "notifications_filter_new_applications": "Yangi elonlar",
@@ -291,5 +288,9 @@
   "wizard_camera_option": "Kamera",
   "wizard_gallery_option": "Galereya",
   "wizard_add_image": "Qo'shish",
-  "wizard_images_hint": "Rasmlar ixtiyoriy, lekin ish haqida ko'proq ma'lumot beradi."
+  "wizard_images_hint": "Rasmlar ixtiyoriy, lekin ish haqida ko'proq ma'lumot beradi.",
+  "settings_follow_system": "Tizim mavzusi bo'yicha",
+  "settings_follow_system_hint": "Telefon sozlamasiga qarab yorug' yoki tungi rejim",
+  "settings_dark_mode": "Tungi rejim",
+  "settings_cancel": "Bekor qilish"
 }

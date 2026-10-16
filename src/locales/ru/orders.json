@@ -215,9 +215,6 @@
   "settings_header": "Настройки",
   "settings_appearance": "Внешний вид",
   "settings_language": "Язык",
-  "settings_theme_system": "Системная настройка",
-  "settings_theme_light": "Светлая",
-  "settings_theme_dark": "Тёмная",
 
   "notifications_header": "Уведомления",
   "notifications_filter_new_applications": "Новые заказы",
@@ -291,5 +288,9 @@
   "wizard_camera_option": "Камера",
   "wizard_gallery_option": "Галерея",
   "wizard_add_image": "Добавить",
-  "wizard_images_hint": "Фото необязательны, но дают больше информации о работе."
+  "wizard_images_hint": "Фото необязательны, но дают больше информации о работе.",
+  "settings_follow_system": "Как в системе",
+  "settings_follow_system_hint": "Светлая или тёмная тема по настройкам телефона",
+  "settings_dark_mode": "Тёмная тема",
+  "settings_cancel": "Отмена"
 }

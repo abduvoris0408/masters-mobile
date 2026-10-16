@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { EmptyState } from "@/components/ui/EmptyState";
+import type { IGeoCoords } from "@/hooks/useCurrentLocation";
 import { CardTitle } from "@/components/ui/Typography";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -27,21 +28,38 @@ try {
 interface ApplicationsMapViewProps {
   items: IApplication[];
   onSelect: (item: IApplication) => void;
+  // "Yaqinimda" mode: centers on the viewer and draws the search radius.
+  userLocation?: IGeoCoords | null;
+  radiusKm?: number;
 }
+
+// Region that fits a `radiusKm` circle around a point (1° latitude ≈ 111 km,
+// plus some margin so the ring isn't flush with the map edges).
+const regionAround = ({ lat, lng }: IGeoCoords, radiusKm: number) => {
+  const delta = ((radiusKm * 2) / 111) * 1.3;
+  return { latitude: lat, longitude: lng, latitudeDelta: delta, longitudeDelta: delta };
+};
 
 // "Xaritada ko'rish" mode for the Elonlar feed — one marker per listing that
 // has coordinates, tap a marker to preview it in a small card docked at the
 // bottom (tap the card to open the full detail screen, same destination as
 // the list/grid cards' onPress).
-export function ApplicationsMapView({ items, onSelect }: ApplicationsMapViewProps) {
+export function ApplicationsMapView({ items, onSelect, userLocation, radiusKm }: ApplicationsMapViewProps) {
   const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const [selected, setSelected] = useState<IApplication | null>(null);
+  const mapRef = useRef<InstanceType<ReactNativeMapsModule["default"]>>(null);
 
   const pins = useMemo(
     () => items.filter((item) => item.latitude != null && item.longitude != null),
     [items],
   );
+
+  // Follow the "near me" circle as the radius or position changes — the map
+  // only reads initialRegion once, on mount.
+  useEffect(() => {
+    if (userLocation && radiusKm) mapRef.current?.animateToRegion(regionAround(userLocation, radiusKm), 400);
+  }, [userLocation, radiusKm]);
 
   if (!mapsModule) {
     return (
@@ -53,23 +71,44 @@ export function ApplicationsMapView({ items, onSelect }: ApplicationsMapViewProp
     );
   }
 
-  if (pins.length === 0) {
+  if (pins.length === 0 && !userLocation) {
     return <EmptyState icon="location-outline" title={t("map_no_located_listings")} />;
   }
 
-  const initialRegion = {
-    latitude: Number(pins[0].latitude),
-    longitude: Number(pins[0].longitude),
-    latitudeDelta: 0.3,
-    longitudeDelta: 0.3,
-  };
+  const initialRegion =
+    userLocation && radiusKm
+      ? regionAround(userLocation, radiusKm)
+      : pins.length > 0
+        ? {
+            latitude: Number(pins[0].latitude),
+            longitude: Number(pins[0].longitude),
+            latitudeDelta: 0.3,
+            longitudeDelta: 0.3,
+          }
+        : {
+            latitude: DEFAULT_MAP_CENTER.lat,
+            longitude: DEFAULT_MAP_CENTER.lng,
+            latitudeDelta: 0.5,
+            longitudeDelta: 0.5,
+          };
 
   return (
     <View style={{ flex: 1 }}>
       <mapsModule.default
+        ref={mapRef}
         style={StyleSheet.absoluteFill}
-        initialRegion={pins.length > 0 ? initialRegion : { ...DEFAULT_MAP_CENTER, latitude: DEFAULT_MAP_CENTER.lat, longitude: DEFAULT_MAP_CENTER.lng, latitudeDelta: 0.5, longitudeDelta: 0.5 }}
+        initialRegion={initialRegion}
+        showsUserLocation={!!userLocation}
       >
+        {userLocation && radiusKm ? (
+          <mapsModule.Circle
+            center={{ latitude: userLocation.lat, longitude: userLocation.lng }}
+            radius={radiusKm * 1000}
+            strokeWidth={1.5}
+            strokeColor={colors.accent}
+            fillColor={`${colors.accent}1A`}
+          />
+        ) : null}
         {pins.map((item) => (
           <mapsModule.Marker
             key={item.guid}

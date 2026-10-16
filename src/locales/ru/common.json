@@ -191,6 +191,8 @@
   "map_tap_or_drag_hint": "Нажмите на карту или перетащите метку, чтобы указать адрес",
   "map_interactive_unavailable": "Интерактивная карта недоступна в этой версии приложения — выберите адрес через поиск",
   "tab_home": "Главная",
+  "tab_orders": "Заказы",
+  "tab_create": "Создать",
   "more_sheet_title": "Ещё",
   "more_sheet_coming_soon": "Скоро",
   "more_sheet_my_applications": "Мои объявления",
@@ -202,5 +204,7 @@
   "more_sheet_switch_to_organization": "Перейти в организацию",
   "more_sheet_legal_help": "Юридическая помощь",
   "more_sheet_post_listing": "Разместить объявление",
-  "more_sheet_blog": "Блог"
+  "more_sheet_blog": "Блог",
+
+  "favorites": "Избранное"
 }

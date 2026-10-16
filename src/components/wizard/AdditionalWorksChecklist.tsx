@@ -1,5 +1,4 @@
-import Checkbox from "expo-checkbox";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Switch, Text, View } from "react-native";
 
 import { CardTitle, Caption } from "@/components/ui/Typography";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -14,9 +13,10 @@ interface AdditionalWorksChecklistProps {
   emptyText: string;
 }
 
-// Selectable list of category-scoped extra work items — mirrors the web
-// wizard's AdditionalWorksChecklist (checkbox-card pattern, emerald active
-// state) for the create-application wizard's optional additional-works step.
+// Selectable list of category-scoped extra work items for the
+// create-application wizard's optional additional-works step. Each row ends
+// in a native switch (UISwitch on iOS, Material switch on Android), like a
+// Settings list; tapping anywhere on the row toggles it too.
 export function AdditionalWorksChecklist({ works, loading, selected, onToggle, emptyText }: AdditionalWorksChecklistProps) {
   const colors = useThemeColors();
 
@@ -38,18 +38,15 @@ export function AdditionalWorksChecklist({ works, loading, selected, onToggle, e
           <Pressable
             key={work.id}
             onPress={() => onToggle(work.id)}
-            className={`flex-row items-start gap-3 rounded-2xl border p-4 ${active ? "border-accent bg-emerald-50 dark:bg-accent/15" : "border-border bg-surface"}`}
+            accessibilityRole="switch"
+            accessibilityState={{ checked: active }}
+            className={`flex-row items-center gap-3 rounded-2xl border p-4 ${active ? "border-accent bg-emerald-50 dark:bg-accent/15" : "border-border bg-surface"}`}
           >
-            <Checkbox
-              value={active}
-              onValueChange={() => onToggle(work.id)}
-              color={active ? colors.accent : undefined}
-              style={{ marginTop: 2 }}
-            />
             <View className="flex-1 gap-0.5">
               <CardTitle style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>{work.name}</CardTitle>
               {work.description ? <Caption className="leading-5">{work.description}</Caption> : null}
             </View>
+            <Switch value={active} onValueChange={() => onToggle(work.id)} trackColor={{ true: colors.accent }} />
           </Pressable>
         );
       })}

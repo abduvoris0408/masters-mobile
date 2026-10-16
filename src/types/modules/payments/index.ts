@@ -39,3 +39,60 @@ export interface IEscrowDetail {
   is_paid: boolean;
   is_payer: boolean;
 }
+
+export type TStatisticsPeriod = "week" | "month" | "year";
+
+// GET /payments/balance/master-statistics/ — the signed-in master's
+// dashboard numbers. Rates/averages/change percents come back as null when
+// there's nothing to compute them from (e.g. no orders in either period),
+// so they're rendered as "—" rather than 0.
+export interface IMasterStatistics {
+  period: {
+    type: TStatisticsPeriod;
+    date_from: string;
+    date_to: string;
+  };
+  orders: {
+    total: number;
+    previous_total: number;
+    change_percent: number | null;
+    new: number;
+    active: number;
+    completed: number;
+    cancelled: number;
+    completion_rate: number | null;
+    completed_value: number;
+  };
+  income: {
+    earned: number;
+    previous_earned: number;
+    change_percent: number | null;
+    commission: number;
+    pending: number;
+    total_earned: number;
+    balance: number;
+  };
+  rating: {
+    average: number | null;
+    reviews_count: number;
+    period_average: number | null;
+    period_reviews_count: number;
+    previous_average: number | null;
+    // Keyed by criterion slug (quality, timeliness, ...); the backend may add
+    // more, so labels are translated with the slug as fallback.
+    criteria: Record<string, number | null>;
+  };
+  offers: {
+    sent: number;
+    accepted: number;
+    acceptance_rate: number | null;
+  };
+  // Trailing months, oldest first; `month` is "YYYY-MM".
+  monthly: {
+    month: string;
+    orders: number;
+    earned: number;
+    rating: number | null;
+    reviews_count: number;
+  }[];
+}

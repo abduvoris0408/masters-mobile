@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-native";
 import { router } from "expo-router";
 
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { Avatar } from "@/components/ui/Avatar";
 import { PressableCard } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -68,6 +69,7 @@ export default function OrganizationsCatalogScreen() {
                   {item.categories.map((c) => c.name).join(", ") || t("orgs_catalog_category_not_specified")}
                 </Text>
               </View>
+              <FavoriteButton type="organization" targetGuid={item.guid} />
             </PressableCard>
           )}
           onEndReachedThreshold={0.4}

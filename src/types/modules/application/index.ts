@@ -89,6 +89,11 @@ export interface IApplicationsListFilters {
   // Backend accepts `?sort=most_offers` to rank listings by offers_count
   // descending instead of the default newest-first order.
   sort?: "most_offers";
+  // "Near me": listings within `radius` km of (lat, long). `long`, not `lng`,
+  // is the backend's param name.
+  lat?: number;
+  long?: number;
+  radius?: number;
 }
 
 export type TPaymentType = "escrow" | "direct";

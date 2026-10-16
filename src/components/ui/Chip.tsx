@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
 const ICON_COLOR = {
-  neutral: "#79748A",
+  neutral: "#646A78",
   success: "#059669",
   warning: "#D97706",
   info: "#16A34A",

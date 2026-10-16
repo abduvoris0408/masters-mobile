@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Linking, Pressable, Share, Text, View } from "react-native";
 import { router } from "expo-router";
 
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
@@ -145,10 +146,14 @@ export function MasterHeaderCard({ master, categories, averageRating, onContact,
           <CardTitle>{t("master_header_share_button")}</CardTitle>
         </Pressable>
 
-        {master.last_login ? (
+        <FavoriteButton type="profile" targetGuid={master.guid} variant="button" />
+
+        {master.last_activity_at ? (
           <View className="flex-row items-center gap-1.5 rounded-full bg-background px-3 py-2">
             <Ionicons name="time-outline" size={14} color={colors.muted} />
-            <Text className="text-xs text-muted">{t("master_header_last_active", { time: fromNow(master.last_login) })}</Text>
+            <Text className="text-xs text-muted">
+              {t("master_header_last_active", { time: fromNow(master.last_activity_at) })}
+            </Text>
           </View>
         ) : null}
       </View>

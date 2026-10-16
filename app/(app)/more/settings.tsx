@@ -1,40 +1,67 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { router } from "expo-router";
+import { useColorScheme } from "nativewind";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, View } from "react-native";
-import Svg, { Path } from "react-native-svg";
+import { Pressable, ScrollView, Switch, Text, View } from "react-native";
 
 import { Header } from "@/components/ui/Header";
-import { Caption, ListLabel } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
-import { useLanguageStore } from "@/stores/language.store";
+import { useLanguageStore, type AppLanguage } from "@/stores/language.store";
 import { useThemeStore } from "@/stores/theme.store";
 import { ETheme } from "@/types";
 
-const LANGUAGE_OPTIONS: { value: "uz" | "ru" | "en"; label: string }[] = [
+const LANGUAGE_OPTIONS: { value: AppLanguage; label: string }[] = [
   { value: "uz", label: "O'zbekcha" },
   { value: "ru", label: "Русский" },
   { value: "en", label: "English" },
 ];
 
-// Drawn with react-native-svg rather than Ionicons — the icon-font glyph
-// intermittently failed to rasterize here (Expo Go font-cache flakiness),
-// leaving the row looking like the icon+label had merged with nothing
-// selected on the right. An SVG path has no font dependency to fail.
-function CheckBadge({ active, color, borderColor }: { active: boolean; color: string; borderColor: string }) {
+// Grouped settings list (iOS Settings style): a bold section title above a
+// rounded card of rows, hairline dividers between rows.
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <View
-      className="h-6 w-6 items-center justify-center rounded-full"
-      style={active ? { backgroundColor: color } : { borderWidth: 2, borderColor }}
-    >
-      {active ? (
-        <Svg width={13} height={13} viewBox="0 0 24 24">
-          <Path d="M5 13L10 18L19 7" stroke="#FFFFFF" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-        </Svg>
-      ) : null}
+    <View className="gap-2.5">
+      <Text className="px-1 text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+        {title}
+      </Text>
+      <View className="overflow-hidden rounded-2xl bg-surface">{children}</View>
     </View>
+  );
+}
+
+function Row({
+  label,
+  hint,
+  right,
+  onPress,
+  first,
+  disabled,
+}: {
+  label: string;
+  hint?: string;
+  right: ReactNode;
+  onPress?: () => void;
+  first?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress || disabled}
+      className={`flex-row items-center gap-3 px-4 py-3.5 active:opacity-70 ${first ? "" : "border-t border-border"}`}
+    >
+      <View className={`flex-1 gap-0.5 ${disabled ? "opacity-40" : ""}`}>
+        <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.medium }}>
+          {label}
+        </Text>
+        {hint ? <Text className="text-xs text-muted">{hint}</Text> : null}
+      </View>
+      {right}
+    </Pressable>
   );
 }
 
@@ -42,70 +69,79 @@ export default function SettingsScreen() {
   const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
+  const { colorScheme } = useColorScheme();
+  const { showActionSheetWithOptions } = useActionSheet();
   const preference = useThemeStore((s) => s.preference);
   const setPreference = useThemeStore((s) => s.setPreference);
   const language = useLanguageStore((s) => s.language);
   const setLanguage = useLanguageStore((s) => s.setLanguage);
 
-  const THEME_OPTIONS: { value: ETheme; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-    { value: ETheme.SYSTEM, label: t("settings_theme_system"), icon: "phone-portrait-outline" },
-    { value: ETheme.LIGHT, label: t("settings_theme_light"), icon: "sunny-outline" },
-    { value: ETheme.DARK, label: t("settings_theme_dark"), icon: "moon-outline" },
-  ];
+  // Theme as two native switches instead of a 3-way radio list: "match
+  // system" on defers to the OS (and disables the dark switch); off pins the
+  // theme, starting from whatever is showing right now so nothing flips.
+  const followSystem = preference === ETheme.SYSTEM;
+  const isDark = followSystem ? colorScheme === "dark" : preference === ETheme.DARK;
+
+  const toggleFollowSystem = (on: boolean) => {
+    if (on) setPreference(ETheme.SYSTEM);
+    else setPreference(colorScheme === "dark" ? ETheme.DARK : ETheme.LIGHT);
+  };
+
+  // A 3-way choice doesn't fit a switch — a row showing the current value
+  // that opens the native action sheet, like iOS Settings' pickers.
+  const pickLanguage = () => {
+    const labels = [...LANGUAGE_OPTIONS.map((o) => o.label), t("settings_cancel")];
+    const cancelButtonIndex = labels.length - 1;
+    showActionSheetWithOptions({ options: labels, cancelButtonIndex, title: t("settings_language") }, (index) => {
+      if (index == null || index === cancelButtonIndex) return;
+      setLanguage(LANGUAGE_OPTIONS[index].value);
+    });
+  };
+
+  const switchTrack = { true: colors.accent, false: colors.border };
 
   return (
     <View className="flex-1 bg-background">
       <Header title={t("settings_header")} onBackPress={() => router.back()} hideSettings />
 
-      <View className="gap-7 px-4 py-4" style={{ paddingTop: headerHeight + 16 }}>
-        <View className="gap-2.5">
-          <Caption className="px-1 text-sm">{t("settings_appearance")}</Caption>
-          <View className="overflow-hidden rounded-2xl bg-surface">
-            {THEME_OPTIONS.map((opt, i) => {
-              const active = preference === opt.value;
-              return (
-                <Pressable
-                  key={opt.value}
-                  onPress={() => setPreference(opt.value)}
-                  className={`flex-row items-center gap-4 px-4 py-4 ${i > 0 ? "border-t border-border" : ""}`}
-                >
-                  <View style={{ width: 22, alignItems: "center" }}>
-                    <Ionicons name={opt.icon} size={20} color={active ? colors.accent : colors.foreground} />
-                  </View>
-                  <ListLabel className="flex-1" style={{ fontFamily: active ? GOLOS_WEIGHTS.semibold : GOLOS_WEIGHTS.medium }}>
-                    {opt.label}
-                  </ListLabel>
-                  <CheckBadge active={active} color={colors.accent} borderColor={colors.border} />
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
+      <ScrollView contentContainerClassName="gap-7 px-4" contentContainerStyle={{ paddingTop: headerHeight + 16, paddingBottom: 32 }}>
+        <Section title={t("settings_appearance")}>
+          <Row
+            first
+            label={t("settings_follow_system")}
+            hint={t("settings_follow_system_hint")}
+            right={<Switch value={followSystem} onValueChange={toggleFollowSystem} trackColor={switchTrack} />}
+          />
+          <Row
+            label={t("settings_dark_mode")}
+            disabled={followSystem}
+            right={
+              <Switch
+                value={isDark}
+                disabled={followSystem}
+                onValueChange={(on) => setPreference(on ? ETheme.DARK : ETheme.LIGHT)}
+                trackColor={switchTrack}
+              />
+            }
+          />
+        </Section>
 
-        <View className="gap-2.5">
-          <Caption className="px-1 text-sm">{t("settings_language")}</Caption>
-          <View className="overflow-hidden rounded-2xl bg-surface">
-            {LANGUAGE_OPTIONS.map((opt, i) => {
-              const active = language === opt.value;
-              return (
-                <Pressable
-                  key={opt.value}
-                  onPress={() => setLanguage(opt.value)}
-                  className={`flex-row items-center gap-4 px-4 py-4 ${i > 0 ? "border-t border-border" : ""}`}
-                >
-                  <View style={{ width: 22, alignItems: "center" }}>
-                    <Ionicons name="language-outline" size={20} color={active ? colors.accent : colors.foreground} />
-                  </View>
-                  <ListLabel className="flex-1" style={{ fontFamily: active ? GOLOS_WEIGHTS.semibold : GOLOS_WEIGHTS.medium }}>
-                    {opt.label}
-                  </ListLabel>
-                  <CheckBadge active={active} color={colors.accent} borderColor={colors.border} />
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-      </View>
+        <Section title={t("settings_language")}>
+          <Row
+            first
+            label={t("settings_language")}
+            onPress={pickLanguage}
+            right={
+              <View className="flex-row items-center gap-1">
+                <Text className="text-base text-muted">
+                  {LANGUAGE_OPTIONS.find((o) => o.value === language)?.label}
+                </Text>
+                <Ionicons name="chevron-forward" size={17} color={colors.muted} />
+              </View>
+            }
+          />
+        </Section>
+      </ScrollView>
     </View>
   );
 }

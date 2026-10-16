@@ -1,0 +1,18 @@
+{
+  "title": "Favorites",
+  "tab_masters": "Masters",
+  "tab_organizations": "Organizations",
+  "add": "Add to favorites",
+  "remove": "Remove from favorites",
+  "save": "Save",
+  "saved": "Saved",
+  "added": "Added to favorites",
+  "removed": "Removed from favorites",
+  "no_description": "No description yet",
+  "empty_masters_title": "No favorite masters yet",
+  "empty_organizations_title": "No favorite organizations yet",
+  "empty_desc": "Save the ones you like with the ♥ button — they'll gather here so you can find them fast.",
+  "browse_masters": "Browse masters",
+  "browse_organizations": "Browse organizations",
+  "unnamed_master": "Master"
+}

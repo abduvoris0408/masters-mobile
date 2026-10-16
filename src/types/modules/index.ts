@@ -20,3 +20,4 @@ export * from "./terms-of-use";
 export * from "./balance";
 export * from "./payments";
 export * from "./legal-support";
+export * from "./favorite";

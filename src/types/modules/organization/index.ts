@@ -186,6 +186,8 @@ export interface IOrganizationMemberDetail {
   region: string | null;
   district: string | null;
   last_login: string | null;
+  // Preferred over `last_login` for "last seen" when the backend sends it.
+  last_activity_at?: string | null;
   services: IOrganizationMemberService[];
 }
 

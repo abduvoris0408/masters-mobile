@@ -4,18 +4,21 @@ import { initReactI18next } from "react-i18next";
 import enAuth from "@/locales/en/auth.json";
 import enCatalog from "@/locales/en/catalog.json";
 import enCommon from "@/locales/en/common.json";
+import enFavorites from "@/locales/en/favorites.json";
 import enOnboarding from "@/locales/en/onboarding.json";
 import enOrders from "@/locales/en/orders.json";
 import enProfile from "@/locales/en/profile.json";
 import ruAuth from "@/locales/ru/auth.json";
 import ruCatalog from "@/locales/ru/catalog.json";
 import ruCommon from "@/locales/ru/common.json";
+import ruFavorites from "@/locales/ru/favorites.json";
 import ruOnboarding from "@/locales/ru/onboarding.json";
 import ruOrders from "@/locales/ru/orders.json";
 import ruProfile from "@/locales/ru/profile.json";
 import uzAuth from "@/locales/uz/auth.json";
 import uzCatalog from "@/locales/uz/catalog.json";
 import uzCommon from "@/locales/uz/common.json";
+import uzFavorites from "@/locales/uz/favorites.json";
 import uzOnboarding from "@/locales/uz/onboarding.json";
 import uzOrders from "@/locales/uz/orders.json";
 import uzProfile from "@/locales/uz/profile.json";
@@ -26,9 +29,9 @@ import { useLanguageStore } from "@/stores/language.store";
 // offline and on first paint. Add a namespace here (and to `ns` below) as each
 // feature milestone ports its screens; only common+auth+onboarding exist so far.
 const resources = {
-  uz: { common: uzCommon, auth: uzAuth, onboarding: uzOnboarding, catalog: uzCatalog, profile: uzProfile, orders: uzOrders },
-  ru: { common: ruCommon, auth: ruAuth, onboarding: ruOnboarding, catalog: ruCatalog, profile: ruProfile, orders: ruOrders },
-  en: { common: enCommon, auth: enAuth, onboarding: enOnboarding, catalog: enCatalog, profile: enProfile, orders: enOrders },
+  uz: { common: uzCommon, auth: uzAuth, onboarding: uzOnboarding, catalog: uzCatalog, profile: uzProfile, orders: uzOrders, favorites: uzFavorites },
+  ru: { common: ruCommon, auth: ruAuth, onboarding: ruOnboarding, catalog: ruCatalog, profile: ruProfile, orders: ruOrders, favorites: ruFavorites },
+  en: { common: enCommon, auth: enAuth, onboarding: enOnboarding, catalog: enCatalog, profile: enProfile, orders: enOrders, favorites: enFavorites },
 };
 
 // Every screen in this app is designed uz-first — deliberately NOT keyed off
@@ -43,7 +46,7 @@ i18n.use(initReactI18next).init({
   lng: persistedLanguage,
   fallbackLng: "uz",
   supportedLngs: ["uz", "ru", "en"],
-  ns: ["common", "auth", "onboarding", "catalog", "profile", "orders"],
+  ns: ["common", "auth", "onboarding", "catalog", "profile", "orders", "favorites"],
   defaultNS: "common",
   interpolation: { escapeValue: false },
 });

@@ -1,5 +1,6 @@
 import { Text, View } from "react-native";
 
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { Avatar } from "@/components/ui/Avatar";
 import { PressableCard } from "@/components/ui/Card";
 import { Rating } from "@/components/ui/Rating";
@@ -8,6 +9,7 @@ import { CardTitle, Caption } from "@/components/ui/Typography";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 
 export interface MasterCardData {
+  // The master profile's guid — also what the favorite heart toggles.
   id: string;
   name: string;
   photo?: string | null;
@@ -35,6 +37,7 @@ export function MasterCard({ item, onPress }: MasterCardProps) {
           <Caption>{item.fromPrice}</Caption>
         </View>
       </View>
+      <FavoriteButton type="profile" targetGuid={item.id} />
     </PressableCard>
   );
 }

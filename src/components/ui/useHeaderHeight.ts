@@ -1,11 +1,12 @@
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useHeaderHeight as useNativeHeaderHeight } from "expo-router/react-navigation";
+import { Platform } from "react-native";
 
-// Header.tsx's rendered height: safe-area top inset + 10 top padding + 44px
-// icon-row content (HeaderIconButton is h-11) + 12 bottom padding. Screens
-// that put the floating Header over a ScrollView/FlatList use this as the
-// list's top padding/inset so content starts below the glass instead of
-// hiding under it.
+// How far a screen's content must be pushed down to start below the native
+// header. iOS draws the header transparent over the content (see
+// useNativeHeaderOptions), so this is the real measured header height
+// (status bar included). Android's header is opaque and already lays the
+// content out below itself, so nothing extra is needed there.
 export function useHeaderHeight(): number {
-  const insets = useSafeAreaInsets();
-  return insets.top + 10 + 44 + 12;
+  const height = useNativeHeaderHeight();
+  return Platform.OS === "ios" ? height : 0;
 }

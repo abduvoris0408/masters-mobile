@@ -1,7 +1,7 @@
 import { Pressable, View, type PressableProps, type ViewProps } from "react-native";
 
 const SHADOW = {
-  shadowColor: "#171421",
+  shadowColor: "#0F172A",
   shadowOpacity: 0.06,
   shadowRadius: 12,
   shadowOffset: { width: 0, height: 4 },

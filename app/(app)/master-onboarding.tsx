@@ -11,7 +11,6 @@ import { TextField } from "@/components/ui/TextField";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
-import { useRoleUpdateMutation } from "@/services/auth";
 import {
   useCreateMasterProfileMutation,
   useDistrictsQuery,
@@ -22,7 +21,6 @@ import {
 } from "@/services/master";
 import { useAuthStore } from "@/stores";
 import { EProfileType, EUserType } from "@/types";
-import { USER_ROLE_ID } from "@/constants";
 import { showError, showSuccess } from "@/utils/toast";
 
 // Mobile counterpart to the web project's master-onboarding page, trimmed to
@@ -50,9 +48,8 @@ export default function MasterOnboardingScreen() {
   const { data: regions, isLoading: regionsLoading } = useRegionsQuery();
   const { data: districts, isLoading: districtsLoading } = useDistrictsQuery(regionGuid);
 
-  const roleUpdateMutation = useRoleUpdateMutation();
   const createProfileMutation = useCreateMasterProfileMutation();
-  const isSaving = roleUpdateMutation.isPending || createProfileMutation.isPending;
+  const isSaving = createProfileMutation.isPending;
 
   useEffect(() => {
     setCategoryId(null);
@@ -69,13 +66,9 @@ export default function MasterOnboardingScreen() {
   const handleSubmit = async () => {
     if (!canSubmit) return;
     try {
-      // Role first, then the profile record itself — mirrors the web flow's
-      // ordering (role-update → createMasterProfile). Without this, the
-      // "switch role" toggle used to grant WORKER with no profile behind it,
-      // silently stranding the user.
-      if (user?.user_type !== EUserType.WORKER) {
-        await roleUpdateMutation.mutateAsync({ role: [USER_ROLE_ID.MASTER] });
-      }
+      // Creating the profile is the whole switch — same as the web flow,
+      // which dropped its separate role-update call (the backend grants the
+      // master role along with the profile).
       await createProfileMutation.mutateAsync({
         type: EProfileType.INDIVIDUAL,
         description: description.trim() || undefined,
@@ -87,7 +80,8 @@ export default function MasterOnboardingScreen() {
       });
       if (user) setUser({ ...user, user_type: EUserType.WORKER });
       showSuccess(t("master_onboarding_success"));
-      router.replace("/(app)/(tabs)/profile");
+      // Pops back to the tabs (already under this screen) and lands on Profil.
+      router.dismissTo("/profile");
     } catch {
       showError(t("onboarding_save_error"));
     }

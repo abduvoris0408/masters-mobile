@@ -1,5 +1,4 @@
 import * as Haptics from "expo-haptics";
-import { useColorScheme } from "nativewind";
 import type { ReactNode } from "react";
 import { Pressable, View, type GestureResponderEvent, type PressableProps } from "react-native";
 
@@ -7,14 +6,11 @@ interface HeaderIconButtonProps extends PressableProps {
   children: ReactNode;
 }
 
-// Shared "glass pill" circular button used for every Header slot (back,
-// search, menu, notification bell) so they all render at the same size and
-// visual weight instead of the bell looking like a bare icon next to a
-// bordered back button.
+// Plain icon button for the native header's left/right slots (search, menu,
+// settings, notification bell). No border or fill of its own — iOS 26 wraps
+// header items in Liquid Glass itself, and the Material top bar on Android
+// uses bare icons too.
 export function HeaderIconButton({ children, style, onPress, ...rest }: HeaderIconButtonProps) {
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === "dark";
-
   const handlePress = (e: GestureResponderEvent) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
     onPress?.(e);
@@ -24,7 +20,7 @@ export function HeaderIconButton({ children, style, onPress, ...rest }: HeaderIc
     <Pressable
       hitSlop={8}
       onPress={handlePress}
-      className={`h-11 w-11 items-center justify-center rounded-full border ${isDark ? "border-white/10 bg-white/10" : "border-white/60 bg-white/55"}`}
+      className="h-9 w-9 items-center justify-center rounded-full active:opacity-60"
       style={style}
       {...rest}
     >

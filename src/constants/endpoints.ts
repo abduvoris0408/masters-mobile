@@ -246,9 +246,16 @@ export const ENDPOINTS = {
   TERMS_OF_USE: {
     LIST_USER: "/terms-of-use/list-user/",
   },
+  FAVORITE: {
+    LIST: "/favorite/list/",
+    CREATE: "/favorite/create/",
+    // Takes the favorite record's own guid, not the profile/organization's.
+    DELETE: (guid: string) => `/favorite/delete/${guid}/`,
+  },
   PAYMENTS: {
     BALANCE_ME: "/payments/balance/me-balans/",
     BALANCE_DEPOSIT: "/payments/balance/deposit/",
+    MASTER_STATISTICS: "/payments/balance/master-statistics/",
     BALANCE_TRANSACTIONS_MY_LIST: "/payments/balance-transaction/my-list/",
     ESCROW_CREATE: "/payments/escrow/create/",
     ESCROW_DETAIL: (orderGuid: string) => `/payments/escrow/detail/${orderGuid}/`,

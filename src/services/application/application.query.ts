@@ -60,7 +60,12 @@ export const APPLICATION_KEYS = {
 // empty value) to `undefined` so it's simply omitted from the request params.
 const statusParam = (status?: string) => (status && status !== "all" ? status : undefined);
 
-export const useApplicationsQuery = (page: number, pageSize = 12, filters?: IApplicationsListFilters) =>
+export const useApplicationsQuery = (
+  page: number,
+  pageSize = 12,
+  filters?: IApplicationsListFilters,
+  enabled = true,
+) =>
   useQuery({
     queryKey: APPLICATION_KEYS.list(page, pageSize, filters),
     queryFn: (): Promise<IDjangoPaginated<IApplication>> =>
@@ -79,9 +84,13 @@ export const useApplicationsQuery = (page: number, pageSize = 12, filters?: IApp
             q: filters?.q || undefined,
             guid: filters?.guid || undefined,
             sort: filters?.sort ?? undefined,
+            lat: filters?.lat,
+            long: filters?.long,
+            radius: filters?.radius,
           },
         })
         .then((r) => r.data),
+    enabled,
     placeholderData: (prev) => prev,
   });
 
