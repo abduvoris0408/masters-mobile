@@ -80,7 +80,7 @@ function OnboardingSlide({
       </Animated.View>
 
       <Animated.View style={animatedStyle}>
-        <Text className="text-center text-2xl font-bold text-foreground">{title}</Text>
+        <Text className="text-center text-2xl font-semibold text-foreground">{title}</Text>
         <Text className="mt-3 text-center text-sm leading-5 text-muted">{subtitle}</Text>
       </Animated.View>
     </View>
@@ -103,7 +103,7 @@ function BlurPill({
 }) {
   if (Platform.OS === "android") {
     return (
-      <View style={[style, { backgroundColor: isDark ? "rgba(24,27,36,0.96)" : "rgba(255,255,255,0.96)" }]}>
+      <View style={[style, { backgroundColor: isDark ? "rgba(28,28,30,0.96)" : "rgba(255,255,255,0.96)" }]}>
         {children}
       </View>
     );

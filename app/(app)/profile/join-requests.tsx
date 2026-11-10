@@ -172,7 +172,7 @@ function JoinRequestCard({ item, isOrganization }: { item: IJoinRequest; isOrgan
                 className="flex-1 items-center rounded-full bg-accent px-4 py-2.5"
                 style={{ opacity: busy ? 0.6 : 1 }}
               >
-                <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                   {t("join_requests_accept_action")}
                 </Text>
               </Pressable>
@@ -182,7 +182,7 @@ function JoinRequestCard({ item, isOrganization }: { item: IJoinRequest; isOrgan
                 className="flex-1 items-center rounded-full bg-red-50 px-4 py-2.5 dark:bg-danger/15"
                 style={{ opacity: busy ? 0.6 : 1 }}
               >
-                <Text className="text-sm text-danger" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                <Text className="text-sm text-danger" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                   {t("join_requests_reject_action")}
                 </Text>
               </Pressable>
@@ -194,7 +194,7 @@ function JoinRequestCard({ item, isOrganization }: { item: IJoinRequest; isOrgan
               className="flex-1 items-center rounded-full bg-background px-4 py-2.5"
               style={{ opacity: busy ? 0.6 : 1 }}
             >
-              <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+              <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                 {t("join_requests_cancel_action")}
               </Text>
             </Pressable>
@@ -269,8 +269,8 @@ export default function ProfileJoinRequestsScreen() {
           renderItem={({ item }) => <JoinRequestCard item={item} isOrganization={isOrganization} />}
           onEndReachedThreshold={0.4}
           onEndReached={() => hasMore && !isFetching && setPage((p) => p + 1)}
-          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : null}
-          refreshControl={<RefreshControl refreshing={isFetching && page === 1} onRefresh={() => refetch()} />}
+          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : undefined}
+          refreshControl={<RefreshControl refreshing={isFetching && page === 1} onRefresh={() => void refetch()} />}
         />
       )}
     </View>

@@ -24,7 +24,7 @@ export function MasterLevelBadge({ level }: { level: IMasterLevelProgress }) {
           <Ionicons name="ribbon" size={12} color={colors.accent} />
         )}
       </View>
-      <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }} numberOfLines={1}>
+      <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }} numberOfLines={1}>
         {current.name}
       </Text>
     </View>

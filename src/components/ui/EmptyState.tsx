@@ -53,7 +53,7 @@ export function EmptyState({ title, description, actionLabel, onAction }: EmptyS
       <Animated.View style={[textStyle, { alignItems: "center", gap: 6, marginTop: 6 }]}>
         <Text
           className="text-center text-foreground"
-          style={{ fontFamily: GOLOS_WEIGHTS.bold, fontSize: 18 }}
+          style={{ fontFamily: GOLOS_WEIGHTS.semibold, fontSize: 18 }}
         >
           {title}
         </Text>

@@ -7,6 +7,7 @@ import { router } from "expo-router";
 import { PressableCard } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { useHeaderCollapse } from "@/hooks/useHeaderCollapse";
 import { ListLabel } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -17,6 +18,7 @@ import { appendUniquePage } from "@/utils/pagination";
 const PAGE_SIZE = 12;
 
 export default function CoursesScreen() {
+  const { collapsed, scrollProps } = useHeaderCollapse();
   const { t } = useTranslation("orders");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
@@ -35,7 +37,7 @@ export default function CoursesScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title={t("courses_header")} onBackPress={() => router.back()} />
+      <Header largeTitle collapsed={collapsed} title={t("courses_header")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
@@ -58,7 +60,7 @@ export default function CoursesScreen() {
           data={items}
           keyExtractor={(item) => item.guid}
           contentContainerClassName="gap-3 px-4 py-4"
-          contentContainerStyle={{ paddingTop: headerHeight + 16 }}
+          contentInsetAdjustmentBehavior="automatic" {...scrollProps} contentContainerStyle={{ paddingTop: 16 }}
           renderItem={({ item }) => (
             <PressableCard className="flex-row items-center gap-3" onPress={() => router.push(`/courses/${item.guid}`)}>
               <View className={`h-12 w-12 items-center justify-center rounded-2xl ${item.is_completed ? "bg-emerald-50" : "bg-surface"}`}>
@@ -76,8 +78,8 @@ export default function CoursesScreen() {
           )}
           onEndReachedThreshold={0.4}
           onEndReached={() => hasMore && !isFetching && setPage((p) => p + 1)}
-          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : null}
-          refreshControl={<RefreshControl refreshing={isFetching && page === 1} onRefresh={() => refetch()} />}
+          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : undefined}
+          refreshControl={<RefreshControl refreshing={isFetching && page === 1} onRefresh={() => void refetch()} />}
         />
       )}
     </View>

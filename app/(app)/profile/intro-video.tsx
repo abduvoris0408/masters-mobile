@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { useHeaderCollapse } from "@/hooks/useHeaderCollapse";
 import { Caption } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -81,6 +82,7 @@ function VideoRow({
 }
 
 export default function ProfileIntroVideoScreen() {
+  const { collapsed, scrollProps } = useHeaderCollapse();
   const { t } = useTranslation("profile");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
@@ -158,14 +160,14 @@ export default function ProfileIntroVideoScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title={t("intro_video_title")} onBackPress={() => router.back()} />
+      <Header largeTitle collapsed={collapsed} title={t("intro_video_title")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
       ) : (
         <ScrollView
           contentContainerClassName="gap-3 px-4 pb-8"
-          contentContainerStyle={{ paddingTop: headerHeight + 12 }}
+          contentInsetAdjustmentBehavior="automatic" {...scrollProps} contentContainerStyle={{ paddingTop: 12 }}
         >
           <View className="flex-row items-center gap-2 rounded-2xl bg-emerald-50 px-3.5 py-3 dark:bg-accent/15">
             <Ionicons name="film-outline" size={16} color={colors.accent} />

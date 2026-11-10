@@ -25,7 +25,7 @@ export function FilterChips<T extends string>({ options, value, onChange }: Filt
             onPress={() => onChange(opt.value)}
             className={`items-center justify-center rounded-full px-4 py-2.5 ${active ? "bg-accent" : "bg-surface"}`}
           >
-            <Text className={`text-sm ${active ? "text-white" : "text-foreground"}`} style={{ fontWeight: active ? "700" : "500" }}>
+            <Text className={`text-sm ${active ? "font-semibold text-white" : "font-medium text-foreground"}`}>
               {opt.label}
             </Text>
           </Pressable>

@@ -9,22 +9,22 @@ import { useColorScheme } from "nativewind";
 // the reference screens — deliberately distinct from `primary`, which is a
 // slightly darker green used for nav/active-state (mobile-design.md §3).
 const LIGHT = {
-  background: "#F4F6F8",
+  background: "#F2F2F7",
   surface: "#FFFFFF",
   foreground: "#0F172A",
   muted: "#646A78",
-  border: "#E4E7EC",
+  border: "#E5E5EA",
   primary: "#16A34A",
   accent: "#059669",
   danger: "#DC2626",
 };
 
 const DARK = {
-  background: "#181B24",
-  surface: "#232733",
-  foreground: "#F0EFF5",
-  muted: "#9CA3AF",
-  border: "#2A2E3A",
+  background: "#000000",
+  surface: "#1C1C1E",
+  foreground: "#FFFFFF",
+  muted: "#8E8E93",
+  border: "#38383A",
   primary: "#22C55E",
   accent: "#34D399",
   danger: "#F87171",

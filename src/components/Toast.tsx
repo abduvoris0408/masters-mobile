@@ -60,7 +60,7 @@ export function Toast() {
     >
       <Pressable
         onPress={() => dismiss(toast.id)}
-        className={`flex-row items-center gap-3 rounded-2xl border px-4 py-3.5 ${isDark ? "border-white/10 bg-[#1c1f2a]/95" : "border-black/5 bg-white/95"}`}
+        className={`flex-row items-center gap-3 rounded-2xl border px-4 py-3.5 ${isDark ? "border-white/10 bg-[#1c1c1e]/95" : "border-black/5 bg-white/95"}`}
         style={{
           shadowColor: "#0F172A",
           shadowOpacity: 0.18,

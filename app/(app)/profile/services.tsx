@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { useHeaderCollapse } from "@/hooks/useHeaderCollapse";
 import { TextField } from "@/components/ui/TextField";
 import { CardTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
@@ -112,6 +113,7 @@ function CategoryGroup({
 }
 
 export default function ProfileServicesScreen() {
+  const { collapsed, scrollProps } = useHeaderCollapse();
   const { t } = useTranslation("profile");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
@@ -132,7 +134,7 @@ export default function ProfileServicesScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title={t("services_title")} onBackPress={() => router.back()} />
+      <Header largeTitle collapsed={collapsed} title={t("services_title")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
@@ -147,7 +149,7 @@ export default function ProfileServicesScreen() {
       ) : (
         <ScrollView
           contentContainerClassName="gap-5 px-4 pb-8"
-          contentContainerStyle={{ paddingTop: headerHeight + 12 }}
+          contentInsetAdjustmentBehavior="automatic" {...scrollProps} contentContainerStyle={{ paddingTop: 12 }}
         >
           <View className="flex-row items-center gap-2 rounded-2xl bg-amber-50 px-3.5 py-3 dark:bg-amber-500/15">
             <Ionicons name="information-circle-outline" size={16} color="#D97706" />

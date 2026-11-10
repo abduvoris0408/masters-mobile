@@ -203,11 +203,11 @@ export default function FavoritesScreen() {
           }
           onEndReachedThreshold={0.4}
           onEndReached={() => hasMore && !isFetching && setPage((p) => p + 1)}
-          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : null}
+          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : undefined}
           refreshControl={
             <RefreshControl
               refreshing={isFetching && page === 1 && items.length > 0}
-              onRefresh={() => (page === 1 ? refetch() : setPage(1))}
+              onRefresh={() => (page === 1 ? void refetch() : setPage(1))}
             />
           }
         />

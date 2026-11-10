@@ -168,6 +168,8 @@
   "listing_view_offers": "View offers",
 
   "filter_sheet_title": "Filter",
+  "filter_sheet_sort": "Sort by",
+  "filter_sheet_sort_newest": "Newest",
   "filter_sheet_category": "Category",
   "filter_sheet_region": "Region",
   "filter_sheet_all": "All",

@@ -1,20 +1,14 @@
 import { Pressable, View, type PressableProps, type ViewProps } from "react-native";
 
-const SHADOW = {
-  shadowColor: "#0F172A",
-  shadowOpacity: 0.06,
-  shadowRadius: 12,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 2,
-};
-
 interface CardProps extends ViewProps {}
 
-// Base elevated surface — white rounded-3xl block, softly shadowed, on the
-// tinted page background. Every list-item/section card in the app composes
-// this instead of repeating the same utility classes everywhere.
+// Base surface — flat rounded-3xl block in the grouped-cell color (white on
+// the #F2F2F7 page, #1C1C1E on black), iOS-style: contrast comes from the
+// fill alone, no drop shadow (shadows made the light theme look hazy). Every
+// list-item/section card in the app composes this instead of repeating the
+// same utility classes everywhere.
 export function Card({ className, style, ...rest }: CardProps) {
-  return <View className={`rounded-3xl bg-surface p-5 ${className ?? ""}`} style={[SHADOW, style]} {...rest} />;
+  return <View className={`rounded-3xl bg-surface p-5 ${className ?? ""}`} style={style} {...rest} />;
 }
 
 interface PressableCardProps extends PressableProps {
@@ -25,7 +19,7 @@ export function PressableCard({ className, style, ...rest }: PressableCardProps)
   return (
     <Pressable
       className={`rounded-3xl bg-surface p-5 ${className ?? ""}`}
-      style={[SHADOW, style as object]}
+      style={style}
       {...rest}
     />
   );

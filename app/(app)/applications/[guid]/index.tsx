@@ -56,7 +56,7 @@ function OfferRow({
 
       <View className="flex-row items-center justify-between rounded-xl bg-background px-3 py-2.5">
         <Text className="text-xs text-muted">{t("offer_price_label")}</Text>
-        <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+        <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
           {formatPrice(Number(offer.price))}
         </Text>
       </View>
@@ -76,7 +76,7 @@ function OfferRow({
           ) : (
             <>
               <Ionicons name="checkmark-circle-outline" size={16} color="#FFFFFF" />
-              <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+              <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                 {t("offer_accept_button")}
               </Text>
             </>
@@ -181,7 +181,7 @@ export default function ApplicationManageScreen() {
             </View>
             <View className="flex-row items-center justify-between border-t border-border pt-3">
               <Text className="text-xs text-muted">{t("field_budget")}</Text>
-              <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+              <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                 {data.budget_from === data.budget_to
                   ? formatPrice(Number(data.budget_from))
                   : `${formatPrice(Number(data.budget_from))} – ${formatPrice(Number(data.budget_to))}`}

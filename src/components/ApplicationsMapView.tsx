@@ -127,7 +127,7 @@ export function ApplicationsMapView({ items, onSelect, userLocation, radiusKm }:
         >
           <View className="flex-1 gap-1">
             <CardTitle numberOfLines={1}>{selected.title}</CardTitle>
-            <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+            <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
               {selected.budget_from === selected.budget_to
                 ? formatPrice(Number(selected.budget_from))
                 : `${formatPrice(Number(selected.budget_from))} – ${formatPrice(Number(selected.budget_to))}`}

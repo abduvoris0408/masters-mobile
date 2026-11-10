@@ -78,8 +78,8 @@ export default function BlogScreen() {
           renderItem={({ item }) => <BlogRow item={item} />}
           onEndReachedThreshold={0.4}
           onEndReached={() => hasMore && !isFetching && setPageSize((p) => p + PAGE_SIZE_STEP)}
-          ListFooterComponent={isFetching && pageSize > PAGE_SIZE_STEP ? <ActivityIndicator className="py-4" color={colors.accent} /> : null}
-          refreshControl={<RefreshControl refreshing={isFetching && pageSize === PAGE_SIZE_STEP} onRefresh={() => refetch()} />}
+          ListFooterComponent={isFetching && pageSize > PAGE_SIZE_STEP ? <ActivityIndicator className="py-4" color={colors.accent} /> : undefined}
+          refreshControl={<RefreshControl refreshing={isFetching && pageSize === PAGE_SIZE_STEP} onRefresh={() => void refetch()} />}
         />
       )}
     </View>

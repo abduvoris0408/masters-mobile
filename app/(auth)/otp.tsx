@@ -57,7 +57,7 @@ export default function OtpScreen() {
 
   return (
     <View className="flex-1 justify-center bg-background px-6">
-      <Text className="text-center text-2xl font-bold text-foreground">{t("otp_title")}</Text>
+      <Text className="text-center text-2xl font-semibold text-foreground">{t("otp_title")}</Text>
       <Text className="mb-8 mt-1.5 text-center text-sm text-muted">{t("otp_subtitle", { phone })}</Text>
 
       <OtpInput value={code} onChange={setCode} length={OTP_LENGTH} autoFocus onComplete={submit} />

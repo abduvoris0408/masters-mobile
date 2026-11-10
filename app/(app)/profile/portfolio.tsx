@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { useHeaderCollapse } from "@/hooks/useHeaderCollapse";
 import { Caption, ScreenTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -227,7 +228,7 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
             style={{ width: 88, height: 88 }}
           >
             <Ionicons name="image-outline" size={20} color={colors.muted} />
-            <Text className="text-[10px] text-muted">{t("portfolio_add_image")}</Text>
+            <Text className="text-[11px] text-muted">{t("portfolio_add_image")}</Text>
           </Pressable>
         </View>
 
@@ -240,6 +241,7 @@ const PortfolioFormModal = forwardRef<PortfolioFormModalHandle, { profileGuid: s
 });
 
 export default function ProfilePortfolioScreen() {
+  const { collapsed, scrollProps } = useHeaderCollapse();
   const { t } = useTranslation("profile");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
@@ -277,7 +279,7 @@ export default function ProfilePortfolioScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header
+      <Header largeTitle collapsed={collapsed}
         title={t("portfolio_title")}
         onBackPress={() => router.back()}
         right={
@@ -304,7 +306,7 @@ export default function ProfilePortfolioScreen() {
           data={works}
           keyExtractor={(item: IPortfolioWork) => item.guid}
           contentContainerClassName="gap-3 px-4 pb-8"
-          contentContainerStyle={{ paddingTop: headerHeight + 12 }}
+          contentInsetAdjustmentBehavior="automatic" {...scrollProps} contentContainerStyle={{ paddingTop: 12 }}
           renderItem={({ item }) => (
             <View className="gap-2 rounded-3xl bg-surface p-3">
               <View className="flex-row flex-wrap gap-2">

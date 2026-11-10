@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { Card, PressableCard } from "@/components/ui/Card";
 import { Header } from "@/components/ui/Header";
+import { useHeaderCollapse } from "@/hooks/useHeaderCollapse";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { SectionTitle } from "@/components/ui/Typography";
 import { useProfilePerspective } from "@/hooks/useProfilePerspective";
@@ -17,6 +18,7 @@ import { ProfileAvatar, useAvatarPicker } from "./_profile/ProfileAvatar";
 import { InfoRow, NavRow } from "./_profile/ProfileRows";
 
 export default function ProfileScreen() {
+  const { collapsed, scrollProps } = useHeaderCollapse();
   const { t } = useTranslation("profile");
   const colors = useThemeColors();
   const user = useAuthStore((s) => s.user);
@@ -80,10 +82,10 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title={t("screen_title")} />
+      <Header title={t("screen_title")} largeTitle collapsed={collapsed} />
 
       <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
+        contentInsetAdjustmentBehavior="automatic" {...scrollProps}
         contentContainerClassName="gap-3 px-4"
         contentContainerStyle={{ paddingTop: 12, paddingBottom: 32 }}
       >
@@ -154,12 +156,12 @@ export default function ProfileScreen() {
               </View>
               <View className="flex-1">
                 <Text className="text-xs text-muted">{t("master_level_label")}</Text>
-                <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                   {level.current.name}
                 </Text>
               </View>
               {level.next ? (
-                <Text className="text-lg text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                <Text className="text-lg text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                   {levelPercent}%
                 </Text>
               ) : (
@@ -192,7 +194,7 @@ export default function ProfileScreen() {
         {/* Personal info — the name is already in the card above. */}
         <Card className="px-4 pb-1 pt-4">
           <View className="flex-row items-center justify-between">
-            <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+            <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
               {t("personal_info_title")}
             </Text>
             <Pressable

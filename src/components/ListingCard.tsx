@@ -109,7 +109,7 @@ export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer",
             {item.price}
           </Text>
           <View className="mt-0.5 self-start rounded-full bg-emerald-50 px-2.5 py-1 dark:bg-accent/15">
-            <BadgeLabel className="text-[11px] text-accent" numberOfLines={1}>
+            <BadgeLabel className="text-xs text-accent" numberOfLines={1}>
               {item.offersCount > 0 ? t("listing_offers_count", { count: item.offersCount }) : t("listing_no_offers")}
             </BadgeLabel>
           </View>
@@ -206,7 +206,7 @@ export function ListingCard({ item, onPress, onOfferPress, ctaVariant = "offer",
         className="flex-row items-center justify-center gap-2 rounded-full bg-accent py-3"
       >
         <Ionicons name={ctaVariant === "manage" ? "people-outline" : "paper-plane-outline"} size={16} color="#FFFFFF" />
-        <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+        <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
           {ctaVariant === "manage" ? t("listing_view_offers") : t("listing_send_offer")}
         </Text>
       </Pressable>

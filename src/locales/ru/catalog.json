@@ -13,7 +13,7 @@
   "home_search_placeholder": "Поиск по работам...",
   "home_all_categories": "Все",
   "home_active_count": "{{count}} активных объявлений",
-  "home_sort_most_offers": "Больше откликов",
+  "home_sort_most_offers": "По количеству предложений",
   "home_sort_default": "Сортировка",
   "home_address_not_specified": "Адрес не указан",
   "home_urgent": "Срочно",
@@ -168,6 +168,8 @@
   "listing_view_offers": "Посмотреть отклики",
 
   "filter_sheet_title": "Фильтр",
+  "filter_sheet_sort": "Сортировка",
+  "filter_sheet_sort_newest": "Сначала новые",
   "filter_sheet_category": "Категория",
   "filter_sheet_region": "Область",
   "filter_sheet_all": "Все",

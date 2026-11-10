@@ -1,8 +1,13 @@
-import MaskedView from "@react-native-masked-view/masked-view";
+import MaskedViewNative from "@react-native-masked-view/masked-view";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import type { PropsWithChildren } from "react";
-import { Platform, StyleSheet, View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from "react-native";
+import type { ComponentType, PropsWithChildren, ReactElement } from "react";
+import { Platform, StyleSheet, View, type LayoutChangeEvent, type StyleProp, type ViewProps, type ViewStyle } from "react-native";
+
+// masked-view 0.3.2's typings extend RN's `NativeMethods`, which RN 0.88
+// removed, so the class no longer type-checks as a JSX component. Runtime is
+// unaffected — re-type it with the props it actually takes.
+const MaskedView = MaskedViewNative as unknown as ComponentType<ViewProps & { maskElement: ReactElement }>;
 
 interface ProgressiveBlurViewProps extends PropsWithChildren {
   intensity?: number;
@@ -31,7 +36,7 @@ export function ProgressiveBlurView({ intensity = 80, tint = "light", fade = "do
   const gradientColors = fade === "down" ? (["#000000", "#000000", "transparent"] as const) : (["transparent", "#000000", "#000000"] as const);
 
   if (Platform.OS === "android") {
-    const solidColor = tint === "dark" ? "rgba(24,27,36,0.96)" : "rgba(255,255,255,0.96)";
+    const solidColor = tint === "dark" ? "rgba(28,28,30,0.96)" : "rgba(255,255,255,0.96)";
     return (
       <View style={[style, { backgroundColor: solidColor }]} onLayout={onLayout}>
         {children}

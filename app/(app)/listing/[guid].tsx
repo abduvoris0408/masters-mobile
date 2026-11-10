@@ -180,7 +180,7 @@ export default function ListingDetailScreen() {
               <ScreenTitle className="text-xl">{data.title}</ScreenTitle>
 
               <View className="self-start rounded-full bg-amber-100 px-3 py-1.5 dark:bg-amber-500/20">
-                <Text className="text-sm text-amber-700 dark:text-amber-400" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                <Text className="text-sm text-amber-700 dark:text-amber-400" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                   {data.budget_from === data.budget_to
                     ? formatPrice(Number(data.budget_from))
                     : `${formatPrice(Number(data.budget_from))} – ${formatPrice(Number(data.budget_to))}`}

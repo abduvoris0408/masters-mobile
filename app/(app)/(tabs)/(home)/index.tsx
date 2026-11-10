@@ -12,10 +12,10 @@ import {
 } from "@/components/CategoryRegionFilterSheet";
 import { ListingCard, ListingCardSkeleton, type ListingCardData } from "@/components/ListingCard";
 import { NotificationBell } from "@/components/NotificationBell";
-import { AppBrand } from "@/components/ui/AppLogo";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterChips } from "@/components/ui/FilterChips";
 import { Header } from "@/components/ui/Header";
+import { useHeaderCollapse } from "@/hooks/useHeaderCollapse";
 import { HeaderIconButton } from "@/components/ui/HeaderIconButton";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
@@ -27,8 +27,6 @@ import { useApplicationsQuery } from "@/services/application";
 import type { IApplication } from "@/types";
 import { formatAddress, formatPostedAt, formatPrice } from "@/utils/format";
 import { appendUniquePage } from "@/utils/pagination";
-
-type SortMode = "most_offers" | undefined;
 
 function toListingCard(item: IApplication, t: (key: string, options?: Record<string, unknown>) => string): ListingCardData {
   const sameBudget = item.budget_from === item.budget_to;
@@ -142,8 +140,8 @@ export default function HomeScreen() {
   const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
+  const { collapsed, scrollProps } = useHeaderCollapse();
   const [categoryFilter, setCategoryFilter] = useState<string>(ALL_CATEGORY);
-  const [sort, setSort] = useState<SortMode>(undefined);
   const filterSheetRef = useRef<CategoryRegionFilterSheetHandle>(null);
   const [filters, setFilters] = useState<CategoryRegionFilterValue>({ category: [], region: null });
   const [page, setPage] = useState(1);
@@ -185,7 +183,7 @@ export default function HomeScreen() {
   useEffect(() => {
     setPage(1);
     setItems([]);
-  }, [categoryFilter, filters, sort, query, nearbyRadius, nearbyCoords]);
+  }, [categoryFilter, filters, query, nearbyRadius, nearbyCoords]);
 
   const { data, isLoading, isFetching, isPlaceholderData, isError, refetch } = useApplicationsQuery(
     page,
@@ -194,7 +192,7 @@ export default function HomeScreen() {
       category:
         categoryFilter !== ALL_CATEGORY ? [Number(categoryFilter)] : filters.category.length ? filters.category : undefined,
       region: filters.region,
-      sort,
+      sort: filters.sort,
       q: query || undefined,
       ...(nearbyCoords && nearbyRadius != null
         ? { lat: nearbyCoords.lat, long: nearbyCoords.lng, radius: nearbyRadius }
@@ -216,7 +214,9 @@ export default function HomeScreen() {
 
   const hasMore = !!data?.next;
   const totalCount = data?.count ?? items.length;
-  const activeFilterCount = filters.category.length + (filters.region ? 1 : 0);
+  // Sort lives in the filter sheet too, so a non-default sort counts toward
+  // the badge on the filter button.
+  const activeFilterCount = filters.category.length + (filters.region ? 1 : 0) + (filters.sort ? 1 : 0);
 
   // Search / categories / toolbar / "Yaqinimda" — rendered as the list's
   // header so it scrolls away with the cards, under the transparent iOS bar.
@@ -244,7 +244,7 @@ export default function HomeScreen() {
             <Ionicons name="options-outline" size={17} color={colors.foreground} />
             {activeFilterCount > 0 ? (
               <View className="absolute -right-1 -top-1 h-4 w-4 items-center justify-center rounded-full bg-accent">
-                <Text className="text-[10px] text-white" style={{ fontWeight: "700" }}>
+                <Text className="text-[11px] text-white font-semibold">
                   {activeFilterCount}
                 </Text>
               </View>
@@ -268,16 +268,6 @@ export default function HomeScreen() {
         </View>
 
         <View className="flex-row items-center gap-2">
-          <Pressable
-            onPress={() => setSort((s) => (s === "most_offers" ? undefined : "most_offers"))}
-            className="flex-row items-center gap-1 rounded-xl bg-surface px-3 py-2"
-          >
-            <Text className="text-sm text-foreground" style={{ fontWeight: "600" }}>
-              {sort === "most_offers" ? t("home_sort_most_offers") : t("home_sort_default")}
-            </Text>
-            <Ionicons name="chevron-down" size={14} color={colors.muted} />
-          </Pressable>
-
           <View className="flex-row items-center rounded-xl bg-surface p-1">
             {(
               [
@@ -312,7 +302,7 @@ export default function HomeScreen() {
   );
 
   // What the list area shows when there are no cards to render yet.
-  const emptyContent = nearbyWaiting ? null : showSkeleton ? (
+  const emptyContent = nearbyWaiting ? undefined : showSkeleton ? (
     <View className={viewMode === "list" ? "px-4" : "gap-3 px-4"}>
       {Array.from({ length: 6 }).map((_, i) => (
         <ListingCardSkeleton key={i} variant={viewMode === "list" ? "grid" : "list"} />
@@ -343,9 +333,12 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      {/* No title — the brand on the left already says where you are. */}
+      {/* Large title only in list/grid mode — the map doesn't scroll, so a
+          large title there would never collapse. */}
       <Header
-        left={<AppBrand />}
+        title={t("home_title")}
+        largeTitle
+        collapsed={collapsed || showMap}
         right={
           <View className="flex-row items-center gap-1">
             <HeaderIconButton
@@ -379,6 +372,7 @@ export default function HomeScreen() {
           data={showCards ? items : []}
           keyExtractor={(item) => item.guid}
           contentInsetAdjustmentBehavior="automatic"
+          {...scrollProps}
           keyboardShouldPersistTaps="handled"
           contentContainerClassName={viewMode === "list" ? undefined : "gap-3"}
           contentContainerStyle={{ paddingBottom: 140 }}
@@ -397,12 +391,12 @@ export default function HomeScreen() {
           )}
           onEndReachedThreshold={0.4}
           onEndReached={() => showCards && hasMore && !isFetching && setPage((p) => p + 1)}
-          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : null}
-          refreshControl={<RefreshControl refreshing={isFetching && page === 1 && showCards} onRefresh={() => refetch()} />}
+          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : undefined}
+          refreshControl={<RefreshControl refreshing={isFetching && page === 1 && showCards} onRefresh={() => void refetch()} />}
         />
       )}
 
-      <CategoryRegionFilterSheet ref={filterSheetRef} value={filters} onApply={setFilters} />
+      <CategoryRegionFilterSheet ref={filterSheetRef} value={filters} onApply={setFilters} showSort />
     </View>
   );
 }

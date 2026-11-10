@@ -9,8 +9,8 @@ import { Card } from "@/components/ui/Card";
 import { Chip, type ChipTone } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { useHeaderCollapse } from "@/hooks/useHeaderCollapse";
 import { CardTitle, Caption, SectionTitle } from "@/components/ui/Typography";
-import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useThemeColors } from "@/lib/theme/colors";
 import {
@@ -94,9 +94,9 @@ function RequestHistoryRow({ item }: { item: ILegalSupportRequestListItem }) {
 }
 
 export default function LegalHelpScreen() {
+  const { collapsed, scrollProps } = useHeaderCollapse();
   const { t } = useTranslation("orders");
   const colors = useThemeColors();
-  const headerHeight = useHeaderHeight();
 
   const TRUST_BADGES: { icon: keyof typeof Ionicons.glyphMap; label: string }[] = [
     { icon: "flash-outline", label: t("legal_trust_badge_free_consult") },
@@ -153,13 +153,13 @@ export default function LegalHelpScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title={t("legal_help_header")} onBackPress={() => router.back()} />
+      <Header largeTitle collapsed={collapsed} title={t("legal_help_header")} onBackPress={() => router.back()} />
 
       <FlatList
         data={historyItems}
         keyExtractor={(item) => item.guid}
         contentContainerClassName="gap-4 px-4 pb-10"
-        contentContainerStyle={{ paddingTop: headerHeight + 12 }}
+        contentInsetAdjustmentBehavior="automatic" {...scrollProps} contentContainerStyle={{ paddingTop: 12 }}
         ListHeaderComponent={
           <View className="gap-4">
             <View className="items-center gap-3 rounded-3xl bg-surface p-5">
@@ -281,7 +281,7 @@ export default function LegalHelpScreen() {
                 ].map((step, i) => (
                   <View key={step} className="flex-row items-center gap-2.5">
                     <View className="h-5 w-5 items-center justify-center rounded-full bg-emerald-50 dark:bg-accent/15">
-                      <Text className="text-[11px] text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                      <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                         {i + 1}
                       </Text>
                     </View>
@@ -290,7 +290,7 @@ export default function LegalHelpScreen() {
                 ))}
               </View>
               <View className="items-center gap-0.5 rounded-2xl bg-background py-3">
-                <Text className="text-2xl text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+                <Text className="text-2xl text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
                   870+
                 </Text>
                 <Text className="text-xs text-muted">{t("legal_requests_resolved_label")}</Text>
@@ -320,8 +320,8 @@ export default function LegalHelpScreen() {
         }
         onEndReachedThreshold={0.4}
         onEndReached={() => hasMoreHistory && !isFetching && setHistoryPage((p) => p + 1)}
-        ListFooterComponent={isFetching && historyPage > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : null}
-        refreshControl={<RefreshControl refreshing={isFetching && historyPage === 1} onRefresh={() => refetch()} />}
+        ListFooterComponent={isFetching && historyPage > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : undefined}
+        refreshControl={<RefreshControl refreshing={isFetching && historyPage === 1} onRefresh={() => void refetch()} />}
       />
     </View>
   );

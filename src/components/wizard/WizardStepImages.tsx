@@ -131,7 +131,7 @@ export function WizardStepImages({ images, onChange }: WizardStepImagesProps) {
             className="h-[92px] w-[92px] items-center justify-center gap-1 rounded-2xl border border-dashed border-border bg-background"
           >
             <Ionicons name="image-outline" size={20} color={colors.muted} />
-            <Text className="text-[11px] text-muted">{t("wizard_add_image")}</Text>
+            <Text className="text-xs text-muted">{t("wizard_add_image")}</Text>
           </Pressable>
         ) : null}
       </View>

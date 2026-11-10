@@ -280,7 +280,7 @@ export function ApplicationWizard({ onFinish, submitting = false }: ApplicationW
               <ActivityIndicator color="#FFFFFF" />
             ) : (
               <>
-                <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                <Text className="text-sm text-white" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                   {stepKey === "review" ? t("wizard_submit_button") : t("common_continue")}
                 </Text>
                 <Ionicons name={stepKey === "review" ? "paper-plane-outline" : "arrow-forward"} size={16} color="#FFFFFF" />

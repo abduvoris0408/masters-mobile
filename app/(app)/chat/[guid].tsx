@@ -93,7 +93,7 @@ function InviteBubble({ message }: { message: IChatMessage }) {
 
       {message.order ? (
         <View className="gap-2 border-t border-border pt-3">
-          <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+          <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
             {formatPrice(Number(message.order.price))}
           </Text>
           {message.order.address ? <InviteDetailRow icon="location-outline" label={t("chat_invite_address")} value={formatAddress(message.order.address)} /> : null}
@@ -101,7 +101,7 @@ function InviteBubble({ message }: { message: IChatMessage }) {
         </View>
       ) : message.offer ? (
         <View className="gap-2 border-t border-border pt-3">
-          <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+          <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
             {formatPrice(Number(message.offer.price))}
           </Text>
           {message.offer.comment ? <InviteDetailRow icon="chatbox-ellipses-outline" label={t("chat_invite_comment")} value={message.offer.comment} /> : null}
@@ -109,7 +109,7 @@ function InviteBubble({ message }: { message: IChatMessage }) {
       ) : message.application ? (
         <View className="gap-2 border-t border-border pt-3">
           {message.application.budget_from ? (
-            <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+            <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
               {formatPrice(Number(message.application.budget_from))}
               {message.application.budget_to ? ` – ${formatPrice(Number(message.application.budget_to))}` : ""}
             </Text>
@@ -164,9 +164,9 @@ function MessageBubble({
         ) : null}
         <View className="flex-row items-center justify-end gap-1">
           {message.updated_at && message.updated_at !== message.created_at ? (
-            <Text className={`text-[10px] ${isOwn ? "text-white/70" : "text-muted"}`}>{t("chat_message_edited")}</Text>
+            <Text className={`text-[11px] ${isOwn ? "text-white/70" : "text-muted"}`}>{t("chat_message_edited")}</Text>
           ) : null}
-          <Text className={`text-[10px] ${isOwn ? "text-white/70" : "text-muted"}`}>{time}</Text>
+          <Text className={`text-[11px] ${isOwn ? "text-white/70" : "text-muted"}`}>{time}</Text>
           {isOwn ? (
             <Ionicons name={isRead ? "checkmark-done" : "checkmark"} size={12} color="rgba(255,255,255,0.85)" />
           ) : null}

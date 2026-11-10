@@ -126,7 +126,7 @@ export default function NotificationsScreen() {
           data={notifications}
           keyExtractor={(n) => n.guid}
           contentContainerClassName="gap-2.5 px-4 py-2"
-          refreshControl={<RefreshControl refreshing={isFetching} onRefresh={() => refetch()} />}
+          refreshControl={<RefreshControl refreshing={isFetching} onRefresh={() => void refetch()} />}
           renderItem={({ item: notif }) => {
             const style = NOTIF_TYPE_STYLE[notif.type] ?? { icon: "notifications-outline" as const, color: colors.muted };
             const isAdmin = ADMIN_TYPES.includes(notif.type);
@@ -152,12 +152,12 @@ export default function NotificationsScreen() {
                 <View className="flex-1 gap-1">
                   <View className="flex-row items-center gap-1.5">
                     {label ? (
-                      <Text className="shrink text-[11px] text-muted" numberOfLines={1}>
+                      <Text className="shrink text-xs text-muted" numberOfLines={1}>
                         {label}
                       </Text>
                     ) : null}
-                    {label ? <Text className="text-[11px] text-muted">·</Text> : null}
-                    <Text className="text-[11px] text-muted" numberOfLines={1}>
+                    {label ? <Text className="text-xs text-muted">·</Text> : null}
+                    <Text className="text-xs text-muted" numberOfLines={1}>
                       {fromNow(notif.created_at)}
                     </Text>
                     {!notif.is_read ? <View className="h-2 w-2 rounded-full bg-amber-500" /> : null}

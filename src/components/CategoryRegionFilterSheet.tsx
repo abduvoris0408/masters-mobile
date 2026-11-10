@@ -7,15 +7,26 @@ import { Button } from "@/components/ui/Button";
 import { useThemeColors } from "@/lib/theme/colors";
 import { useAllJobsCategoriesQuery, useRegionsQuery } from "@/services/master";
 
+export type TListingSort = "most_offers" | undefined;
+
 export interface CategoryRegionFilterValue {
   category: number[];
   region: number | null;
+  /** Only used when the sheet is opened with `showSort`; undefined = newest first. */
+  sort?: TListingSort;
 }
 
 interface CategoryRegionFilterSheetProps {
   value: CategoryRegionFilterValue;
   onApply: (value: CategoryRegionFilterValue) => void;
+  /** Show the "Saralash" section (listings feed only — the backend sort applies to applications). */
+  showSort?: boolean;
 }
+
+const SORT_OPTIONS: { key: TListingSort; labelKey: string }[] = [
+  { key: undefined, labelKey: "filter_sheet_sort_newest" },
+  { key: "most_offers", labelKey: "home_sort_most_offers" },
+];
 
 export interface CategoryRegionFilterSheetHandle {
   present: () => void;
@@ -32,7 +43,7 @@ export interface CategoryRegionFilterSheetHandle {
 // present()/dismiss() via ref; `open` (local state, driven by the sheet's
 // own onChange) replaces the old `visible` prop as the queries' fetch-gate.
 export const CategoryRegionFilterSheet = forwardRef<CategoryRegionFilterSheetHandle, CategoryRegionFilterSheetProps>(
-  function CategoryRegionFilterSheet({ value, onApply }, ref) {
+  function CategoryRegionFilterSheet({ value, onApply, showSort }, ref) {
     const { t } = useTranslation("catalog");
     const sheetRef = useRef<BottomSheetModal>(null);
     const colors = useThemeColors();
@@ -42,11 +53,13 @@ export const CategoryRegionFilterSheet = forwardRef<CategoryRegionFilterSheetHan
 
     const [category, setCategory] = useState<number[]>(value.category);
     const [region, setRegion] = useState<number | null>(value.region);
+    const [sort, setSort] = useState<TListingSort>(value.sort);
 
     useImperativeHandle(ref, () => ({
       present: () => {
         setCategory(value.category);
         setRegion(value.region);
+        setSort(value.sort);
         sheetRef.current?.present();
       },
       dismiss: () => sheetRef.current?.dismiss(),
@@ -59,10 +72,11 @@ export const CategoryRegionFilterSheet = forwardRef<CategoryRegionFilterSheetHan
     const reset = () => {
       setCategory([]);
       setRegion(null);
+      setSort(undefined);
     };
 
     const apply = () => {
-      onApply({ category, region });
+      onApply(showSort ? { category, region, sort } : { category, region });
       sheetRef.current?.dismiss();
     };
 
@@ -88,6 +102,28 @@ export const CategoryRegionFilterSheet = forwardRef<CategoryRegionFilterSheetHan
         </View>
 
         <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20 }}>
+          {showSort ? (
+            <>
+              <Text className="mb-2 text-sm font-medium text-muted">{t("filter_sheet_sort")}</Text>
+              <View className="mb-5 flex-row flex-wrap gap-2">
+                {SORT_OPTIONS.map((option) => {
+                  const active = sort === option.key;
+                  return (
+                    <Pressable
+                      key={option.labelKey}
+                      onPress={() => setSort(option.key)}
+                      className={`rounded-full px-3.5 py-2 ${active ? "bg-primary" : "bg-surface"}`}
+                    >
+                      <Text className={`text-sm font-medium ${active ? "text-primary-foreground" : "text-foreground"}`}>
+                        {t(option.labelKey)}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </>
+          ) : null}
+
           <Text className="mb-2 text-sm font-medium text-muted">{t("filter_sheet_category")}</Text>
           <View className="mb-5 flex-row flex-wrap gap-2">
             {categories?.map((c) => {

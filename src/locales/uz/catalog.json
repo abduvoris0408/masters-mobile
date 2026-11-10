@@ -9,11 +9,11 @@
   "common_retry_action": "Qayta urinish",
   "common_retry_description": "Qayta urinib ko'ring",
 
-  "home_title": "Elonlar",
+  "home_title": "E'lonlar",
   "home_search_placeholder": "Ishlar bo'yicha qidirish...",
   "home_all_categories": "Barchasi",
   "home_active_count": "{{count}} ta faol elon",
-  "home_sort_most_offers": "Ko'p taklif",
+  "home_sort_most_offers": "Eng ko'p taklif bo'yicha",
   "home_sort_default": "Saralash",
   "home_address_not_specified": "Manzil ko'rsatilmagan",
   "home_urgent": "Shoshilinch",
@@ -168,6 +168,8 @@
   "listing_view_offers": "Takliflarni ko'rish",
 
   "filter_sheet_title": "Filtr",
+  "filter_sheet_sort": "Saralash",
+  "filter_sheet_sort_newest": "Eng yangilari",
   "filter_sheet_category": "Kategoriya",
   "filter_sheet_region": "Viloyat",
   "filter_sheet_all": "Barchasi",

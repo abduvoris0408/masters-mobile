@@ -58,7 +58,7 @@ export default function ForgotPasswordScreen() {
 
   return (
     <View className="flex-1 justify-center bg-background px-6">
-      <Text className="text-center text-2xl font-bold text-foreground">{t("forgot_title")}</Text>
+      <Text className="text-center text-2xl font-semibold text-foreground">{t("forgot_title")}</Text>
       <Text className="mb-8 mt-1.5 text-center text-sm text-muted">
         {step === 0 ? t("forgot_subtitle") : step === 1 ? t("forgot_sms_sent", { phone }) : t("forgot_new_password_hint")}
       </Text>

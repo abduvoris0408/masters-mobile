@@ -110,7 +110,7 @@ export function ProfileAvatar({
         <Image source={{ uri }} style={[round, dimmed]} />
       ) : (
         <View className="items-center justify-center bg-emerald-100 dark:bg-accent/15" style={[round, dimmed]}>
-          <Text className="text-primary" style={{ fontSize: size * 0.4, fontFamily: GOLOS_WEIGHTS.bold }}>
+          <Text className="text-primary" style={{ fontSize: size * 0.4, fontFamily: GOLOS_WEIGHTS.semibold }}>
             {(displayName.trim()?.[0] ?? "?").toUpperCase()}
           </Text>
         </View>

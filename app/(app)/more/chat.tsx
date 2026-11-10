@@ -55,7 +55,7 @@ function ChatRow({ chat }: { chat: IChatListItem }) {
         <View className="flex-row items-center justify-between gap-2">
           <Text
             className="flex-1 text-sm text-foreground"
-            style={{ fontFamily: unreadCount > 0 ? GOLOS_WEIGHTS.bold : GOLOS_WEIGHTS.semibold }}
+            style={{ fontFamily: unreadCount > 0 ? GOLOS_WEIGHTS.semibold : GOLOS_WEIGHTS.semibold }}
             numberOfLines={1}
           >
             {name}
@@ -68,7 +68,7 @@ function ChatRow({ chat }: { chat: IChatListItem }) {
       </View>
       {unreadCount > 0 ? (
         <View className="h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5">
-          <Text className="text-[11px] text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+          <Text className="text-xs text-white" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
             {unreadCount > 9 ? "9+" : unreadCount}
           </Text>
         </View>
@@ -122,8 +122,8 @@ export default function ChatListScreen() {
           renderItem={({ item }) => <ChatRow chat={item} />}
           onEndReachedThreshold={0.4}
           onEndReached={() => hasMore && !isFetching && setPageSize((p) => p + PAGE_SIZE_STEP)}
-          refreshControl={<RefreshControl refreshing={isFetching && pageSize === PAGE_SIZE_STEP} onRefresh={() => refetch()} />}
-          ListFooterComponent={isFetching && pageSize > PAGE_SIZE_STEP ? <ActivityIndicator className="py-4" color={colors.accent} /> : null}
+          refreshControl={<RefreshControl refreshing={isFetching && pageSize === PAGE_SIZE_STEP} onRefresh={() => void refetch()} />}
+          ListFooterComponent={isFetching && pageSize > PAGE_SIZE_STEP ? <ActivityIndicator className="py-4" color={colors.accent} /> : undefined}
         />
       )}
     </View>

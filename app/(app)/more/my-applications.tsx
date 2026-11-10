@@ -118,8 +118,8 @@ export default function MyApplicationsScreen() {
           )}
           onEndReachedThreshold={0.4}
           onEndReached={() => hasMore && !isFetching && setPage((p) => p + 1)}
-          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : null}
-          refreshControl={<RefreshControl refreshing={isFetching && page === 1} onRefresh={() => refetch()} />}
+          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : undefined}
+          refreshControl={<RefreshControl refreshing={isFetching && page === 1} onRefresh={() => void refetch()} />}
         />
       )}
     </View>

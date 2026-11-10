@@ -63,7 +63,7 @@ export function Button({
       ) : (
         <Text
           className={`text-base ${variant === "solid" ? "text-white" : textColorClass}`}
-          style={{ fontFamily: GOLOS_WEIGHTS.bold }}
+          style={{ fontFamily: GOLOS_WEIGHTS.semibold }}
         >
           {children}
         </Text>

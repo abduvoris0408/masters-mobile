@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, Switch, Text, View } from "react-native";
 
 import { Header } from "@/components/ui/Header";
-import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
+import { useHeaderCollapse } from "@/hooks/useHeaderCollapse";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useLanguageStore, type AppLanguage } from "@/stores/language.store";
@@ -25,7 +25,7 @@ const LANGUAGE_OPTIONS: { value: AppLanguage; label: string }[] = [
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <View className="gap-2.5">
-      <Text className="px-1 text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+      <Text className="px-1 text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
         {title}
       </Text>
       <View className="overflow-hidden rounded-2xl bg-surface">{children}</View>
@@ -66,9 +66,9 @@ function Row({
 }
 
 export default function SettingsScreen() {
+  const { collapsed, scrollProps } = useHeaderCollapse();
   const { t } = useTranslation("orders");
   const colors = useThemeColors();
-  const headerHeight = useHeaderHeight();
   const { colorScheme } = useColorScheme();
   const { showActionSheetWithOptions } = useActionSheet();
   const preference = useThemeStore((s) => s.preference);
@@ -102,9 +102,9 @@ export default function SettingsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title={t("settings_header")} onBackPress={() => router.back()} hideSettings />
+      <Header largeTitle collapsed={collapsed} title={t("settings_header")} onBackPress={() => router.back()} hideSettings />
 
-      <ScrollView contentContainerClassName="gap-7 px-4" contentContainerStyle={{ paddingTop: headerHeight + 16, paddingBottom: 32 }}>
+      <ScrollView contentContainerClassName="gap-7 px-4" contentInsetAdjustmentBehavior="automatic" {...scrollProps} contentContainerStyle={{ paddingTop: 16, paddingBottom: 32 }}>
         <Section title={t("settings_appearance")}>
           <Row
             first

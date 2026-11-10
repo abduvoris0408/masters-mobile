@@ -1,20 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack, useNavigation } from "expo-router";
 import type { ReactNode } from "react";
-import { View } from "react-native";
+import { Platform, Text, View } from "react-native";
 
 import { NotificationBell } from "@/components/NotificationBell";
 import { HeaderIconButton } from "@/components/ui/HeaderIconButton";
 import { useThemeColors } from "@/lib/theme/colors";
+import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useAuthStore } from "@/stores";
 
 interface HeaderProps {
   title?: string;
-  /** iOS large title that collapses into the bar on scroll. The screen's
-   *  ScrollView must then be its first child, with
-   *  contentInsetAdjustmentBehavior="automatic" instead of a manual
-   *  useHeaderHeight() padding. */
+  /** Title on the left of the bar (same row as the buttons) while the page
+   *  is at the top; once scrolled (`collapsed`, from useHeaderCollapse) it
+   *  moves to the center and the bar gets a blurred background. Used on tab
+   *  roots and list screens; detail pages and forms keep the plain centered
+   *  title. Android shows a Material left-aligned title instead. */
   largeTitle?: boolean;
+  collapsed?: boolean;
   /** Custom left slot for tab roots, where there's no back button (e.g. the
    *  app logo on Asosiy). Ignored when the native back button is shown. */
   left?: ReactNode;
@@ -44,6 +47,7 @@ interface HeaderProps {
 export function Header({
   title,
   largeTitle,
+  collapsed,
   left: customLeft,
   onBackPress,
   right,
@@ -84,17 +88,60 @@ export function Header({
   // unstable_headerLeftItems is iOS-only and overrides headerLeft there;
   // Android keeps using headerLeft.
   const plainLeft = !canGoBack && !!customLeft;
+  const rightOption = resolvedRight ? () => resolvedRight : undefined;
+
+  if (largeTitle && Platform.OS === "android") {
+    return (
+      <Stack.Screen
+        options={{
+          title: title ?? "",
+          headerTitleAlign: "left",
+          headerTitleStyle: { fontFamily: GOLOS_WEIGHTS.semibold, fontSize: 20, color: iconColor },
+          headerLeft: left ? () => left : undefined,
+          headerRight: rightOption,
+        }}
+      />
+    );
+  }
+
+  if (largeTitle && !collapsed) {
+    // At the top: the title sits in the bar's left slot as plain text (no
+    // Liquid Glass capsule), next to the native back button when there is
+    // one; the centered title is empty and the bar has no background.
+    const leftTitle = (
+      <Text
+        className="text-foreground"
+        style={{ fontFamily: GOLOS_WEIGHTS.semibold, fontSize: 22, maxWidth: 240 }}
+        numberOfLines={1}
+      >
+        {title}
+      </Text>
+    );
+    return (
+      <Stack.Screen
+        options={{
+          title: "",
+          headerBackVisible: canGoBack,
+          headerLeft: () => leftTitle,
+          unstable_headerLeftItems: () => [{ type: "custom", element: leftTitle, hidesSharedBackground: true }],
+          headerRight: rightOption,
+        }}
+      />
+    );
+  }
 
   return (
     <Stack.Screen
       options={{
         title: title ?? "",
-        headerLargeTitle: largeTitle,
+        headerBackVisible: true,
         headerLeft: left ? () => left : undefined,
         unstable_headerLeftItems: plainLeft
           ? () => [{ type: "custom", element: <>{customLeft}</>, hidesSharedBackground: true }]
           : undefined,
-        headerRight: resolvedRight ? () => resolvedRight : undefined,
+        headerRight: rightOption,
+        // The blurred backdrop comes from HeaderBackground (stack
+        // screenOptions), shown on every iOS screen as content scrolls under.
       }}
     />
   );

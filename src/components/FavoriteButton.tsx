@@ -84,7 +84,7 @@ export function FavoriteButton({ type, targetGuid, variant = "icon" }: Props) {
         {pending ? <ActivityIndicator size="small" color={HEART_COLOR} /> : heart(16, colors.foreground)}
         <Text
           className="text-base"
-          style={{ fontFamily: GOLOS_WEIGHTS.bold, color: isFavorite ? HEART_COLOR : colors.foreground }}
+          style={{ fontFamily: GOLOS_WEIGHTS.semibold, color: isFavorite ? HEART_COLOR : colors.foreground }}
         >
           {isFavorite ? t("saved") : t("save")}
         </Text>

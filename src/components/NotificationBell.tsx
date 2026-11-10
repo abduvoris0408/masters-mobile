@@ -21,7 +21,7 @@ export function NotificationBell() {
       <Ionicons name="notifications-outline" size={20} color={colors.foreground} />
       {count > 0 ? (
         <View className="absolute -right-1.5 -top-1.5 h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1">
-          <Text className="text-[10px] text-white" style={{ fontWeight: "700" }}>
+          <Text className="text-[11px] text-white font-semibold">
             {count > 9 ? "9+" : count}
           </Text>
         </View>

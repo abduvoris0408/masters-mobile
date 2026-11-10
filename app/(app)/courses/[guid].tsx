@@ -61,7 +61,7 @@ function LessonListRow({
       <View className="flex-1 gap-0.5">
         <Text
           className={`text-sm ${active ? "text-accent" : "text-foreground"}`}
-          style={{ fontFamily: active ? GOLOS_WEIGHTS.bold : GOLOS_WEIGHTS.medium }}
+          style={{ fontFamily: active ? GOLOS_WEIGHTS.semibold : GOLOS_WEIGHTS.medium }}
           numberOfLines={2}
         >
           {lesson.title}

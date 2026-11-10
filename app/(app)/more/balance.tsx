@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { GradientCard } from "@/components/ui/GradientCard";
 import { Header } from "@/components/ui/Header";
+import { useHeaderCollapse } from "@/hooks/useHeaderCollapse";
 import { TextField } from "@/components/ui/TextField";
 import { CardTitle, Caption, ScreenTitle } from "@/components/ui/Typography";
-import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { useBalanceQuery, useBalanceTransactionsQuery, useDepositBalanceMutation } from "@/services/payments";
@@ -49,11 +49,11 @@ function TransactionRow({ item }: { item: IBalanceTransaction }) {
         <Text className="text-xs text-muted">{formatDateTime(item.created_at)}</Text>
       </View>
       <View className="items-end gap-0.5">
-        <Text className="text-sm" style={{ fontFamily: GOLOS_WEIGHTS.bold, color: isCredit ? colors.accent : colors.foreground }}>
+        <Text className="text-sm" style={{ fontFamily: GOLOS_WEIGHTS.semibold, color: isCredit ? colors.accent : colors.foreground }}>
           {isCredit ? "+" : "-"}
           {formatPrice(Math.abs(Number(item.amount)))}
         </Text>
-        <Text className="text-[11px] text-muted">{t("balance_after_label", { amount: formatPrice(Number(item.balance_after)) })}</Text>
+        <Text className="text-xs text-muted">{t("balance_after_label", { amount: formatPrice(Number(item.balance_after)) })}</Text>
       </View>
     </View>
   );
@@ -142,9 +142,9 @@ const DepositModal = forwardRef<DepositModalHandle>(function DepositModal(_props
 });
 
 export default function BalanceScreen() {
+  const { collapsed, scrollProps } = useHeaderCollapse();
   const { t } = useTranslation("orders");
   const colors = useThemeColors();
-  const headerHeight = useHeaderHeight();
   const [page, setPage] = useState(1);
   const [items, setItems] = useState<IBalanceTransaction[]>([]);
   const depositSheetRef = useRef<DepositModalHandle>(null);
@@ -168,13 +168,13 @@ export default function BalanceScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title={t("balance_header")} onBackPress={() => router.back()} />
+      <Header largeTitle collapsed={collapsed} title={t("balance_header")} onBackPress={() => router.back()} />
 
       <FlatList
         data={items}
         keyExtractor={(item) => item.guid}
         contentContainerClassName="gap-3 px-4 pb-8"
-        contentContainerStyle={{ paddingTop: headerHeight + 12 }}
+        contentInsetAdjustmentBehavior="automatic" {...scrollProps} contentContainerStyle={{ paddingTop: 12 }}
         ListHeaderComponent={
           <View className="mb-4 gap-3">
             <GradientCard>
@@ -187,7 +187,7 @@ export default function BalanceScreen() {
               {balanceLoading ? (
                 <ActivityIndicator color="#FFFFFF" style={{ marginTop: 10, alignSelf: "flex-start" }} />
               ) : (
-                <Text className="mt-1 text-3xl text-white" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+                <Text className="mt-1 text-3xl text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
                   {formatPrice(Number(balance?.amount ?? 0))}
                 </Text>
               )}
@@ -240,7 +240,7 @@ export default function BalanceScreen() {
         }
         onEndReachedThreshold={0.4}
         onEndReached={() => hasMore && !isFetching && setPage((p) => p + 1)}
-        ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : null}
+        ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : undefined}
         refreshControl={
           <RefreshControl refreshing={(isFetching && page === 1) || balanceFetching} onRefresh={handleRefresh} />
         }

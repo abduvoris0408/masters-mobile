@@ -8,6 +8,7 @@ import { MasterStatisticsPanel } from "@/components/MasterStatisticsPanel";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/ui/Header";
+import { useHeaderCollapse } from "@/hooks/useHeaderCollapse";
 import { CardTitle, Caption, SectionTitle } from "@/components/ui/Typography";
 import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
@@ -66,6 +67,7 @@ function StatTile({
 }
 
 export default function DashboardScreen() {
+  const { collapsed, scrollProps } = useHeaderCollapse();
   const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const headerHeight = useHeaderHeight();
@@ -78,7 +80,7 @@ export default function DashboardScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Header title={t("dashboard_title")} onBackPress={() => router.back()} />
+      <Header largeTitle collapsed={collapsed} title={t("dashboard_title")} onBackPress={() => router.back()} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: headerHeight + 24 }} />
@@ -87,7 +89,7 @@ export default function DashboardScreen() {
           <EmptyState icon="speedometer-outline" title={t("dashboard_profile_not_found")} />
         </View>
       ) : (
-        <ScrollView contentContainerClassName="gap-4 px-4" contentContainerStyle={{ paddingTop: headerHeight + 16, paddingBottom: 32 }}>
+        <ScrollView contentContainerClassName="gap-4 px-4" contentInsetAdjustmentBehavior="automatic" {...scrollProps} contentContainerStyle={{ paddingTop: 16, paddingBottom: 32 }}>
           {masterProfile.level ? (
             <View className="gap-3 rounded-3xl bg-surface p-4">
               <View className="flex-row items-center gap-3">
@@ -105,7 +107,7 @@ export default function DashboardScreen() {
                     <Text className="text-xs text-muted">
                       {t("dashboard_level_progress", { count: masterProfile.completed_orders_count, total: masterProfile.level.next.min_orders })}
                     </Text>
-                    <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                    <Text className="text-xs text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                       {Math.min(
                         100,
                         Math.round(
@@ -173,7 +175,7 @@ export default function DashboardScreen() {
                     <CardTitle className="flex-1" numberOfLines={1}>
                       #{order.order_number}
                     </CardTitle>
-                    <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                    <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                       {formatPrice(Number(order.price))}
                     </Text>
                   </View>

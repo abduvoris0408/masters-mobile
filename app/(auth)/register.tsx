@@ -309,7 +309,7 @@ export default function RegisterScreen() {
             <Text className="text-sm text-muted">{t("have_account")} </Text>
             <Link href="/login" asChild>
               <Pressable>
-                <Text className="text-sm font-bold text-primary">{t("login_link")}</Text>
+                <Text className="text-sm font-semibold text-primary">{t("login_link")}</Text>
               </Pressable>
             </Link>
           </View>

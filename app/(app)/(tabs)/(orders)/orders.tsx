@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, Linking, Pressable, RefreshControl, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,10 +10,10 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterChips } from "@/components/ui/FilterChips";
 import { Header } from "@/components/ui/Header";
+import { useHeaderCollapse } from "@/hooks/useHeaderCollapse";
 import { PillTabs } from "@/components/ui/PillTabs";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { BadgeLabel, CardTitle, Caption } from "@/components/ui/Typography";
-import { useHeaderHeight } from "@/components/ui/useHeaderHeight";
 import { useThemeColors } from "@/lib/theme/colors";
 import { GOLOS_WEIGHTS } from "@/lib/theme/fonts";
 import { extractChatGuid, extractChatId, useStartChatMutation } from "@/services/chat";
@@ -126,7 +126,7 @@ function OrderCard({ order, perspective, onMessage, onFinish, finishing, onCompl
           </Caption>
           {counterpart?.phone ? <Text className="text-xs text-muted">{formatPhoneNumber(counterpart.phone)}</Text> : null}
         </View>
-        <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+        <Text className="text-base text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
           {formatPrice(Number(order.price))}
         </Text>
       </View>
@@ -178,7 +178,15 @@ function OrderCard({ order, perspective, onMessage, onFinish, finishing, onCompl
   );
 }
 
-function OrdersList({ perspective }: { perspective: "client" | "worker" }) {
+function OrdersList({
+  perspective,
+  header,
+  scrollProps,
+}: {
+  perspective: "client" | "worker";
+  header: ReactNode;
+  scrollProps: ReturnType<typeof useHeaderCollapse>["scrollProps"];
+}) {
   const { t } = useTranslation("catalog");
   const colors = useThemeColors();
   const STATUS_FILTERS = useStatusFilters(t);
@@ -247,96 +255,111 @@ function OrdersList({ perspective }: { perspective: "client" | "worker" }) {
     }
   };
 
-  return (
-    <View style={{ flex: 1 }}>
-      <View className="pb-2 pt-3">
-        <FilterChips options={STATUS_FILTERS} value={status} onChange={setStatus} />
+  // Everything lives inside the FlatList (tabs + chips as its header, the
+  // loading/error/empty states as its empty component) so the list is the
+  // screen's first scroll view and iOS can collapse the large title.
+  const emptyContent = (
+    isLoading ? (
+      <View className="gap-3 px-4 py-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <OrderCardSkeleton key={i} />
+        ))}
       </View>
-
-      {isLoading ? (
-        <View className="gap-3 px-4 py-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <OrderCardSkeleton key={i} />
-          ))}
-        </View>
-      ) : isError ? (
-        <View style={{ flex: 1, marginTop: -44 }}>
-          <EmptyState
-            icon="alert-circle-outline"
-            title={t("common_load_error_title")}
-            description={t("common_retry_description")}
-            actionLabel={t("common_retry_action")}
-            onAction={() => refetch()}
-          />
-        </View>
-      ) : items.length === 0 ? (
-        <View style={{ flex: 1, marginTop: -44 }}>
-          <EmptyState
-            icon="document-text-outline"
-            title={
-              status === "all"
-                ? perspective === "worker"
-                  ? t("orders_empty_worker_title")
-                  : t("orders_empty_client_title")
-                : t("orders_empty_status_title", { status: STATUS_FILTERS.find((f) => f.value === status)?.label ?? "" })
-            }
-            description={
-              status === "all"
-                ? perspective === "worker"
-                  ? t("orders_empty_worker_description")
-                  : t("orders_empty_client_description")
-                : t("orders_empty_status_description")
-            }
-          />
-        </View>
-      ) : (
-        <FlatList
-          data={items}
-          keyExtractor={(item) => item.guid}
-          contentContainerClassName="gap-3 px-4 py-2"
-          contentContainerStyle={{ paddingBottom: 140 }}
-          renderItem={({ item }) => (
-            <OrderCard
-              order={item}
-              perspective={perspective}
-              onMessage={handleMessage}
-              onFinish={perspective === "worker" ? handleFinish : undefined}
-              finishing={finishingGuid === item.guid}
-              onComplete={perspective === "client" ? handleComplete : undefined}
-              completing={completingGuid === item.guid}
-            />
-          )}
-          onEndReachedThreshold={0.4}
-          onEndReached={() => hasMore && !isFetching && setPage((p) => p + 1)}
-          ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : null}
-          refreshControl={<RefreshControl refreshing={isFetching && page === 1} onRefresh={() => refetch()} />}
+    ) : isError ? (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <EmptyState
+          icon="alert-circle-outline"
+          title={t("common_load_error_title")}
+          description={t("common_retry_description")}
+          actionLabel={t("common_retry_action")}
+          onAction={() => refetch()}
         />
+      </View>
+    ) : items.length === 0 ? (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <EmptyState
+          icon="document-text-outline"
+          title={
+            status === "all"
+              ? perspective === "worker"
+                ? t("orders_empty_worker_title")
+                : t("orders_empty_client_title")
+              : t("orders_empty_status_title", { status: STATUS_FILTERS.find((f) => f.value === status)?.label ?? "" })
+          }
+          description={
+            status === "all"
+              ? perspective === "worker"
+                ? t("orders_empty_worker_description")
+                : t("orders_empty_client_description")
+              : t("orders_empty_status_description")
+          }
+        />
+      </View>
+    ) : undefined
+  );
+
+  return (
+    <FlatList
+      data={isLoading || isError ? [] : items}
+      keyExtractor={(item) => item.guid}
+      contentInsetAdjustmentBehavior="automatic"
+      {...scrollProps}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 140 }}
+      ListHeaderComponent={
+        <View className="pb-3">
+          {header}
+          <View className="pt-3">
+            <FilterChips options={STATUS_FILTERS} value={status} onChange={setStatus} />
+          </View>
+        </View>
+      }
+      ListEmptyComponent={emptyContent}
+      ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+      renderItem={({ item }) => (
+        <View className="px-4">
+          <OrderCard
+            order={item}
+            perspective={perspective}
+            onMessage={handleMessage}
+            onFinish={perspective === "worker" ? handleFinish : undefined}
+            finishing={finishingGuid === item.guid}
+            onComplete={perspective === "client" ? handleComplete : undefined}
+            completing={completingGuid === item.guid}
+          />
+        </View>
       )}
-    </View>
+      onEndReachedThreshold={0.4}
+      onEndReached={() => hasMore && !isFetching && setPage((p) => p + 1)}
+      ListFooterComponent={isFetching && page > 1 ? <ActivityIndicator className="py-4" color={colors.accent} /> : undefined}
+      refreshControl={<RefreshControl refreshing={isFetching && page === 1 && !isLoading} onRefresh={() => void refetch()} />}
+    />
   );
 }
 
 export default function OrdersScreen() {
   const { t } = useTranslation("catalog");
   const [view, setView] = useState<OrdersView>("client");
-  const headerHeight = useHeaderHeight();
+  const { collapsed, scrollProps } = useHeaderCollapse();
 
   return (
     <View className="flex-1 bg-background">
-      <Header title={t("orders_title")} />
-      <View style={{ flex: 1, paddingTop: headerHeight }}>
-        <View className="px-4 pb-1 pt-2">
-          <PillTabs
-            value={view}
-            onChange={setView}
-            options={[
-              { value: "worker", label: t("orders_tab_worker") },
-              { value: "client", label: t("orders_tab_client") },
-            ]}
-          />
-        </View>
-        <OrdersList perspective={view} />
-      </View>
+      <Header title={t("orders_title")} largeTitle collapsed={collapsed} />
+      <OrdersList
+        perspective={view}
+        scrollProps={scrollProps}
+        header={
+          <View className="px-4 pt-2">
+            <PillTabs
+              value={view}
+              onChange={setView}
+              options={[
+                { value: "worker", label: t("orders_tab_worker") },
+                { value: "client", label: t("orders_tab_client") },
+              ]}
+            />
+          </View>
+        }
+      />
     </View>
   );
 }

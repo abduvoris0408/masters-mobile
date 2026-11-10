@@ -132,7 +132,7 @@ function StatCard({
         ) : null}
       </Text>
       {sub ? (
-        <Text className="text-[11px] text-muted" numberOfLines={2}>
+        <Text className="text-xs text-muted" numberOfLines={2}>
           {sub}
         </Text>
       ) : null}
@@ -190,7 +190,7 @@ function MonthlyBarChart({ data, metric }: { data: Monthly[]; metric: ChartMetri
       <View className="flex-row gap-2">
         <View style={{ width: 44, height: CHART_HEIGHT }} className="justify-between">
           {ticks.map((tick, i) => (
-            <Text key={i} className="text-right text-[10px] text-muted" numberOfLines={1}>
+            <Text key={i} className="text-right text-[11px] text-muted" numberOfLines={1}>
               {formatValue(tick)}
             </Text>
           ))}
@@ -280,7 +280,7 @@ function OrdersBreakdown({ orders }: { orders: IMasterStatistics["orders"] }) {
   return (
     <Card className="gap-4 p-4">
       <View className="flex-row items-baseline justify-between gap-3">
-        <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+        <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
           {t("stats_breakdown")}
         </Text>
         <Caption className="text-xs">{t("stats_orders_total", { count: orders.total })}</Caption>
@@ -304,7 +304,7 @@ function OrdersBreakdown({ orders }: { orders: IMasterStatistics["orders"] }) {
             <Text className="flex-1 text-[13px] text-muted" numberOfLines={1}>
               {t(`stats_status_${s.key}`)}
             </Text>
-            <Text className="text-[13px] text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+            <Text className="text-[13px] text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
               {s.value}
             </Text>
           </View>
@@ -316,7 +316,7 @@ function OrdersBreakdown({ orders }: { orders: IMasterStatistics["orders"] }) {
         style={{ borderTopWidth: 1, borderStyle: "dashed", borderColor: colors.border }}
       >
         <Text className="flex-1 text-[13px] text-muted">{t("stats_completed_value")}</Text>
-        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+        <Text className="text-sm text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
           {formatPrice(orders.completed_value)}
         </Text>
       </View>
@@ -331,7 +331,7 @@ function RatingCriteria({ rating }: { rating: IMasterStatistics["rating"] }) {
 
   return (
     <Card className="gap-3.5 p-4">
-      <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+      <Text className="text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
         {t("stats_criteria")}
       </Text>
 
@@ -340,7 +340,7 @@ function RatingCriteria({ rating }: { rating: IMasterStatistics["rating"] }) {
       ) : (
         <>
           <View className="flex-row items-center gap-3 rounded-2xl px-3.5 py-2.5" style={{ backgroundColor: `${STAR_COLOR}1A` }}>
-            <Text className="text-3xl text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+            <Text className="text-3xl text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
               {rating.average?.toFixed(1) ?? "—"}
             </Text>
             <View className="gap-0.5">
@@ -362,7 +362,7 @@ function RatingCriteria({ rating }: { rating: IMasterStatistics["rating"] }) {
             <View key={key} className="gap-1">
               <View className="flex-row items-center justify-between gap-2">
                 <Text className="flex-1 text-[13px] text-foreground">{t(`stats_criteria_${key}`, { defaultValue: key })}</Text>
-                <Text className="text-[13px] text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                <Text className="text-[13px] text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                   {value?.toFixed(1) ?? "—"}
                 </Text>
               </View>
@@ -508,7 +508,7 @@ export function MasterStatisticsPanel() {
                 <View className="h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 dark:bg-accent/15">
                   <Ionicons name="bar-chart-outline" size={16} color={colors.accent} />
                 </View>
-                <Text className="flex-1 text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                <Text className="flex-1 text-base text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                   {t("stats_monthly")}
                 </Text>
               </View>

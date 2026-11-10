@@ -95,7 +95,7 @@ export default function LoginScreen() {
           >
             <View className="flex-1 flex-row items-center justify-center gap-2.5">
               <Ionicons name="hammer" size={30} color="#FFFFFF" />
-              <Text className="text-3xl text-white" style={{ fontFamily: GOLOS_WEIGHTS.extrabold }}>
+              <Text className="text-3xl text-white" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
                 Masters
               </Text>
             </View>
@@ -118,7 +118,7 @@ export default function LoginScreen() {
             className="flex-1 bg-surface px-6 pb-10 pt-8"
             style={{ overflow: "hidden", borderTopLeftRadius: 32, borderTopRightRadius: 32 }}
           >
-            <Text className="text-center text-2xl text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+            <Text className="text-center text-2xl text-foreground" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
               {t("login_title")}
             </Text>
             <Text className="mb-8 mt-1.5 text-center text-sm text-muted">{t("login_subtitle")}</Text>
@@ -162,7 +162,7 @@ export default function LoginScreen() {
                 ) : (
                   <>
                     <Ionicons name="paper-plane" size={17} color={TELEGRAM_BLUE} />
-                    <Text className="text-base" style={{ fontFamily: GOLOS_WEIGHTS.bold, color: TELEGRAM_BLUE }}>
+                    <Text className="text-base" style={{ fontFamily: GOLOS_WEIGHTS.semibold, color: TELEGRAM_BLUE }}>
                       {t("telegram_login_btn")}
                     </Text>
                   </>
@@ -182,7 +182,7 @@ export default function LoginScreen() {
               <Text className="text-sm text-muted">{t("no_account")} </Text>
               <Link href="/register" asChild>
                 <Pressable>
-                  <Text className="text-sm font-bold text-primary">{t("register_link")}</Text>
+                  <Text className="text-sm font-semibold text-primary">{t("register_link")}</Text>
                 </Pressable>
               </Link>
             </View>

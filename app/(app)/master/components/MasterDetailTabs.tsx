@@ -78,7 +78,7 @@ function ServicesTab({ groups, onOrder }: { groups: ServiceGroup[]; onOrder?: (s
                     {service.service_name ?? t("master_tabs_service_fallback")}
                   </Text>
                   <View className="flex-row items-baseline gap-1">
-                    <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.bold }}>
+                    <Text className="text-sm text-accent" style={{ fontFamily: GOLOS_WEIGHTS.semibold }}>
                       {formatPrice(Number(service.price))}
                     </Text>
                     {service.allowed_units[0] ? (

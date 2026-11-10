@@ -11,7 +11,7 @@ export function ScreenTitle({ className, style, ...rest }: TextProps) {
   return (
     <Text
       className={`text-xl text-foreground ${className ?? ""}`}
-      style={[{ fontFamily: GOLOS_WEIGHTS.bold }, style]}
+      style={[{ fontFamily: GOLOS_WEIGHTS.semibold }, style]}
       {...rest}
     />
   );
@@ -22,7 +22,7 @@ export function SectionTitle({ className, style, ...rest }: TextProps) {
   return (
     <Text
       className={`text-lg text-foreground ${className ?? ""}`}
-      style={[{ fontFamily: GOLOS_WEIGHTS.bold }, style]}
+      style={[{ fontFamily: GOLOS_WEIGHTS.semibold }, style]}
       {...rest}
     />
   );
@@ -33,8 +33,8 @@ export function SectionTitle({ className, style, ...rest }: TextProps) {
 export function ListLabel({ className, style, ...rest }: TextProps) {
   return (
     <Text
-      className={`text-lg text-foreground ${className ?? ""}`}
-      style={[{ fontFamily: GOLOS_WEIGHTS.medium }, style]}
+      className={`text-[17px] text-foreground ${className ?? ""}`}
+      style={[{ fontFamily: GOLOS_WEIGHTS.regular }, style]}
       {...rest}
     />
   );
@@ -45,7 +45,7 @@ export function CardTitle({ className, style, ...rest }: TextProps) {
   return (
     <Text
       className={`text-base text-foreground ${className ?? ""}`}
-      style={[{ fontFamily: GOLOS_WEIGHTS.bold }, style]}
+      style={[{ fontFamily: GOLOS_WEIGHTS.semibold }, style]}
       {...rest}
     />
   );
@@ -56,7 +56,7 @@ export function BadgeLabel({ className, style, ...rest }: TextProps) {
   return (
     <Text
       className={`text-sm ${className ?? ""}`}
-      style={[{ fontFamily: GOLOS_WEIGHTS.semibold }, style]}
+      style={[{ fontFamily: GOLOS_WEIGHTS.medium }, style]}
       {...rest}
     />
   );
@@ -78,7 +78,7 @@ export function Caption({ className, style, ...rest }: TextProps) {
   return (
     <Text
       className={`text-sm text-muted ${className ?? ""}`}
-      style={[{ fontFamily: GOLOS_WEIGHTS.medium }, style]}
+      style={[{ fontFamily: GOLOS_WEIGHTS.regular }, style]}
       {...rest}
     />
   );

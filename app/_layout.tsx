@@ -36,6 +36,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 // the native splash dissolves straight into the real UI.
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
+// Before anything renders, so every <Text>/<TextInput> defaults to Golos.
+applyGolosAsDefaultFont();
+
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     GolosText_400Regular,
@@ -51,8 +54,6 @@ export default function RootLayout() {
   }, [fontsLoaded]);
 
   if (!fontsLoaded) return null;
-
-  applyGolosAsDefaultFont();
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
